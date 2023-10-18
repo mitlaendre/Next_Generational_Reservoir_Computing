@@ -61,6 +61,7 @@ def experiment(data, reservoir_size, reservoir_lr=0.3, reservoir_sr=1.25, ridge_
 
 set_seed(0)
 
+
 x_train, y_train, x_test, y_test = generate_data(3000, 1000)
 
 data = (x_train, y_train, x_test, y_test)
