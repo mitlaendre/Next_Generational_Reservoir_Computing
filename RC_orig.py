@@ -1,6 +1,6 @@
 import numpy as np
 import pathlib
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import matplotlib.pyplot
 import reservoirpy
 
@@ -89,7 +89,7 @@ def array_min_finder(input_array = np.array([0],dtype=object)): #output is a np.
 
 
 #surface plot for errors
-
+"""
 tomb = np.array(
                 [[[ 58.15923757,  64.4747462,   90.53759092, 113.50645819, 168.68428256],
                   [ 90.97613044,  84.64348166,  82.05740897,  80.47934262,  81.86836333],
@@ -127,4 +127,6 @@ def plot_errors_surface(input_errors = np.array([]),Reservoir_sizes = np.array([
         plt.pyplot.show()
 
 
-plot_errors_surface(tomb,Leaking_Rates = Leaking_Rates,Spectral_Radiuses=Spectral_Radiuses,Reservoir_sizes=Reservoir_sizes)
+plot_errors_surface(tomb,Leaking_Rates = Leaking_Rates,Spectral_Radiuses=Spectral_Radiuses,Reservoir_sizes=Reservoir_sizes)"""
+
+
