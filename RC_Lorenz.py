@@ -37,6 +37,17 @@ def plot_data(x):
     ax.set_title("Lorenz Attractor")
     plt.show()
 
+def plot_errors_surface(input_errors = np.array([]),Reservoir_sizes = np.array([]),Leaking_Rates = np.array([]),Spectral_Radiuses = np.array([])):
+    for i in range(input_errors.shape[0]):
+        hf = plt.figure()
+        ha = hf.add_subplot(111, projection='3d')
+
+        X, Y = np.meshgrid(Leaking_Rates, Spectral_Radiuses)  # `plot_surface` expects `x` and `y` data to be 2D
+        ha.plot_surface(X, Y, input_errors[i])
+        ha.set_xlabel('$Leaking Rate$')
+        ha.set_ylabel('$Spectral Radius$')
+        ha.set_zlabel(r'$Average error$')
+        plt.show()
 
 def compare_3d_data(ground_truth, prediction):
     ax = plt.figure().add_subplot(projection='3d')
@@ -112,6 +123,7 @@ Spectral_Radiuses = np.linspace(start = 0.5, stop = 1.5, num= 5)
 Seeds = np.array([0,10,20])
 #14 err 1000,0.3,0.5
 
+"""
 Reservoir_sizes = np.array([800,900,1000,1100,1200])
 Leaking_Rates = np.linspace(start = 0.1, stop = 0.9, num= 8)
 Spectral_Radiuses = np.linspace(start = 0.5, stop = 1.5, num= 8)
@@ -130,11 +142,11 @@ Spectral_Radiuses = np.linspace(start = 0.15, stop = 0.45, num= 8)
 Seeds = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150])
 #12 err 1180,0.1143,0.3643
 
+"""
 
-
-errors = experiment_multiple(data,reservoir_size=Reservoir_sizes,reservoir_lr=Leaking_Rates,reservoir_sr=Spectral_Radiuses,seed=Seeds,threads=20)
+errors = experiment_multiple(data,reservoir_size=Reservoir_sizes,reservoir_lr=Leaking_Rates,reservoir_sr=Spectral_Radiuses,seed=Seeds,threads=4)
 errors1 = sum(errors)/Seeds.size
-best_setup = array_min_finder(errors1,maxthreads=10)
+best_setup = array_min_finder(errors1,maxthreads=4)
 print(errors1)
 print(best_setup[0])
 print(best_setup[1])
@@ -144,6 +156,8 @@ print("Best leaking rate:")
 print(Leaking_Rates[best_setup[0][1]])
 print("Best spectral radius:")
 print(Spectral_Radiuses[best_setup[0][2]])
+
+plot_errors_surface(errors1,Leaking_Rates=Leaking_Rates,Reservoir_sizes=Reservoir_sizes,Spectral_Radiuses=Spectral_Radiuses)
 
 """
 #sima futi

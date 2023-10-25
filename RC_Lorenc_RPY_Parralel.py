@@ -7,8 +7,8 @@ from reservoirpy.nodes import Ridge, Reservoir, NVAR
 from reservoirpy import set_seed
 
 
-howManySeeds: int = 3;
-change_steps: int = 5;
+howManySeeds: int = 1;
+change_steps: int = 1;
 
 plotEverySeed: bool = False;
 length_train = 2000;
@@ -50,7 +50,7 @@ sr = 1
 
 
 results = Parallel(n_jobs=2)(delayed(RC_Lorenc_run)(array,seed*17,(units+1)*100,lr,sr) for seed in range(howManySeeds) for units in range(change_steps))
-results1 = np.array(results).reshape(-1, 10)
+results1 = np.array(results).reshape(-1, howManySeeds)
 
 plt.plot(sum(results1.transpose()), label="Changing")
 plt.legend()

@@ -6,8 +6,8 @@ from reservoirpy.nodes import Ridge, Reservoir, NVAR
 from reservoirpy import set_seed
 
 
-howManySeeds: int = 3;
-change_steps: int = 5;
+howManySeeds: int = 1;
+change_steps: int = 1;
 
 plotEverySeed: bool = False;
 length_train = 2000;
@@ -33,7 +33,7 @@ for changing in range(change_steps):
             y_test = x[length_train+1:]
 
 
-            res1 = Reservoir((changing+1)*1000, lr=0.9, sr=0.5)
+            res1 = Reservoir((changing+1)*3000, lr=0.9, sr=0.5)
             #res2 = Reservoir(100, sr=0.9, lr=0.3)
 
             readout = Ridge(ridge=1e-6)
