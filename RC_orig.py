@@ -129,4 +129,8 @@ def plot_errors_surface(input_errors = np.array([]),Reservoir_sizes = np.array([
 
 plot_errors_surface(tomb,Leaking_Rates = Leaking_Rates,Spectral_Radiuses=Spectral_Radiuses,Reservoir_sizes=Reservoir_sizes)"""
 
-
+#help for parametric plots
+"""
+x = np.array([[1,2],[1.1,1.9],[1.2,1.8],[1.15,1.85],[1.1,1.9],[1,2]])
+plt.plot(np.transpose(x)[0],np.transpose(x)[1])
+plt.show()"""

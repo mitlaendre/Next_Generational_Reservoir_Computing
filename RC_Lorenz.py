@@ -42,6 +42,14 @@ def plot_3dData_2dPlot(x):
     plt.plot(np.transpose(x)[1],"g-",legend = "y")
     plt.plot(np.transpose(x)[2],"b-",legend = "z")
     plt.show()
+
+    x1 = np.full((x.shape[0],2),0)
+    for i in range(x1.shape[0]):
+        x1[i,0] = x[i,0]+x[i,1]
+        x1[i,1] = x[i,2]
+    plt.plot(np.transpose(x1)[0],np.transpose(x1)[1])
+    plt.show()
+
     return
 
 def compare_3dData_3dPlot(ground_truth, prediction):
@@ -64,6 +72,13 @@ def compare_3dData_2dPlot(ground_truth, prediction):
     plt.plot(np.transpose(prediction)[0], "r--", label="Prediction x")
     plt.plot(np.transpose(prediction)[1], "g--", label="Prediciton y")
     plt.plot(np.transpose(prediction)[2], "b--", label="Prediciton z")
+    plt.show()
+
+    x1 = np.full((prediction.shape[0], 2), 0)
+    for i in range(x1.shape[0]):
+        x1[i, 0] = prediction[i, 0] + prediction[i, 1]
+        x1[i, 1] = prediction[i, 2]
+    plt.plot(np.transpose(x1)[0], np.transpose(x1)[1])
     plt.show()
     return
 
