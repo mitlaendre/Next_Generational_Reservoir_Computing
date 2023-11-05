@@ -1,10 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
+
+import Kombi
+import Data_Manipulation
 from Lorenz63 import lorenzfull
 
 from reservoirpy.nodes import Ridge, Reservoir, NVAR
 from reservoirpy import set_seed
-
 from joblib import Parallel, delayed
 
 
@@ -24,223 +25,153 @@ def create_esn(reservoir_size, reservoir_lr=0.9, reservoir_sr=0.5, ridge_reg=1e-
     return deep_esn
 
 
-def error_func_mse(x, y):
-    return np.average(np.power(sum(np.square(x - y)), 0.5))
-
-
-def plot_3dData_3dPlot(x):
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.plot(*x.T, lw=0.5)
-    ax.set_xlabel("X Axis")
-    ax.set_ylabel("Y Axis")
-    ax.set_zlabel("Z Axis")
-    ax.set_title("Lorenz Attractor")
-    plt.show()
-
-def plot_3dData_2dPlot(x):
-    plt.plot(np.transpose(x)[0],"r-",legend = "x")
-    plt.plot(np.transpose(x)[1],"g-",legend = "y")
-    plt.plot(np.transpose(x)[2],"b-",legend = "z")
-    plt.show()
-
-    x1 = np.full((x.shape[0],2),0)
-    for i in range(x1.shape[0]):
-        x1[i,0] = x[i,0]+x[i,1]
-        x1[i,1] = x[i,2]
-    plt.plot(np.transpose(x1)[0],np.transpose(x1)[1])
-    plt.show()
-
-    return
-
-def compare_3dData_3dPlot(ground_truth, prediction):
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.plot(*ground_truth.T, lw=0.5, label="ground truth")
-    ax.set_xlabel("X Axis")
-    ax.set_ylabel("Y Axis")
-    ax.set_zlabel("Z Axis")
-
-    ax.plot(*prediction.T, lw=0.5, label="prediction")
-
-    plt.legend()
-    plt.show()
-    return
-
-def compare_3dData_2dPlot(ground_truth, prediction):
-    plt.plot(np.transpose(ground_truth)[0], "r-", label="x")
-    plt.plot(np.transpose(ground_truth)[1], "g-", label="y")
-    plt.plot(np.transpose(ground_truth)[2], "b-", label="z")
-    plt.plot(np.transpose(prediction)[0], "r--", label="Prediction x")
-    plt.plot(np.transpose(prediction)[1], "g--", label="Prediciton y")
-    plt.plot(np.transpose(prediction)[2], "b--", label="Prediciton z")
-    plt.show()
-
-    x1 = np.full((prediction.shape[0], 2), 0)
-    for i in range(x1.shape[0]):
-        x1[i, 0] = prediction[i, 0] + prediction[i, 1]
-        x1[i, 1] = prediction[i, 2]
-    plt.plot(np.transpose(x1)[0], np.transpose(x1)[1])
-    plt.show()
-    return
-
-def plot_errors_surface(input_errors = np.array([]),Reservoir_sizes = np.array([]),Leaking_Rates = np.array([]),Spectral_Radiuses = np.array([])):
-    for i in range(input_errors.shape[0]):
-        hf = plt.figure()
-        ha = hf.add_subplot(111, projection='3d')
-
-        X, Y = np.meshgrid(Leaking_Rates, Spectral_Radiuses)  # `plot_surface` expects `x` and `y` data to be 2D
-        ha.plot_surface(X, Y, input_errors[i])
-        ha.set_xlabel('$Leaking Rate$')
-        ha.set_ylabel('$Spectral Radius$')
-        ha.set_zlabel(r'$Average error$')
-        plt.show()
-
 def experiment(data, reservoir_size, reservoir_lr=0.3, reservoir_sr=1.25, ridge_reg=1e-6, seed=0, warmup=100,Plotting = False):
     x_train, y_train, x_test, y_test = data
-    set_seed(seed)
-    my_esn = create_esn(reservoir_size, reservoir_lr=reservoir_lr, reservoir_sr=reservoir_sr, ridge_reg=ridge_reg, ridge_name=str(reservoir_size) + str(seed) + str(reservoir_lr) + str(reservoir_sr))
+    set_seed(int(seed))
+    my_esn = create_esn(int(reservoir_size), reservoir_lr=reservoir_lr, reservoir_sr=reservoir_sr, ridge_reg=ridge_reg, ridge_name=str(reservoir_size) + str(seed) + str(reservoir_lr) + str(reservoir_sr))
     my_esn.fit(x_train, y_train, warmup=warmup)
     predictions = my_esn.run(x_test)
-    error = error_func_mse(y_test, predictions)
+    error = Data_Manipulation.error_func_mse(y_test, predictions)
 
     if Plotting:
-        compare_3dData_2dPlot(y_test, predictions)
-        compare_3dData_3dPlot(y_test, predictions)
+        Data_Manipulation.compare_3dData_2dPlot(y_test, predictions)
+        Data_Manipulation.compare_3dData_3dPlot(y_test, predictions)
 
     return error
 
-def array_min_finder(input_array = np.array([0],dtype=object),maxthreads = 1): #output is a np.array with first element is the location vector, second is the minimum value
-    if (input_array.ndim == 1):
-        return np.array([np.array([np.argmin(input_array)]),np.amin(input_array)],dtype=object)
+def experiment_Dummy(data, reservoir_size, reservoir_lr=0.3, reservoir_sr=1.25, ridge_reg=1e-6, seed=0, warmup=100,Plotting = False):
+    x_train, y_train, x_test, y_test = data
+    return 10
+
+def run_Parallel_on_array(function,array = np.array([],dtype=object),threads = 1):
+
+    array_sizes = np.full(array.shape[0],0,dtype=int)
+    for i in range(array.shape[0]):
+        array_sizes[i] = array[i].shape[0]
+
+    number_of_runs = Kombi.kulonbozoSzamjegyuSzamokSzama(array_sizes)
+    print(type(threads))
+    results = Parallel(n_jobs=threads)(delayed(function)(*Data_Manipulation.Array_Combination_to_tuple(array,Kombi.kulonbozoSzamjegyuSzam(array_sizes,i))) for i in range(number_of_runs))
+
+    results = np.array(results).reshape(*Data_Manipulation.Array_to_tuple(array_sizes))
+    return results
+
+
+def Generate_new_Intervals(current_intervals = np.array([],dtype=object),current_Parameterarray = np.array([],dtype=object),minimum_Lokation = np.array([],dtype=float),strict_intervals: bool = True):
+    Is_Minimum_coordinate_On_Edge = np.full(minimum_Lokation.shape[0], False, dtype=bool)
+    Is_Minimum_On_Edge = False
+    for i in range(minimum_Lokation.shape[0]):
+        if (current_Parameterarray[i].shape[0] > 2):
+            if (current_intervals[i].shape[0] != 1):
+                if (minimum_Lokation[i] == 0):
+                    Is_Minimum_coordinate_On_Edge[i] = True
+                    Is_Minimum_On_Edge = True
+                if (minimum_Lokation[i] == current_Parameterarray[i].shape[0]):
+                    Is_Minimum_coordinate_On_Edge[i] = True
+                    Is_Minimum_On_Edge = True
+
+
+    new_intervals = np.full(current_intervals.shape[0], 0, dtype=object)
+    if strict_intervals:
+        for i in range(minimum_Lokation.shape[0]):
+            if (current_Parameterarray[i].shape[0] > 2):
+                if Is_Minimum_coordinate_On_Edge[i]:
+                    if (minimum_Lokation[i] == 0):
+                        new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i]],current_Parameterarray[i][minimum_Lokation[i] + 2]])
+                    else:
+                        new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i] - 2],current_Parameterarray[i][minimum_Lokation[i]]])
+                else:
+                    new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i] - 1],current_Parameterarray[i][minimum_Lokation[i] + 1]])
+            else:
+                new_intervals[i] = current_intervals[i]
     else:
-        this_dimensions_size = input_array.shape[0]
-        sub_solutions = Parallel(n_jobs=min(input_array.size,maxthreads))(delayed(array_min_finder)(input_array[i],maxthreads = max(1,(maxthreads//input_array.size))) for i in range(this_dimensions_size))
-
-        locations = np.full(this_dimensions_size,0,dtype=object)
-        minimums = np.full(this_dimensions_size,0)
-        for i in range(this_dimensions_size):
-            locations[i] = sub_solutions[i][0]
-            minimums[i] = sub_solutions[i][1]
-
-        return np.array([np.append(np.array([np.argmin(minimums)]),locations[np.argmin(minimums)]),minimums[np.argmin(minimums)]],dtype=object)
-
-def experiment_multiple(
-        data,
-        reservoir_size = np.array([100,1000,2000,5000]),
-        reservoir_lr = np.array([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]),
-        reservoir_sr = np.array([0.5,0.7,0.9,1,1.1,1.3,1.5,1.7]),
-        ridge_reg=1e-6,
-        seed = np.array([0,10,20,30,40,50,60,70,80,90]),
-        warmup: int = 100,
-        threads: int = 10):
-    errors = Parallel(n_jobs=threads)(delayed(experiment)(data = data,
-                                                          reservoir_size = reservoir_size[current_res_size].item(),
-                                                          seed = seed[current_seed].item(),
-                                                          reservoir_lr = reservoir_lr[current_reservoir_lr].item(),
-                                                          reservoir_sr = reservoir_sr[current_reservoir_sr].item()
-                                                          )
-                                                            for current_seed in range(seed.size)
-                                                            for current_res_size in range(reservoir_size.size)
-                                                            for current_reservoir_lr in range(reservoir_lr.size)
-                                                            for current_reservoir_sr in range(reservoir_sr.size)
-                                                            )
-    errors = np.array(errors).reshape(seed.size,reservoir_size.size,reservoir_lr.size,reservoir_sr.size)
-    return errors
+        if Is_Minimum_On_Edge:
+            for i in range(minimum_Lokation.shape[0]):
+                if (current_Parameterarray[i].shape[0] > 2):
+                    current_interval_size_half = current_intervals[i][1] - current_intervals[i][0] / 2
+                    new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i]] - current_interval_size_half,current_Parameterarray[i][minimum_Lokation[i]] + current_interval_size_half])
+                else:
+                    new_intervals[i] = current_intervals[i]
+        else:
+            for i in range(minimum_Lokation.shape[0]):
+                if (current_Parameterarray[i].shape[0] > 2):
+                    new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i] - 1],current_Parameterarray[i][minimum_Lokation[i] + 1]])
+                else:
+                    new_intervals[i] = current_intervals[i]
+    return new_intervals
 
 
-def multiFuti():
+def best_parameters_finder(
+        function,
+        parameters_intervals = np.array([],dtype=object),
+        threads: int = 4,
+        searching_array_size: int = 7,
+        strict_intervals: bool = True,
+        goal_error_diff_percentage = 0.01):
+
+    current_intervals = parameters_intervals
+    minimum_Lokation = np.array([],dtype=float)
+    minimum_Value = 0
+
+
+    counter = 0
+    prev_result = float('inf')
+    result_diff = float('inf')
+    print("Current error differetial percentage = " +  str(result_diff*prev_result))
+    while((counter < 100) and (result_diff >= (prev_result * goal_error_diff_percentage))):
+        current_Parameterarray = np.full(current_intervals.shape[0], 0, dtype=object)
+
+        for i in range(current_intervals.shape[0]):
+            if (current_intervals[i].shape[0] == 1):
+                current_Parameterarray[i] = current_intervals[i]
+            else:
+                if(((type(current_intervals[i][0]) == type(np.int32(1))) or (type(current_intervals[i][0]) == type(np.float64(1)))) and ((type(current_intervals[i][1]) == type(np.int32(1))) or (type(current_intervals[i][1]) == type(np.float64(1))))):
+                    current_Parameterarray[i] = np.linspace(start=current_intervals[i][0], stop=current_intervals[i][1],num=searching_array_size)
+                else:
+                    print("ERROR, cannot build linspace in parameter number " + str(i))
+                    print("It's types are: ")
+                    print(type(current_intervals[i][0]))
+                    print(type(current_intervals[i][1]))
+                    print("but needs to be: ")
+                    print(type(np.int32(1)))
+                    print(" or ")
+                    print(type(np.float64(1)))
+                    current_Parameterarray[i] = current_intervals[i]
+        print("Running on: " + str(current_intervals))
+        errors = run_Parallel_on_array(function,current_Parameterarray,threads)
+        print("Errors: " + str(errors))
+        (minimum_Lokation,minimum_Value) = Data_Manipulation.array_min_finder(errors, maxthreads=threads)
+        print("Minimum found: " + str(minimum_Value) + "   In lokation: " + str(minimum_Lokation))
+
+        current_intervals = Generate_new_Intervals(current_intervals,current_Parameterarray,minimum_Lokation,strict_intervals)
+
+        result_diff = prev_result - minimum_Value
+        prev_result = minimum_Value
+        counter += 1
+    print("\n\nBest parameters found: ")
+    for i in range(current_Parameterarray.shape[0]):
+        if(current_Parameterarray[i].shape[0] > 2):
+            print(current_Parameterarray[i][minimum_Lokation[i]])
+        else:
+            print("This parameter is not changing")
+
+    return
+
+
+def tesztFuti():
     x_train, y_train, x_test, y_test = generate_data(3000, 1000)
     data = (x_train, y_train, x_test, y_test)
 
+    datas = np.array([data],dtype=object)
+    Reservoir_size_interval = np.array([100, 5000])
+    Leaking_Rate_interval = np.array([0.1,0.9])
+    Spectral_Radius_interval = np.array([0.1,2])
+    ridge_reg_interval = np.array([1e-6])
+    seeds = np.array([int(10)],dtype=int)
+    warmups = np.array([100])
 
+    running_Parameter_intervals = np.array([datas,Reservoir_size_interval,Leaking_Rate_interval,Spectral_Radius_interval],dtype=object)
 
+    best_parameters_finder(experiment,running_Parameter_intervals,threads=20,searching_array_size=5)
 
-    Reservoir_sizes = np.array([100,1000,2000])
-    Leaking_Rates = np.linspace(start = 0.1, stop = 0.9, num= 5)
-    Spectral_Radiuses = np.linspace(start = 0.5, stop = 1.5, num= 5)
-    Seeds = np.array([0,10,20])
-    #14 err 1000,0.3,0.5
-
-    """
-    Reservoir_sizes = np.array([800,900,1000,1100,1200])
-    Leaking_Rates = np.linspace(start = 0.1, stop = 0.9, num= 8)
-    Spectral_Radiuses = np.linspace(start = 0.5, stop = 1.5, num= 8)
-    Seeds = np.array([10,20,30,40,50,60,70,80])
-    #17 err  1200,0.1,0.5
-    
-    Reservoir_sizes = np.array([1100,1200,1300,1400,1500])
-    Leaking_Rates = np.linspace(start = 0.02, stop = 0.3, num= 8)
-    Spectral_Radiuses = np.linspace(start = 0.1, stop = 0.7, num= 8)
-    Seeds = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150])
-    #12 err 1200,0.1399,0.35714
-    
-    Reservoir_sizes = np.array([1160,1180,1200,1220,1240])
-    Leaking_Rates = np.linspace(start = 0.1, stop = 0.2, num= 8)
-    Spectral_Radiuses = np.linspace(start = 0.15, stop = 0.45, num= 8)
-    Seeds = np.array([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150])
-    #12 err 1180,0.1143,0.3643
-    
-    """
-
-    errors = experiment_multiple(data,reservoir_size=Reservoir_sizes,reservoir_lr=Leaking_Rates,reservoir_sr=Spectral_Radiuses,seed=Seeds,threads=4)
-    errors1 = sum(errors)/Seeds.size
-    best_setup = array_min_finder(errors1,maxthreads=4)
-    print("Average errors:")
-    print(errors1)
-    print("Best error position:")
-    print(best_setup[0])
-    print("Best error value:")
-    print(best_setup[1])
-    print("Best reservoir size:")
-    print(Reservoir_sizes[best_setup[0][0]])
-    print("Best leaking rate:")
-    print(Leaking_Rates[best_setup[0][1]])
-    print("Best spectral radius:")
-    print(Spectral_Radiuses[best_setup[0][2]])
-
-    plot_errors_surface(errors1,Leaking_Rates=Leaking_Rates,Reservoir_sizes=Reservoir_sizes,Spectral_Radiuses=Spectral_Radiuses)
-
-def simaFuti():
-    x_train, y_train, x_test, y_test = generate_data(3000, 1000)
-    data = (x_train, y_train, x_test, y_test)
-    experiment((x_train, y_train, x_test, y_test),seed=1000,reservoir_size= 1180, reservoir_lr=.1143,reservoir_sr=.3643,Plotting=True)
-
-
-
-
-simaFuti()
-
-
-
-
-
-
-
-
-
-"""errors = np.full((num_res_sizes, num_seeds),0.)
-
-for res_size in range(num_res_sizes):
-    for seed in range(num_seeds):
-        errors[res_size, seed] = experiment(data, (res_size + 1) * 500, seed=seed * 17)
-
-plt.plot(sum(errors.transpose()), label="Error")
-plt.legend()
-plt.show()"""
-
-"""my_esn = create_esn(3000, reservoir_lr=0.3, reservoir_sr=1.25)
-
-my_esn.fit(x_train, y_train, warmup=100)
-
-predictions = my_esn.run(x_test)
-
-error = error_func_mse(y_test, predictions)
-
-compare_3d_data(y_test, predictions)"""
-
-"""for res_size in range(5):
-    my_esn = create_esn((res_size + 5) * 100, reservoir_lr=0.3, reservoir_sr=1.25)
-    my_esn.fit(x_train, y_train, warmup=100)
-    predictions = my_esn.run(x_test)
-    error = error_func_mse(y_test, predictions)
-    compare_3d_data(y_test, predictions)
-    print(error)"""
+tesztFuti()
