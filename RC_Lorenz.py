@@ -7,7 +7,7 @@ from Lorenz63 import lorenzfull
 from reservoirpy.nodes import Ridge, Reservoir, NVAR
 from reservoirpy import set_seed
 from joblib import Parallel, delayed
-
+from datetime import datetime
 
 def generate_data(length_train, length_test):
     x = lorenzfull(length_train + length_test, 0.01)
@@ -28,7 +28,7 @@ def create_esn(reservoir_size, reservoir_lr=0.9, reservoir_sr=0.5, ridge_reg=1e-
 def experiment(data, reservoir_size, reservoir_lr=0.3, reservoir_sr=1.25, ridge_reg=1e-6, seed=0, warmup=100,Plotting = False):
     x_train, y_train, x_test, y_test = data
     set_seed(int(seed))
-    my_esn = create_esn(int(reservoir_size), reservoir_lr=reservoir_lr, reservoir_sr=reservoir_sr, ridge_reg=ridge_reg, ridge_name=str(reservoir_size) + str(seed) + str(reservoir_lr) + str(reservoir_sr))
+    my_esn = create_esn(int(reservoir_size), reservoir_lr=reservoir_lr, reservoir_sr=reservoir_sr, ridge_reg=ridge_reg, ridge_name=str(reservoir_size) + str(seed) + str(reservoir_lr) + str(reservoir_sr) + str(datetime.now().strftime("%H_%M_%S")))
     my_esn.fit(x_train, y_train, warmup=warmup)
     predictions = my_esn.run(x_test)
     error = Data_Manipulation.error_func_mse(y_test, predictions)
@@ -139,7 +139,7 @@ def best_parameters_finder(
                     current_Parameterarray[i] = current_intervals[i]
         print("Running on: " + str(current_intervals))
         errors = run_Parallel_on_array(function,current_Parameterarray,threads)
-        print("Errors: " + str(errors))
+        #print("Errors: " + str(errors))
         (minimum_Lokation,minimum_Value) = Data_Manipulation.array_min_finder(errors, maxthreads=threads)
         print("Minimum found: " + str(minimum_Value) + "   In lokation: " + str(minimum_Lokation))
 
@@ -148,7 +148,7 @@ def best_parameters_finder(
         result_diff = prev_result - minimum_Value
         prev_result = minimum_Value
         counter += 1
-    print("\n\nBest parameters found: ")
+    print("\n\nBest parameters found: \n")
     for i in range(current_Parameterarray.shape[0]):
         if(current_Parameterarray[i].shape[0] > 2):
             print(current_Parameterarray[i][minimum_Lokation[i]])
@@ -163,14 +163,14 @@ def tesztFuti():
     data = (x_train, y_train, x_test, y_test)
 
     datas = np.array([data],dtype=object)
-    Reservoir_size_interval = np.array([100, 5000])
+    Reservoir_size_interval = np.array([100, 500])
     Leaking_Rate_interval = np.array([0.1,0.9])
     Spectral_Radius_interval = np.array([0.1,2])
     ridge_reg_interval = np.array([1e-6])
-    seeds = np.array([int(10)],dtype=int)
+    seeds = np.array([10])
     warmups = np.array([100])
 
-    running_Parameter_intervals = np.array([datas,Reservoir_size_interval,Leaking_Rate_interval,Spectral_Radius_interval],dtype=object)
+    running_Parameter_intervals = np.array([datas,Reservoir_size_interval,Leaking_Rate_interval,Spectral_Radius_interval,ridge_reg_interval,seeds,warmups],dtype=object)
 
     best_parameters_finder(experiment,running_Parameter_intervals,threads=20,searching_array_size=5)
 
