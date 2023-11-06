@@ -106,9 +106,11 @@ def best_parameters_finder(
         parameters_intervals = np.array([],dtype=object),
         threads: int = 4,
         searching_array_size: int = 7,
-        strict_intervals: bool = True,
+        parameters_IS_Strict_Interval = np.array([True],dtype=bool),
+        parameters_IS_Needs_averageing = np.array([False],dtype=bool),
         goal_error_diff_percentage = 0.01):
 
+    strict_intervals = True
     current_intervals = parameters_intervals
     minimum_Lokation = np.array([],dtype=float)
     minimum_Value = 0
@@ -137,7 +139,8 @@ def best_parameters_finder(
                     print(" or ")
                     print(type(np.float64(1)))
                     current_Parameterarray[i] = current_intervals[i]
-        print("Running on: " + str(current_intervals))
+        print("Running on: ")
+        print(current_intervals)
         errors = run_Parallel_on_array(function,current_Parameterarray,threads)
         #print("Errors: " + str(errors))
         (minimum_Lokation,minimum_Value) = Data_Manipulation.array_min_finder(errors, maxthreads=threads)
