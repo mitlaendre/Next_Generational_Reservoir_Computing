@@ -143,10 +143,10 @@ def best_parameters_finder(
         print(current_intervals)
         errors = run_Parallel_on_array(function,current_Parameterarray,threads)
         #print("Errors: " + str(errors))
-        (minimum_Lokation,minimum_Value) = Data_Manipulation.array_min_finder(errors, maxthreads=threads)
-        print("Minimum found: " + str(minimum_Value) + "   In lokation: " + str(minimum_Lokation))
+        (minimum_Location,minimum_Value) = Data_Manipulation.array_min_finder(errors, maxthreads=threads)
+        print("Minimum found: " + str(minimum_Value) + "   In location: " + str(minimum_Location))
 
-        current_intervals = Generate_new_Intervals(current_intervals,current_Parameterarray,minimum_Lokation,strict_intervals)
+        current_intervals = Generate_new_Intervals(current_intervals,current_Parameterarray,minimum_Location,strict_intervals)
 
         result_diff = prev_result - minimum_Value
         prev_result = minimum_Value
@@ -154,7 +154,7 @@ def best_parameters_finder(
     print("\n\nBest parameters found: \n")
     for i in range(current_Parameterarray.shape[0]):
         if(current_Parameterarray[i].shape[0] > 2):
-            print(current_Parameterarray[i][minimum_Lokation[i]])
+            print(current_Parameterarray[i][minimum_Location[i]])
         else:
             print("This parameter is not changing")
 
@@ -166,8 +166,8 @@ def tesztFuti():
     data = (x_train, y_train, x_test, y_test)
 
     datas = np.array([data],dtype=object)
-    Reservoir_size_interval = np.array([100, 500])
-    Leaking_Rate_interval = np.array([0.1,0.9])
+    Reservoir_size_interval = np.array([100, 3000])
+    Leaking_Rate_interval = np.array([0.05,0.95])
     Spectral_Radius_interval = np.array([0.1,2])
     ridge_reg_interval = np.array([1e-6])
     seeds = np.array([10])
