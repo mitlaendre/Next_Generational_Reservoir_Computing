@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib.pyplot
 import reservoirpy
 
-
 #np.array használata
 """
 teszt1 = np.full((10,2),0)

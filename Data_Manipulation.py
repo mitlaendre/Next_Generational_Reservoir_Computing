@@ -17,7 +17,6 @@ def Array_to_tuple(array = np.array([],dtype=object)):
 def error_func_mse(x, y):
     return np.average(np.power(sum(np.square(x - y)), 0.5))
 
-
 def plot_3dData_3dPlot(x):
     ax = plt.figure().add_subplot(projection='3d')
     ax.plot(*x.T, lw=0.5)
