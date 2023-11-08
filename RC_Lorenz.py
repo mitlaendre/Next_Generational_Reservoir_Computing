@@ -57,47 +57,33 @@ def run_Parallel_on_array(function,array = np.array([],dtype=object),threads = 1
     return results
 
 
-def Generate_new_Intervals(current_intervals = np.array([],dtype=object),current_Parameterarray = np.array([],dtype=object),minimum_Lokation = np.array([],dtype=float),strict_intervals: bool = True):
+def Generate_new_Intervals(current_intervals = np.array([],dtype=object),current_Parameterarray = np.array([],dtype=object),minimum_Lokation = np.array([],dtype=float),array_IS_needs_averaging = np.array([False],dtype=bool)):
     Is_Minimum_coordinate_On_Edge = np.full(minimum_Lokation.shape[0], False, dtype=bool)
-    Is_Minimum_On_Edge = False
+
     for i in range(minimum_Lokation.shape[0]):
         if (current_Parameterarray[i].shape[0] > 2):
             if (current_intervals[i].shape[0] != 1):
                 if (minimum_Lokation[i] == 0):
                     Is_Minimum_coordinate_On_Edge[i] = True
-                    Is_Minimum_On_Edge = True
                 if (minimum_Lokation[i] == current_Parameterarray[i].shape[0]):
                     Is_Minimum_coordinate_On_Edge[i] = True
-                    Is_Minimum_On_Edge = True
+
+    if(array_IS_needs_averaging.shape[0] != current_intervals.shape[0]):
+        array_IS_needs_averaging = np.full(current_intervals.shape[0],False)
 
 
     new_intervals = np.full(current_intervals.shape[0], 0, dtype=object)
-    if strict_intervals:
-        for i in range(minimum_Lokation.shape[0]):
-            if (current_Parameterarray[i].shape[0] > 2):
-                if Is_Minimum_coordinate_On_Edge[i]:
-                    if (minimum_Lokation[i] == 0):
-                        new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i]],current_Parameterarray[i][minimum_Lokation[i] + 2]])
-                    else:
-                        new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i] - 2],current_Parameterarray[i][minimum_Lokation[i]]])
+    for i in range(minimum_Lokation.shape[0]):
+        if ((current_Parameterarray[i].shape[0] > 2) and (array_IS_needs_averaging[i] == False)):
+            if Is_Minimum_coordinate_On_Edge[i]:
+                if (minimum_Lokation[i] == 0):
+                    new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i]],current_Parameterarray[i][minimum_Lokation[i] + 2]])
                 else:
-                    new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i] - 1],current_Parameterarray[i][minimum_Lokation[i] + 1]])
+                    new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i] - 2],current_Parameterarray[i][minimum_Lokation[i]]])
             else:
-                new_intervals[i] = current_intervals[i]
-    else:
-        if Is_Minimum_On_Edge:
-            for i in range(minimum_Lokation.shape[0]):
-                if (current_Parameterarray[i].shape[0] > 2):
-                    current_interval_size_half = current_intervals[i][1] - current_intervals[i][0] / 2
-                    new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i]] - current_interval_size_half,current_Parameterarray[i][minimum_Lokation[i]] + current_interval_size_half])
-                else:
-                    new_intervals[i] = current_intervals[i]
+                new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i] - 1],current_Parameterarray[i][minimum_Lokation[i] + 1]])
         else:
-            for i in range(minimum_Lokation.shape[0]):
-                if (current_Parameterarray[i].shape[0] > 2):
-                    new_intervals[i] = np.array([current_Parameterarray[i][minimum_Lokation[i] - 1],current_Parameterarray[i][minimum_Lokation[i] + 1]])
-                else:
-                    new_intervals[i] = current_intervals[i]
+            new_intervals[i] = current_intervals[i]
     return new_intervals
 
 
@@ -106,20 +92,16 @@ def best_parameters_finder(
         parameters_intervals = np.array([],dtype=object),
         threads: int = 4,
         searching_array_size: int = 7,
-        parameters_IS_Strict_Interval = np.array([True],dtype=bool),
-        parameters_IS_Needs_averageing = np.array([False],dtype=bool),
+        parameters_IS_Needs_averageing = np.array([False],dtype=bool), # a "parameters" long bool array, or a 1 long with a False
         goal_error_diff_percentage = 0.01):
 
-    strict_intervals = True
     current_intervals = parameters_intervals
-    minimum_Lokation = np.array([],dtype=float)
-    minimum_Value = 0
-
 
     counter = 0
     prev_result = float('inf')
     result_diff = float('inf')
     print("Current error differetial percentage = " +  str(result_diff*prev_result))
+
     while((counter < 100) and (result_diff >= (prev_result * goal_error_diff_percentage))):
         current_Parameterarray = np.full(current_intervals.shape[0], 0, dtype=object)
 
@@ -142,11 +124,15 @@ def best_parameters_finder(
         print("Running on: ")
         print(current_intervals)
         errors = run_Parallel_on_array(function,current_Parameterarray,threads)
+
+        if((parameters_IS_Needs_averageing.shape[0] != 1) or parameters_IS_Needs_averageing[0] == True):
+            errors = Data_Manipulation.multidimensional_array_special_averaging(errors,parameters_IS_Needs_averageing)
+
         #print("Errors: " + str(errors))
         (minimum_Location,minimum_Value) = Data_Manipulation.array_min_finder(errors, maxthreads=threads)
         print("Minimum found: " + str(minimum_Value) + "   In location: " + str(minimum_Location))
 
-        current_intervals = Generate_new_Intervals(current_intervals,current_Parameterarray,minimum_Location,strict_intervals)
+        current_intervals = Generate_new_Intervals(current_intervals,current_Parameterarray,minimum_Location,parameters_IS_Needs_averageing)
 
         result_diff = prev_result - minimum_Value
         prev_result = minimum_Value
@@ -166,15 +152,16 @@ def tesztFuti():
     data = (x_train, y_train, x_test, y_test)
 
     datas = np.array([data],dtype=object)
-    Reservoir_size_interval = np.array([100, 3000])
+    Reservoir_size_interval = np.array([100, 200])
     Leaking_Rate_interval = np.array([0.05,0.95])
     Spectral_Radius_interval = np.array([0.1,2])
     ridge_reg_interval = np.array([1e-6])
-    seeds = np.array([10])
+    seeds = np.array([10,20,30,40,50,60,70,80,90,100])
     warmups = np.array([100])
 
     running_Parameter_intervals = np.array([datas,Reservoir_size_interval,Leaking_Rate_interval,Spectral_Radius_interval,ridge_reg_interval,seeds,warmups],dtype=object)
 
-    best_parameters_finder(experiment,running_Parameter_intervals,threads=20,searching_array_size=5)
+    this_parameters_need_averaging = np.array([False,False,False,False,False,True,False])
+    best_parameters_finder(experiment,running_Parameter_intervals,threads=4,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
 
 tesztFuti()

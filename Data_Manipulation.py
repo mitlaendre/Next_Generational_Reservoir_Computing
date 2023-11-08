@@ -98,3 +98,16 @@ def array_min_finder(input_array = np.array([0],dtype=object),maxthreads = 1): #
             minimums[i] = sub_solutions[i][1]
 
         return (np.append(np.array([np.argmin(minimums)]),locations[np.argmin(minimums)]),minimums[np.argmin(minimums)])
+
+def multidimensional_array_special_averaging(array = np.array([],dtype=object), array_IS_this_dimension_needs_averaging = np.array([],dtype=bool)):
+    #the averaged dimensions of the array will still be there, but it will be 1 long
+    dimensions_to_Average = ()
+    for i in range(array_IS_this_dimension_needs_averaging.shape[0]):
+        if(array_IS_this_dimension_needs_averaging[i] == True):
+            dimensions_to_Average = dimensions_to_Average + (i,)
+
+    for i in dimensions_to_Average:
+        array = array.mean(axis = i,keepdims=True)
+
+    return array
+
