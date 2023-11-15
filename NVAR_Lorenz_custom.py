@@ -1,8 +1,7 @@
 import Data_Manipulation
+import nvar_custom
 from Lorenz63 import lorenzfull
 
-from reservoirpy.nodes import Ridge, Reservoir, NVAR
-from reservoirpy import set_seed
 from datetime import datetime
 
 def generate_data(length_train, length_test):
@@ -15,16 +14,13 @@ def generate_data(length_train, length_test):
 
 
 def create_esn(delay = 1, order = 1, strides = 1, ridge_reg=1e-6, ridge_name="default_ridge"):
-    nvar = NVAR(delay=int(delay), order=int(order), strides=int(strides))
-    readout = Ridge(ridge=ridge_reg, name=ridge_name)
-    deep_esn = nvar >> readout
-    return deep_esn
+    nvar = nvar_custom.NVAR(delay=int(delay), order=int(order), strides=int(strides), ridge=ridge_reg)
+    return nvar
 
 
-def experiment(data, delay = 1, order = 1, strides = 1, ridge_reg=1e-6, seed=0, warmup=100,Plotting = False):
+def experiment(data, delay = 1, order = 1, strides = 1, ridge_reg=1e-6, warmup=100,Plotting = False):
     x_train, y_train, x_test, y_test = data
-    set_seed(int(seed))
-    my_esn = create_esn(delay=delay, order=order, strides=strides, ridge_reg=ridge_reg, ridge_name=str(delay) + str(seed) + str(order) + str(strides) + str(datetime.now().strftime("%H_%M_%S")))
+    my_esn = create_esn(delay=delay, order=order, strides=strides, ridge_reg=ridge_reg, ridge_name=str(delay) + str(order) + str(strides) + str(datetime.now().strftime("%H_%M_%S")))
     my_esn.fit(x_train, y_train, warmup=warmup)
     predictions = my_esn.run(x_test)
     error = Data_Manipulation.error_func_mse(y_test, predictions)

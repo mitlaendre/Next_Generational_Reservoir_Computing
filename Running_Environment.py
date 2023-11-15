@@ -1,4 +1,6 @@
 import RC_Lorenz
+import NVAR_Lorenz
+import NVAR_Lorenz_custom
 import Kombi
 import Data_Manipulation
 
@@ -61,9 +63,10 @@ def best_parameters_finder(
     counter = 0
     prev_result = float('inf')
     result_diff = float('inf')
-    print("Current error differetial percentage = " +  str(result_diff*prev_result))
 
-    while((counter < 100) and (result_diff >= (prev_result * goal_error_diff_percentage))):
+
+    while((counter < 100) and (result_diff >= (prev_result * goal_error_diff_percentage)) and (result_diff > 0)):
+        print("Current error differetial percentage = " + str(result_diff * prev_result))
         current_Parameterarray = np.full(current_intervals.shape[0], 0, dtype=object)
 
         for i in range(current_intervals.shape[0]):
@@ -100,12 +103,15 @@ def best_parameters_finder(
         counter += 1
     print("\n\nBest parameters found: \n")
     for i in range(current_Parameterarray.shape[0]):
-        if(current_Parameterarray[i].shape[0] > 2):
-            print(current_Parameterarray[i][minimum_Location[i]])
+        if(parameters_IS_Needs_averageing.shape[0] != 1) and (parameters_IS_Needs_averageing[i] == False):
+            if(current_Parameterarray[i].shape[0] > 2):
+                print(current_Parameterarray[i][minimum_Location[i]])
+            else:
+                print("This parameter is not changing")
         else:
-            print("This parameter is not changing")
+            print("This parameter is averaged")
     return
-def tesztFuti():
+def tesztFuti_RC():
     x_train, y_train, x_test, y_test = RC_Lorenz.generate_data(3000, 1000)
     data = (x_train, y_train, x_test, y_test)
 
@@ -120,6 +126,30 @@ def tesztFuti():
     running_Parameter_intervals = np.array([datas,Reservoir_size_interval,Leaking_Rate_interval,Spectral_Radius_interval,ridge_reg_interval,seeds,warmups],dtype=object)
 
     this_parameters_need_averaging = np.array([False,False,False,False,False,True,False])
-    best_parameters_finder(RC_Lorenz.experiment,running_Parameter_intervals,threads=4,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
+    best_parameters_finder(RC_Lorenz.experiment,running_Parameter_intervals,threads=20,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
 
-tesztFuti()
+def tesztFuti_NVAR():
+    x_train, y_train, x_test, y_test = RC_Lorenz.generate_data(3000, 1000)
+    data = (x_train, y_train, x_test, y_test)
+
+    datas = np.array([data],dtype=object)
+    Delay_size_interval = np.array([1, 5])
+    Order_size_interval = np.array([1,5])
+    Strides_size_interval = np.array([1])
+    ridge_reg_interval = np.array([1e-6])
+    seeds = np.array([10,20,30,40,50,60,70,80,90,100])
+    warmups = np.array([100])
+
+    running_Parameter_intervals = np.array([datas,Delay_size_interval,Order_size_interval,Strides_size_interval,ridge_reg_interval,seeds,warmups],dtype=object)
+
+    this_parameters_need_averaging = np.array([False,False,False,False,False,True,False])
+    best_parameters_finder(NVAR_Lorenz.experiment,running_Parameter_intervals,threads=1,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
+
+def tesztFuti_NVAR_single():
+    x_train, y_train, x_test, y_test = RC_Lorenz.generate_data(3000, 1000)
+    data = (x_train, y_train, x_test, y_test)
+    NVAR_Lorenz.experiment(data,delay=1,order=2,strides=1,Plotting=True)
+
+
+tesztFuti_NVAR_single()
+

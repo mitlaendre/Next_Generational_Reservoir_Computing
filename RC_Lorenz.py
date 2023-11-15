@@ -1,25 +1,25 @@
 import Data_Manipulation
-import Lorenz63
+from Lorenz63 import lorenzfull
 
 from reservoirpy.nodes import Ridge, Reservoir, NVAR
 from reservoirpy import set_seed
-
 from datetime import datetime
 
-
 def generate_data(length_train, length_test):
-    x = Lorenz63.lorenzfull(length_train + length_test, 0.01)
+    x = lorenzfull(length_train + length_test, 0.01)
     x_train = x[:length_train]
     y_train = x[1:length_train + 1]
     x_test = x[length_train:-1]
     y_test = x[length_train + 1:]
     return x_train, y_train, x_test, y_test
 
+
 def create_esn(reservoir_size, reservoir_lr=0.9, reservoir_sr=0.5, ridge_reg=1e-6, ridge_name="default_ridge"):
     res = Reservoir(reservoir_size, lr=reservoir_lr, sr=reservoir_sr)
     readout = Ridge(ridge=ridge_reg, name=ridge_name)
     deep_esn = res >> readout
     return deep_esn
+
 
 def experiment(data, reservoir_size, reservoir_lr=0.3, reservoir_sr=1.25, ridge_reg=1e-6, seed=0, warmup=100,Plotting = False):
     x_train, y_train, x_test, y_test = data

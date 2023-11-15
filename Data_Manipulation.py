@@ -62,13 +62,6 @@ def compare_3dData_2dPlot(ground_truth, prediction):
     plt.plot(np.transpose(prediction)[1], "g--", label="Prediciton y")
     plt.plot(np.transpose(prediction)[2], "b--", label="Prediciton z")
     plt.show()
-
-    x1 = np.full((prediction.shape[0], 2), 0)
-    for i in range(x1.shape[0]):
-        x1[i, 0] = prediction[i, 0] + prediction[i, 1]
-        x1[i, 1] = prediction[i, 2]
-    plt.plot(np.transpose(x1)[0], np.transpose(x1)[1])
-    plt.show()
     return
 
 def plot_errors_surface(input_errors = np.array([]),Reservoir_sizes = np.array([]),Leaking_Rates = np.array([]),Spectral_Radiuses = np.array([])):
@@ -91,7 +84,7 @@ def array_min_finder(input_array = np.array([0],dtype=object),maxthreads = 1): #
         sub_solutions = Parallel(n_jobs=min(input_array.size,maxthreads))(delayed(array_min_finder)(input_array[i],maxthreads = max(1,(maxthreads//input_array.size))) for i in range(this_dimensions_size))
 
         locations = np.full(this_dimensions_size,0,dtype=object)
-        minimums = np.full(this_dimensions_size,0)
+        minimums = np.full(this_dimensions_size,0,dtype=float)
         for i in range(this_dimensions_size):
             locations[i] = sub_solutions[i][0]
             minimums[i] = sub_solutions[i][1]

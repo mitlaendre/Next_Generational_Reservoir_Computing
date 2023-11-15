@@ -11,19 +11,6 @@ def lorenz(xyz, *, s=10, r=28, b=2.667):
     return np.array([x_dot, y_dot, z_dot])
 
 
-"""
-def lorenzfull(dt=0.01,num_steps = 10000,initial=(0., 1., 1.05)):
-
-    xyzs = np.empty((num_steps + 1, 3))  # Need one more for the initial values
-    xyzs[0] = initial  # Set initial values
-    # Step through "time", calculating the partial derivatives at the current point
-    # and using them to estimate the next point
-    for i in range(num_steps):
-        xyzs[i + 1] = xyzs[i] + lorenz(xyzs[i]) * dt
-    return xyzs
-"""
-
-
 def lorenzfull(
     n_timesteps: int = 10000,
     h: float = 0.01,                    #delta time
