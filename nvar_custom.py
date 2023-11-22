@@ -14,14 +14,14 @@ class NVAR():
         x_train = x_train.transpose()
         # discrete-time versions of the times defined
         warmup_pts = warmup
-        traintime_pts = x_train.shape[0]
-        warmtrain_pts = warmup_pts + traintime_pts
+        traintime_pts = x_train.shape[1] - warmup_pts
+        warmtrain_pts = x_train.shape[1]
 
         # ridge parameter for regression
         ridge_param = self.ridge
 
 
-        d = x_train[0].shape[0]
+        d = x_train.shape[0]
 
         self.d = d
         # number of time delay taps
@@ -84,7 +84,7 @@ class NVAR():
         x_test[:, 0] = self.initial_feature_vector
 
 
-        out_test = np.full(self.dlin+1,0)
+        #out_test = np.full(self.dlin+1,0)
         for j in range(testtime_pts - 1):
             # copy linear part into whole feature vector
             out_test[1:self.dlin + 1] = x_test[:, j]  # shift by one for constant
@@ -100,7 +100,7 @@ class NVAR():
             # do a prediction
             x_test[0:self.d, j + 1] = x_test[0:self.d, j] + self.W_out @ out_test[:]
 
-        return
+        return x_test.transpose()
 
 
 
