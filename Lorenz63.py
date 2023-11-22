@@ -12,7 +12,7 @@ def lorenz(xyz, *, s=10, r=28, b=2.667):
 
 
 def lorenzfull(
-    n_timesteps: int = 10000,
+    n_timesteps: int = 4000,
     h: float = 0.01,                    #delta time
     rho: float = 28.0,
     sigma: float = 10.0,

@@ -148,7 +148,7 @@ def tesztFuti_NVAR():
 def tesztFuti_NVAR_single():
     x_train, y_train, x_test, y_test = RC_Lorenz.generate_data(3000, 1000)
     data = (x_train, y_train, x_test, y_test)
-    NVAR_Lorenz.experiment(data,delay=1,order=2,strides=1,Plotting=True)
+    NVAR_Lorenz_custom.experiment(data,delay=1,order=2,strides=1,Plotting=True)
 
 
 tesztFuti_NVAR_single()
