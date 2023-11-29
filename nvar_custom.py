@@ -1,7 +1,53 @@
 import itertools as it
 from scipy.special import comb
 import numpy as np
+
+
+def make_all_combinations(input = np.array([]),order = 1):
+    if order <= 0:
+        return np.array([1])
+    return np.product(np.array(list(it.combinations(input,order)),dtype=float),1)
+
+def create_combined_data( data, order=2, delay = 1):
+
+
+    #make the delayed parts
+    if len(data.shape) == 1:
+        data_delayed = np.zeros(delay * data.shape[0])
+        for delay in range(delay):
+                data_delayed[data.shape[0] * delay:data.shape[0] * (delay + 1)] = data[:]
+        out_data = np.ones((data.shape[0]*(delay+1)+1),dtype=float)
+        out_data[1:] = data_delayed[:]
+
+    else:
+        data_delayed = np.zeros((delay*data.shape[0], data.shape[1]))
+        for delay in range(delay):
+            for i in range(delay, data.shape[1]):
+                data_delayed[data.shape[0] * delay:data.shape[0] * (delay + 1), i] = data[:, i - delay]
+        out_data = np.ones((data.shape[0]*(delay+1)+1, data.shape[1]),dtype=float)
+        out_data[1:, :] = data_delayed[:,:]
+
+    #append with combinated parts
+    for i in range(2, order+1):
+        out_data = np.append(out_data, make_all_combinations(data_delayed, i),axis=0)
+
+    return out_data
+
 class NVAR():
+
+    """
+    dim
+    dim_lin
+    dim_nonlin
+    dim_total
+    delay
+    ridge
+    order
+
+
+    """
+
+
 
     def __init__(self, delay: int, order: int,strides: int, ridge: float):
         self.delay = delay
@@ -10,97 +56,53 @@ class NVAR():
 
 
         return
+
+
+
+
     def fit(self,x_train, y_train, warmup=100):
         x_train = x_train.transpose()
-        # discrete-time versions of the times defined
-        warmup_pts = warmup
-        traintime_pts = x_train.shape[1] - warmup_pts
-        warmtrain_pts = x_train.shape[1]
+        y_train = y_train.transpose()
 
-        # ridge parameter for regression
-        ridge_param = self.ridge
+        train_time = x_train.shape[1] - warmup
 
 
-        d = x_train.shape[0]
+        out_train = create_combined_data(x_train,order = self.order, delay=self.delay)[:,warmup:]
+        self.dim = x_train.shape[0]
+        self.dim_total = out_train.shape[0]
+        self.dim_lin = self.delay * self.dim
+        self.dim_nonlin = self.dim_total - 1 - self.dim_lin
 
-        self.d = d
-        # number of time delay taps
-        k = self.delay
-        # size of linear part of feature vector
-        self.dlin = k * d
-        # size of nonlinear part of feature vector
-        dnonlin = int(self.dlin * (self.dlin + 1) / 2)
-        # total size of feature vector: constant + linear + nonlinear
-        self.dtot = 1 + self.dlin + dnonlin
 
-        x_train_all = np.zeros((self.dlin, warmtrain_pts))
 
-        # fill in the linear part of the feature vector for all times
-        for delay in range(k):
-            for j in range(delay, warmtrain_pts):
-                x_train_all[d * delay:d * (delay + 1), j] = x_train[:, j - delay]
+        self.W_out = (y_train[:, warmup:] - y_train[:,warmup-1:-1]) @ out_train[:, :].T @ np.linalg.pinv(out_train[:, :] @ out_train[:, :].T + self.ridge * np.identity(self.dim_total))
 
-        # create an array to hold the full feature vector for training time
-        # (use ones so the constant term is already 1)
-        out_train = np.ones((self.dtot, traintime_pts))
-
-        # copy over the linear part (shift over by one to account for constant)
-        out_train[1:self.dlin + 1, :] = x_train_all[:, warmup_pts - 1:warmtrain_pts - 1]
-
-        # fill in the non-linear part
-        cnt = 0
-        for row in range(self.dlin):
-            for column in range(row, self.dlin):
-                # shift by one for constant
-                out_train[self.dlin + 1 + cnt] = x_train_all[row, warmup_pts - 1:warmtrain_pts - 1] * x_train_all[column,
-                                                                                       warmup_pts - 1:warmtrain_pts - 1]
-                cnt += 1
-
-        # ridge regression: train W_out to map out_train to Lorenz[t] - Lorenz[t - 1]
-        self.W_out = (x_train_all[0:d, warmup_pts:warmtrain_pts] - x_train_all[0:d, warmup_pts - 1:warmtrain_pts - 1]) @ out_train[:,
-                                                                                                :].T @ np.linalg.pinv(
-            out_train[:, :] @ out_train[:, :].T + ridge_param * np.identity(self.dtot))
-
-        # apply W_out to the training feature vector to get the training output
-        x_predict = x_train_all[0:d, warmup_pts - 1:warmtrain_pts - 1] + self.W_out @ out_train[:, 0:traintime_pts]
+        x_predict = out_train[0+1:self.dim+1, :] + self.W_out @ out_train[:, 0:train_time]
 
         # calculate NRMSE between true Lorenz and training output
-        rms = np.sqrt(np.mean((x_train_all[0:d, warmup_pts:warmtrain_pts] - x_predict[:, :]) ** 2))
-        print('training nrmse: ' + str(rms))
-
-        self.initial_feature_vector = x_train_all[:, warmtrain_pts - 1]
+        rms = np.sqrt(np.mean((out_train[1:self.dim+1, :] - x_predict[:, :]) ** 2))
+        print('Training nrmse: ' + str(rms))
 
         return
 
-    def run(self,x_test):
+    def run_iterative(self,initial_vector = np.array([]), testtime = 1):
 
-        testtime_pts = x_test.shape[0]
-
-        # create a place to store feature vectors for prediction
-        out_test = np.zeros(self.dtot)  # full feature vector
-        x_test = np.zeros((self.dlin, testtime_pts))  # linear part
+        y_test = np.zeros((self.dim_lin, testtime))  # linear part
 
         # copy over initial linear feature vector
-        x_test[:, 0] = self.initial_feature_vector
+        y_test[:, 0] = initial_vector
 
 
-        #out_test = np.full(self.dlin+1,0)
-        for j in range(testtime_pts - 1):
-            # copy linear part into whole feature vector
-            out_test[1:self.dlin + 1] = x_test[:, j]  # shift by one for constant
-            # fill in the non-linear part
-            cnt = 0
-            for row in range(self.dlin):
-                for column in range(row, self.dlin):
-                    # shift by one for constant
-                    out_test[self.dlin + 1 + cnt] = x_test[row, j] * x_test[column, j]
-                    cnt += 1
+        for j in range(testtime - 1):
+
             # fill in the delay taps of the next state
-            x_test[self.d:self.dlin, j + 1] = x_test[0:(self.dlin - self.d), j]
-            # do a prediction
-            x_test[0:self.d, j + 1] = x_test[0:self.d, j] + self.W_out @ out_test[:]
+            y_test[self.dim:self.dim_lin, j + 1] = y_test[0:(self.dim_lin - self.dim), j]
 
-        return x_test.transpose()
+            # do a prediction
+            out_test = create_combined_data(y_test[:, j], order=self.order, delay=self.delay)
+            y_test[0:self.dim, j + 1] = y_test[0:self.dim, j] + self.W_out @ out_test[:]
+
+        return y_test.transpose()
 
 
 

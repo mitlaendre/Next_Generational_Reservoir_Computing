@@ -22,7 +22,7 @@ def experiment(data, delay = 1, order = 1, strides = 1, ridge_reg=1e-6, warmup=1
     x_train, y_train, x_test, y_test = data
     my_esn = create_esn(delay=delay, order=order, strides=strides, ridge_reg=ridge_reg, ridge_name=str(delay) + str(order) + str(strides) + str(datetime.now().strftime("%H_%M_%S")))
     my_esn.fit(x_train, y_train, warmup=warmup)
-    predictions = my_esn.run(x_test)
+    predictions = my_esn.run_iterative(initial_vector=y_test[0],testtime=x_test.shape[0])
     error = Data_Manipulation.error_func_mse(y_test, predictions)
 
     if Plotting:
