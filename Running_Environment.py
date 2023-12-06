@@ -1,6 +1,7 @@
-import RC_Lorenz
-import NVAR_Lorenz
-import NVAR_Lorenz_custom
+import NVAR
+import ReservoirPy_RC_Lorenz
+import ReservoirPy_NVAR_Lorenz
+import NVAR_Time_Series
 import Kombi
 import Data_Manipulation
 
@@ -112,7 +113,7 @@ def best_parameters_finder(
             print("This parameter is averaged")
     return
 def tesztFuti_RC():
-    x_train, y_train, x_test, y_test = RC_Lorenz.generate_data(3000, 1000)
+    x_train, y_train, x_test, y_test = ReservoirPy_RC_Lorenz.generate_data(3000, 1000)
     data = (x_train, y_train, x_test, y_test)
 
     datas = np.array([data],dtype=object)
@@ -126,10 +127,10 @@ def tesztFuti_RC():
     running_Parameter_intervals = np.array([datas,Reservoir_size_interval,Leaking_Rate_interval,Spectral_Radius_interval,ridge_reg_interval,seeds,warmups],dtype=object)
 
     this_parameters_need_averaging = np.array([False,False,False,False,False,True,False])
-    best_parameters_finder(RC_Lorenz.experiment,running_Parameter_intervals,threads=20,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
+    best_parameters_finder(ReservoirPy_RC_Lorenz.experiment,running_Parameter_intervals,threads=20,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
 
 def tesztFuti_NVAR():
-    x_train, y_train, x_test, y_test = RC_Lorenz.generate_data(3000, 1000)
+    x_train, y_train, x_test, y_test = ReservoirPy_RC_Lorenz.generate_data(3000, 1000)
     data = (x_train, y_train, x_test, y_test)
 
     datas = np.array([data],dtype=object)
@@ -143,13 +144,9 @@ def tesztFuti_NVAR():
     running_Parameter_intervals = np.array([datas,Delay_size_interval,Order_size_interval,Strides_size_interval,ridge_reg_interval,seeds,warmups],dtype=object)
 
     this_parameters_need_averaging = np.array([False,False,False,False,False,True,False])
-    best_parameters_finder(NVAR_Lorenz.experiment,running_Parameter_intervals,threads=1,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
+    best_parameters_finder(ReservoirPy_NVAR_Lorenz.experiment,running_Parameter_intervals,threads=1,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
 
 def tesztFuti_NVAR_single():
-    x_train, y_train, x_test, y_test = RC_Lorenz.generate_data(3000, 1000)
-    data = (x_train, y_train, x_test, y_test)
-    NVAR_Lorenz_custom.experiment(data,delay=1,order=3,strides=1,warmup=100,Plotting=True)
-
+    NVAR_Time_Series.Lorenz_prediction(length_train = 3000, length_test = 1000,delay=2,order=2,warmup=100,ridge_reg= 0.01,Plotting=True)
 
 tesztFuti_NVAR_single()
-
