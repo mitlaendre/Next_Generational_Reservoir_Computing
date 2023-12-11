@@ -146,6 +146,6 @@ def tesztFuti_NVAR():
     best_parameters_finder(ReservoirPy_NVAR_Lorenz.experiment,running_Parameter_intervals,threads=1,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
 
 def tesztFuti_NVAR_single():
-    NVAR_Time_Series.Lorenz_prediction(length_train = 2000, length_test = 100,delay=3,order=3,warmup=100,ridge_reg= 0.01,Plotting=True)
+    NVAR_Time_Series.Lorenz_prediction(length_train = 600, length_test = 800,delay=1,order=2,warmup=200,ridge_reg= 2.5e-6,Plotting=True)
 
 tesztFuti_NVAR_single()

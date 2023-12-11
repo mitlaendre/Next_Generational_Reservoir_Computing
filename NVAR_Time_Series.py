@@ -31,11 +31,7 @@ class Nvar_TS():
         #Initialise x_train and y_train as differentials
         x_train = delay_data(data = TS_data,delay = self.delay)[warmup:-1,:]
         y_train = TS_data[warmup+1:,:] - TS_data[warmup:-1,:]
-        print("fitting inside NVAR to:")
-        print("x_train:")
-        print(x_train)
-        print("y_train:")
-        print(y_train)
+
         self.NVAR.fit(x_train=x_train,y_train=y_train)
         return
 
@@ -49,10 +45,7 @@ class Nvar_TS():
         for i in range(predict_time):
             diff = self.NVAR.runpoint(y_test[initialisation + i - 1,:])
             current_result = y_test[initialisation + i - 1,:dim]  + diff
-            print("current result: ")
-            print(current_result)
-            print("and current diff:")
-            print(diff)
+
             #Put current result in correct positions:
             for shift in range(min(self.delay,predict_time-i-1)+1):
                 y_test[ (initialisation + i) + shift,dim * shift: dim * (shift+1)] = current_result
@@ -62,15 +55,14 @@ class Nvar_TS():
 
 def Lorenz_prediction(length_train = 1, length_test = 1, delay=1, order=1, ridge_reg=1e-6, warmup=100, Plotting=False):
 
-    data = Lorenz63.lorenzfull(length_train + length_test, 0.01)
+    data = Lorenz63.lorenzfull(length_train + length_test, 0.025, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268])
     x_train = data[:length_train]
     x_test = data[length_train:]
 
     my_nvar = Nvar_TS(delay=delay,order=order,ridge=ridge_reg)
     print("NVAR_TS created")
     my_nvar.fit(x_train,warmup=warmup)
-    print("NVAR TS fitted")
-    print(my_nvar.NVAR.W_out)
+
     predictions = my_nvar.predict(x_train[-delay-5:],predict_time=x_test.shape[0])
     print("NVAR TS predicted")
     error = Data_Manipulation.error_func_mse(x_test, predictions)

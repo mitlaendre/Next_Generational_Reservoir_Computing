@@ -8,7 +8,7 @@ def make_all_combinations(input = np.array([]),order = 1):
         return np.full((input.shape[0],1),1)
     if order > input.shape[1]:
         return np.array()
-    return np.product(np.array(list(it.combinations(input.T,order)),dtype=float),1).T
+    return np.product(np.array(list(it.combinations_with_replacement(input.T,order)),dtype=float),1).T
 
 
 def combine_data( data, order=2):
@@ -52,6 +52,13 @@ class NVAR():
 
         #Fit the W_out matrix:
         self.W_out = self.y_train.T @ combined_x_train @ np.linalg.pinv(combined_x_train.T @ combined_x_train + self.ridge * np.identity(combined_x_train.shape[1]))
+        print("x_train: ")
+        print(combined_x_train.T)
+        print("y_train: ")
+        print(self.y_train.T)
+
+        print("Fitted: ")
+        print(self.W_out)
         return
 
 
