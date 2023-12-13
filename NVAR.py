@@ -52,8 +52,12 @@ class NVAR():
 
         #Fit the W_out matrix:
         self.W_out = self.y_train.T @ combined_x_train @ np.linalg.pinv(combined_x_train.T @ combined_x_train + self.ridge * np.identity(combined_x_train.shape[1]))
+        print("x_train.shape")
+        print(combined_x_train.T.shape)
         print("x_train: ")
         print(combined_x_train.T)
+        print("y_train.shape")
+        print(y_train.T.shape)
         print("y_train: ")
         print(self.y_train.T)
 

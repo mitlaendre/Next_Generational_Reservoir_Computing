@@ -12,7 +12,7 @@ def lorenz(xyz, *, s=10, r=28, b=2.667):
 
 
 def lorenzfull(
-    n_timesteps: int = 4000,
+    n_timepoints: int = 4000,
     h: float = 0.01,                    #delta time
     rho: float = 28.0,
     sigma: float = 10.0,
@@ -26,12 +26,12 @@ def lorenzfull(
         x, y, z = state
         return sigma * (y - x), x * (rho - z) - y, x * y - beta * z
 
-    t_max = n_timesteps * h
+    t_max = (n_timepoints) * h
 
-    t_eval = np.linspace(0.0, t_max, n_timesteps)
+    t_eval = np.linspace(0.0, t_max, n_timepoints+1)
 
     sol = solve_ivp(
         lorenz_diff, y0=x0, t_span=(0.0, t_max), t_eval=t_eval, **kwargs
     )
 
-    return sol.y.T
+    return sol.y.T[:-1]
