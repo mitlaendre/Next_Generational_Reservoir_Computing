@@ -23,60 +23,66 @@ def combine_data( data, order=2):
 
 
 class NVAR():
-    """
-    self.x_train        x_train data
-    self.y_train        y_train data
-    self.W_out          trained W_out matrix
-    self.order          order of the combinations
-    self.ridge          ridge parameter
-    """
-
 
     def __init__(self, order: int, ridge: float):
 
-        self.x_train = None
-        self.y_train = None
-        self.W_out = None
-        self.order = order
-        self.ridge = ridge
+        self.y_train = None             #y_train data
+        self.x_train = None             #x_train data
+        self.combined_x_train = None    #x_train with all the combinations and the constant
+        self.W_out = None               #trained W_out matrix
+        self.order = order              #order of the combinations
+        self.ridge = ridge              #ridge parameter
         return
 
 
     def fit(self, x_train: np.array([]), y_train: np.array([])) -> None:
-
         self.x_train = x_train
         self.y_train = y_train
 
         #Make combinations:
-        combined_x_train = combine_data(self.x_train,order = self.order)
+        self.combined_x_train = combine_data(self.x_train,order = self.order)
 
         #Fit the W_out matrix:
-        self.W_out = self.y_train.T @ combined_x_train @ np.linalg.pinv(combined_x_train.T @ combined_x_train + self.ridge * np.identity(combined_x_train.shape[1]))
-        print("x_train.shape")
-        print(combined_x_train.T.shape)
-        print("x_train: ")
-        print(combined_x_train.T)
-        print("y_train.shape")
-        print(y_train.T.shape)
-        print("y_train: ")
-        print(self.y_train.T)
+        self.W_out = self.y_train.T @ self.combined_x_train @ np.linalg.pinv(self.combined_x_train.T @ self.combined_x_train + self.ridge * np.identity(self.combined_x_train.shape[1]))
 
-        print("Fitted: ")
-        print(self.W_out)
         return
 
 
     def run(self,x_data = np.array([])):
+        if(self.W_out.any == None):
+            print("Error: The NVAR has not been trained yet!")
+            return
+
         #Make combinations:
-        combined_x_data = combine_data(x_data,order = self.order)
+        combined_x_test = combine_data(x_data,order = self.order)
 
         #Inicialise the result data:
         y_data = np.zeros((self.y_train.shape[1],x_data.shape[1]))
 
         #Predict:
-        y_data[:,:] = self.W_out @ combined_x_data.T
+        y_data[:,:] = self.W_out @ combined_x_test.T
 
         return y_data
 
-    def runpoint(self,datapoint_vector):
+    def run_vector(self,datapoint_vector):
+        #wrapping the vector in data structure, then unwrap
         return self.run(np.array([datapoint_vector]))[:,0]
+
+    def debug_print(self):
+        print("Ridge param: ")
+        print(self.ridge)
+        print("Order: ")
+        print(self.order)
+
+        if not(self.W_out.any == None):
+            print("X_train data: ")
+            print(self.x_train)
+            print("Y_train data: ")
+            print(self.y_train)
+            print("Combined x_train data: ")
+            print(self.combined_x_train)
+            print("W_out matrix: ")
+            print(self.W_out)
+        else:
+            print("NVAR not trained yet")
+        return

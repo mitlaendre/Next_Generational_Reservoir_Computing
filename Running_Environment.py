@@ -3,6 +3,7 @@ import ReservoirPy_NVAR_Lorenz
 import NVAR_Time_Series
 import Kombi
 import Data_Manipulation
+import Lorenz63
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -145,7 +146,12 @@ def tesztFuti_NVAR():
     this_parameters_need_averaging = np.array([False,False,False,False,False,True,False])
     best_parameters_finder(ReservoirPy_NVAR_Lorenz.experiment,running_Parameter_intervals,threads=1,searching_array_size=5,parameters_IS_Needs_averageing=this_parameters_need_averaging)
 
-def tesztFuti_NVAR_single():
-    NVAR_Time_Series.Lorenz_prediction(length_train = 600, length_test = 800,delay=1,order=2,warmup=200,ridge_reg= 2.5e-6,Plotting=True)
+def CIKK_reproduction():
+    length_train = 600
+    length_test = 799
+    data = Lorenz63.lorenzfull(length_train + length_test, 0.025,
+                               x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
 
-tesztFuti_NVAR_single()
+    NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1,order=2,warmup=198,ridge_reg= 2.5e-6,Plotting=True,Printing=True)
+
+CIKK_reproduction()

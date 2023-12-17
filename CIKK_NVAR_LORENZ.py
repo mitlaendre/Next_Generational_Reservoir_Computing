@@ -5,6 +5,9 @@ Created on Sat Feb 20 13:17:10 2021
 NVAR with time delays for Lorenz forecasting.  Don't be efficient for now.
 
 @author: Dan
+
+
+Edit: out_test initialization from zeroes() to ones()
 """
 
 import numpy as np
@@ -143,7 +146,7 @@ x_predict = x[0:d, warmup_pts - 1:warmtrain_pts - 1] + W_out @ out_train[:, 0:tr
 
 
 # create a place to store feature vectors for prediction
-out_test = np.zeros(dtot)  # full feature vector
+out_test = np.ones(dtot)  # full feature vector
 x_test = np.zeros((dlin, testtime_pts))  # linear part
 
 # copy over initial linear feature vector
