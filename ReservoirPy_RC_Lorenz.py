@@ -1,12 +1,12 @@
 import Data_Manipulation
-from Lorenz63 import lorenzfull
+from Lorenz63 import lorenzdata
 
 from reservoirpy.nodes import Ridge, Reservoir, NVAR
 from reservoirpy import set_seed
 from datetime import datetime
 
 def generate_data(length_train, length_test):
-    x = lorenzfull(length_train + length_test, 0.01)
+    x = lorenzdata(length_train + length_test, 0.01)
     x_train = x[:length_train]
     y_train = x[1:length_train + 1]
     x_test = x[length_train:-1]
