@@ -81,5 +81,9 @@ def TS_complete_run(data,trainlength = 200, delay=1, order=1, ridge_reg=2.5e-6, 
     if Plotting:
         Data_Manipulation.compare_3dData_2dPlot(x_test, predictions)
         Data_Manipulation.compare_3dData_3dPlot(x_test, predictions)
+        labels = ["const"]
+        for i in range(27):
+            labels += "i"
+        Data_Manipulation.histogram_W_out(my_nvar.NVAR.W_out,labels)
 
     return error

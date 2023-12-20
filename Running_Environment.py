@@ -7,6 +7,8 @@ import numpy as np
 from joblib import Parallel, delayed
 from datetime import datetime
 
+import Rossler
+
 
 def best_parameters_finder(
         function,
@@ -19,8 +21,11 @@ def best_parameters_finder(
         array_sizes = np.full(array.shape[0], 0, dtype=int)
         for i in range(array.shape[0]):
             array_sizes[i] = array[i].shape[0]
-        number_of_runs = Kombi.kulonbozoSzamjegyuSzamokSzama(array_sizes)
-        print(type(threads))
+        number_of_runs = 1
+        for i in range(array_sizes.size):
+            number_of_runs *= array_sizes[i]
+
+
         results = Parallel(n_jobs=threads)(delayed(function)(
             *Data_Manipulation.Array_Combination_to_tuple(array, Kombi.kulonbozoSzamjegyuSzam(array_sizes, i))) for i in
                                            range(number_of_runs))
@@ -137,3 +142,12 @@ def CIKK_reproduction_dt():
 
     NVAR_Time_Series.TS_complete_run(data=data, trainlength=int((traintime+warmup)/dt), delay=1,order=2,warmup=int(warmup/dt-2),ridge_reg= 2.5e-6,Plotting=True,Printing=True)
 
+
+def rossler_tesztfuti():
+    length_train = 600
+    length_test = 800
+    data = Rossler.rosslerdata(n_timepoints= length_train + length_test,h =  0.025,a = 0.2, b = 0.2, c = 5.7, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
+
+    NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1,order=2,warmup=198,ridge_reg= 2.5e-6,Plotting=True,Printing=True)
+
+rossler_tesztfuti()
