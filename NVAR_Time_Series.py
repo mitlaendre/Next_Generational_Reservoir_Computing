@@ -1,6 +1,8 @@
 import numpy as np
-import NVAR
 import Data_Manipulation
+import NVAR
+
+
 def make_delayed(data, delay):
     output = np.zeros((data.shape[0],data.shape[1]))
     output[delay:,:] = data[:-delay,:]
@@ -84,6 +86,6 @@ def TS_complete_run(data,trainlength = 200, delay=1, order=1, ridge_reg=2.5e-6, 
         labels = ["const"]
         for i in range(27):
             labels += "i"
-        Data_Manipulation.histogram_W_out(my_nvar.NVAR.W_out,labels)
+        Data_Manipulation.histogram_W_out(my_nvar.NVAR.W_out, labels)
 
     return error

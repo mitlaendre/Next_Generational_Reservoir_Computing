@@ -2,8 +2,6 @@ import itertools
 
 import numpy as np
 
-import Data_Manipulation
-
 
 # Van OsszesHely darab slot, beleteszünk DarabSzam darab megegyező babot, az összes lehetséges módon végigmegy. Mindegyik egyszer lesz.
 # Eredménye vektor: az i. helyen lévő k érték === az i-dik bab (balról jobbra haladva) k-dik slotban van (balról jobbra számolva)
@@ -84,11 +82,3 @@ def kulonbozoSzamjegyuSzamokSzama( szamjegyekMaximumai = np.array([],dtype=int) 
     for i in range(szamjegyekMaximumai.size):
         szamolo *= szamjegyekMaximumai[i]
     return szamolo
-
-tomb = np.array([10,3,4])
-szama = 50
-
-print(kulonbozoSzamjegyuSzam(tomb,szama))
-print(list(itertools.combinations(tomb.tolist(), szama)))
-print(list(itertools.combinations((1,2,3), 1)))
-

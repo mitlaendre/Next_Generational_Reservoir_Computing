@@ -1,13 +1,10 @@
-import NVAR_Time_Series
 import Kombi
+import NVAR_Time_Series
 import Data_Manipulation
-import Lorenz63
-
+import Differential_Equation
 import numpy as np
 from joblib import Parallel, delayed
-from datetime import datetime
 
-import Rossler
 
 
 def best_parameters_finder(
@@ -98,7 +95,7 @@ def best_parameters_finder(
         errors = run_Parallel_on_array(function,current_Parameterarray,threads)
 
         if((parameters_IS_Needs_averageing.shape[0] != 1) or parameters_IS_Needs_averageing[0] == True):
-            errors = Data_Manipulation.multidimensional_array_special_averaging(errors,parameters_IS_Needs_averageing)
+            errors = Data_Manipulation.multidimensional_array_special_averaging(errors, parameters_IS_Needs_averageing)
 
         #print("Errors: " + str(errors))
         (minimum_Location,minimum_Value) = Data_Manipulation.array_min_finder(errors, maxthreads=threads)
@@ -123,9 +120,11 @@ def best_parameters_finder(
 def CIKK_reproduction():
     length_train = 600
     length_test = 799
-    data = Lorenz63.lorenzdata(n_timepoints= length_train + length_test,h =  0.025,rho = 28.,sigma = 10., beta = 8./3., x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
 
-    NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1,order=2,warmup=198,ridge_reg= 2.5e-6,Plotting=True,Printing=True)
+    diffegy = Differential_Equation.Lorenz63()
+    data = diffegy.generate_data(n_timepoints = length_train + length_test,dt =  0.025, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
+
+    NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1, order=2, warmup=198, ridge_reg= 2.5e-6, Plotting=True, Printing=True)
 
 def CIKK_reproduction_dt():
     dt = 0.025
@@ -138,16 +137,20 @@ def CIKK_reproduction_dt():
     # total time to run for
     maxtime = warmup + traintime + testtime
 
-    data = Lorenz63.lorenzdata(maxtime= maxtime,h =  dt,rho = 28.,sigma = 10., beta = 8./3., x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
+    diffegy = Differential_Equation.Lorenz63()
+    data = diffegy.generate_data(maxtime = maxtime,dt = dt, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
 
-    NVAR_Time_Series.TS_complete_run(data=data, trainlength=int((traintime+warmup)/dt), delay=1,order=2,warmup=int(warmup/dt-2),ridge_reg= 2.5e-6,Plotting=True,Printing=True)
+    NVAR_Time_Series.TS_complete_run(data=data, trainlength=int((traintime + warmup) / dt), delay=1, order=2, warmup=int(warmup / dt - 2), ridge_reg= 2.5e-6, Plotting=False, Printing=True)
+
 
 
 def rossler_tesztfuti():
-    length_train = 600
-    length_test = 800
-    data = Rossler.rosslerdata(n_timepoints= length_train + length_test,h =  0.025,a = 0.2, b = 0.2, c = 5.7, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
+    length_train = 500
+    length_test = 2000
 
-    NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1,order=2,warmup=198,ridge_reg= 2.5e-6,Plotting=True,Printing=True)
+    diffegy = Differential_Equation.Rossler()
+    data = diffegy.generate_data(n_timepoints= length_train + length_test,dt =  0.025, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
+
+    NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1, order=2, warmup=198, ridge_reg= 2.5e-6, Plotting=True, Printing=True)
 
 rossler_tesztfuti()

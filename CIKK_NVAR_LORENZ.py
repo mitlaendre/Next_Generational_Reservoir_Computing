@@ -288,8 +288,8 @@ print(x_test[:3, :800].T.shape)
 print("Prediction: ")
 print(x_test[:3, :800].T)
 
-Data_Manipulation.compare_3dData_2dPlot(x[:3, warmtrain_pts:warmtrain_pts+800].T,x_test[:3, :800].T)
-Data_Manipulation.compare_3dData_3dPlot(x[:3, warmtrain_pts:warmtrain_pts+800].T,x_test[:3, :800].T)
+Data_Manipulation.compare_3dData_2dPlot(x[:3, warmtrain_pts:warmtrain_pts + 800].T, x_test[:3, :800].T)
+Data_Manipulation.compare_3dData_3dPlot(x[:3, warmtrain_pts:warmtrain_pts + 800].T, x_test[:3, :800].T)
 
 """OUTPUT:
 
