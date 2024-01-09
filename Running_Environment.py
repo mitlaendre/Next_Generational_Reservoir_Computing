@@ -153,4 +153,14 @@ def rossler_tesztfuti():
 
     NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1, order=2, warmup=198, ridge_reg= 2.5e-6, Plotting=True, Printing=True)
 
-rossler_tesztfuti()
+def chua_tesztfuti():
+    length_train = 600
+    length_test = 1000
+
+    diffegy = Differential_Equation.Chua(a=9.267,b = 14)
+    data = diffegy.generate_data(n_timepoints= length_train + length_test,dt =  0.025, x0=[0.2,0.1,0.1],method='RK23')
+
+    print(NVAR_Time_Series.TS_complete_run(data=data, trainlength=length_train, delay=1, order=3, warmup=198, ridge_reg= 0.0000109, Plotting=True, Printing=False))
+
+
+chua_tesztfuti()

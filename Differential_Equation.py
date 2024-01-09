@@ -41,3 +41,15 @@ class Rossler(Differential_Equation):
             return -y - z, x + a * y, b + z * (x - c)
         super().__init__(fx)
         return
+
+class Chua(Differential_Equation):
+
+    def default_function(x: float):
+        return x**3 /16 - (x  /6)
+
+    def __init__(self, a: float = 1., b: float = 1., f_function = default_function ):
+        def fx(t, state):
+            x, y, z = state
+            return a*(y-f_function(x)), x - y + z, -b*y
+        super().__init__(fx)
+        return

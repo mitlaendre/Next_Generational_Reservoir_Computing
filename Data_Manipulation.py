@@ -147,7 +147,7 @@ def histogram_W_out(W_out,labels):
 
     axs1a[0].barh(y_pos, W_out[0, :], color=colorx)
     axs1a[0].set_yticks(y_pos)
-    axs1a[0].set_yticklabels(labels)
+    #axs1a[0].set_yticklabels(labels)
     axs1a[0].set_ylim(26.5 + 1, -.5)
     axs1a[0].set_xlabel('$[W_{out}]_x$')
     axs1a[0].grid()
@@ -178,7 +178,7 @@ def histogram_W_out(W_out,labels):
 
     axs1b[0].barh(y_pos, W_out[0, :], color=colorx)
     axs1b[0].set_yticks(y_pos)
-    axs1b[0].set_yticklabels(labels)
+    #axs1b[0].set_yticklabels(labels)
     axs1b[0].set_ylim(26.5 + 1, -.5)
     axs1b[0].set_xlim(-.2, .2)
     axs1b[0].set_xticks([-0.1, 0., .1])
@@ -187,7 +187,7 @@ def histogram_W_out(W_out,labels):
 
     axs1b[1].barh(y_pos, W_out[1, :], color=colory)
     axs1b[1].set_yticks(y_pos)
-    axs1b[1].axes.set_yticklabels([])
+    #axs1b[1].axes.set_yticklabels([])
     axs1b[1].set_ylim(26.5 + 1, -.5)
     axs1b[1].set_xlim(-.3, .3)
     axs1b[1].set_xticks([-0.2, 0., .2])
@@ -196,7 +196,7 @@ def histogram_W_out(W_out,labels):
 
     axs1b[2].barh(y_pos, W_out[2, :], color=colorz)
     axs1b[2].set_yticks(y_pos)
-    axs1b[2].axes.set_yticklabels([])  # ,rotation='vertical')
+    #axs1b[2].axes.set_yticklabels([])  # ,rotation='vertical')
     axs1b[2].set_ylim(26.5 + 1, -.5)
     axs1b[2].set_xlim(-.07, .07)
     axs1b[2].set_xticks([-0.05, 0., .05])
