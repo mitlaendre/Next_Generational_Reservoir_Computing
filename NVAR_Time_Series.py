@@ -1,7 +1,7 @@
 import numpy as np
 import Data_Manipulation
 import NVAR
-
+import Plots
 
 def make_delayed(data, delay):
     output = np.zeros((data.shape[0],data.shape[1]))
@@ -59,33 +59,3 @@ class Nvar_TS():
 
         return y_test[initialisation:,:dim]
 
-
-def TS_complete_run(data,trainlength = 200, delay=1, order=1, ridge_reg=2.5e-6, warmup=100, Plotting=False, Printing = False):
-
-    x_train = data[:trainlength]
-    x_test = data[trainlength:]
-
-    my_nvar = Nvar_TS(delay=delay,order=order,ridge=ridge_reg)
-    my_nvar.fit(x_train,warmup=warmup)
-
-
-    initialization = x_train[-delay - 1:]
-    predictions = my_nvar.predict(initialization, predict_time=x_test.shape[0])
-    error = Data_Manipulation.error_func_mse(x_test, predictions)
-
-    if Printing:
-        my_nvar.NVAR.debug_print()
-        print("Ground truth: ")
-        print(x_test)
-        print("Predicted data: ")
-        print(predictions)
-
-    if Plotting:
-        Data_Manipulation.compare_3dData_2dPlot(x_test, predictions)
-        Data_Manipulation.compare_3dData_3dPlot(x_test, predictions)
-        labels = ["const"]
-        for i in range(27):
-            labels += "i"
-        Data_Manipulation.histogram_W_out(my_nvar.NVAR.W_out, labels)
-
-    return error

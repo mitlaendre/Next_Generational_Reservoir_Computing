@@ -7,12 +7,13 @@ class Differential_Equation():
         return
 
     def generate_data(self,
-            maxtime: float = 10,                              # max time of the generation    (optional)
+            x0: Union[list, np.ndarray] = None,             # starting conditions
+            maxtime: float = None,                          # max time of the generation    (optional)
             n_timepoints: int = None,                       # number of timepoints          (optional)
             dt: float = 0.01,                               # delta time
-            x0: Union[list, np.ndarray] = [0., 0., 0.],     # starting conditions
             **kwargs                                        # parameters passed to the scipy solve_ivp
     ):
+
 
         if n_timepoints == None: n_timepoints = int(maxtime / dt + 1)
         else: maxtime = (n_timepoints-1) * dt
@@ -47,7 +48,7 @@ class Chua(Differential_Equation):
     def default_function(x: float):
         return x**3 /16 - (x  /6)
 
-    def __init__(self, a: float = 1., b: float = 1., f_function = default_function ):
+    def __init__(self, a: float = 9.267, b: float = 14., f_function = default_function ):
         def fx(t, state):
             x, y, z = state
             return a*(y-f_function(x)), x - y + z, -b*y

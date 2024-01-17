@@ -1,11 +1,10 @@
 import Kombi
-import NVAR_Time_Series
 import Data_Manipulation
-import Differential_Equation
 import numpy as np
 from joblib import Parallel, delayed
-
-
+import Plots
+import NVAR_Time_Series
+import Differential_Equation
 
 def best_parameters_finder(
         function,
@@ -117,16 +116,136 @@ def best_parameters_finder(
             print("This parameter is averaged")
     return
 
-def CIKK_reproduction():
-    length_train = 600
-    length_test = 799
 
-    diffegy = Differential_Equation.Lorenz63()
-    data = diffegy.generate_data(n_timepoints = length_train + length_test,dt =  0.025, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
+saved_runs = {"Paper reproduction": {"Train length" : 600,
+                                      "Test length" : 799,
+                                      "Equation" : "Lorenz",
+                                      "Time step length" : 0.025,
+                                      "Method" : "RK23",
+                                      "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
+                                      "Delay" : 1,
+                                      "Order" : 2,
+                                      "Warmup" : 198,
+                                      "Ridge" : 2.5e-6,
+                                      "Plotting" : True,
+                                      "Printing" : True
+                                      },
+               "Paper reproduction 2": {"Train time" : 10.,
+                                        "Test time" : 20.,
+                                        "Time step length": 0.025,
+                                        "Method" : "RK23",
+                                        "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
+                                        "Delay" : 1,
+                                        "Order" : 2,
+                                        "Warmup time" : 5.,
+                                        "Ridge" : 2.5e-6,
+                                        "Plotting" : True,
+                                        "Printing" : True
+                                        },
+               "Rossler example": {"Train length" : 500,
+                                      "Test length" : 2000,
+                                      "Equation" : "Rossler",
+                                      "Time step length" : 0.025,
+                                      "Method" : "RK23",
+                                      "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
+                                      "Delay" : 1,
+                                      "Order" : 2,
+                                      "Warmup" : 198,
+                                      "Ridge" : 2.5e-6,
+                                      "Plotting" : True,
+                                      "Printing" : True
+                                      },
+               "Chua example": {"Train length" : 600,
+                                "Test length" : 1000,
+                                "Equation" : "Chua",
+                                "Time step length" : 0.025,
+                                "Method" : "RK23",
+                                "Starting point" : [0.2,0.1,0.1],
+                                "Delay" : 1,
+                                "Order" : 3,
+                                "Warmup" : 198,
+                                "Ridge" : 0.0000109,
+                                "Plotting" : True,
+                                "Printing" : True
+                                }
+               }
 
-    NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1, order=2, warmup=198, ridge_reg= 2.5e-6, Plotting=True, Printing=True)
+def TS_complete_run(dict = {}):         #Still not complete
 
-def CIKK_reproduction_dt():
+    if "Delay" not in dict:
+        return
+    if "Order" not in dict:
+        return
+    if "Ridge" not in dict:
+        return
+
+    if "Data" not in dict:   #We need to make the data
+        dict["Time step length"] = (dict["Time step length"] if ("Time step length" in dict) else 0.025)    #Initialize if not given
+        if "Equation" in dict:
+            if "Starting point" not in dict:
+                return
+
+            if dict["Equation"] == "Lorenz":
+                Current_Equation = Differential_Equation.Lorenz63()
+            elif dict["Equation"] == "Rossler":
+                Current_Equation = Differential_Equation.Rossler()
+            elif dict["Equation"] == "Chua":
+                Current_Equation = Differential_Equation.Chua()
+            else: return
+
+            dict["Method"] = (dict["Method"] if ("Method" in dict) else "")
+            if "Train time" in dict:
+                if "Test time" in dict:
+                    dict["Data"] = Current_Equation.generate_data(maxtime = dict["Train time"] + dict["Test time"], dt = dict["Time step length"],x0=dict["Staring point"])
+                    x_train = dict["Data"]
+            elif "Train length" in dict:
+                if "Test length" in dict:
+                    dict["Data"] = Current_Equation.generate_data(n_timepoints = dict["Train length"] + dict["Test length"], dt = dict["Time step length"],x0=dict["Staring point"])
+            if "Warmup time" not in dict:
+                if "Warmup length" not in dict:
+                    dict["Warmup length"] = 0
+            else: dict["Warmup length"] = int(dict["Warmup time"] * dict["Time step length"])
+
+        else: return
+    else:   #We have some kind of data
+        if "Train length" not in dict:
+            return
+
+
+
+    x_train = dict["Data"][:dict["Train lenght"]]
+    x_test = dict["Data"][dict["Train lenght"]:]
+
+
+    my_nvar = NVAR_Time_Series.Nvar_TS(delay=dict["Delay"],order=dict["Order"],ridge=dict["Ridge"])
+    my_nvar.fit(x_train,warmup=dict["Warmup length"])
+
+
+    initialization = x_train[-dict["Delay"] - 1:]
+    predictions = my_nvar.predict(initialization, predict_time=x_test.shape[0])
+    error = Data_Manipulation.error_func_mse(x_test, predictions)
+
+    if "Printing" in dict:
+        if dict["Printing"]:
+            my_nvar.NVAR.debug_print()
+            print("Ground truth: ")
+            print(x_test)
+            print("Predicted data: ")
+            print(predictions)
+
+    if "Plotting" in dict:
+        if dict["Plotting"]:
+            Plots.compare_3dData_2dPlot(x_test, predictions)
+            Plots.compare_3dData_3dPlot(x_test, predictions)
+            labels = ["const"]
+            for i in range(27):
+                labels += "i"
+            Data_Manipulation.histogram_W_out(my_nvar.NVAR.W_out, labels)
+
+    return error
+
+
+"""def CIKK_reproduction_dt():
     dt = 0.025
     # units of time to warm up NVAR. need to have warmup_pts >= 1
     warmup = 5.
@@ -140,27 +259,4 @@ def CIKK_reproduction_dt():
     diffegy = Differential_Equation.Lorenz63()
     data = diffegy.generate_data(maxtime = maxtime,dt = dt, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
 
-    NVAR_Time_Series.TS_complete_run(data=data, trainlength=int((traintime + warmup) / dt), delay=1, order=2, warmup=int(warmup / dt - 2), ridge_reg= 2.5e-6, Plotting=False, Printing=True)
-
-
-
-def rossler_tesztfuti():
-    length_train = 500
-    length_test = 2000
-
-    diffegy = Differential_Equation.Rossler()
-    data = diffegy.generate_data(n_timepoints= length_train + length_test,dt =  0.025, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
-
-    NVAR_Time_Series.TS_complete_run(data=data, trainlength=600, delay=1, order=2, warmup=198, ridge_reg= 2.5e-6, Plotting=True, Printing=True)
-
-def chua_tesztfuti():
-    length_train = 600
-    length_test = 1000
-
-    diffegy = Differential_Equation.Chua(a=9.267,b = 14)
-    data = diffegy.generate_data(n_timepoints= length_train + length_test,dt =  0.025, x0=[0.2,0.1,0.1],method='RK23')
-
-    print(NVAR_Time_Series.TS_complete_run(data=data, trainlength=length_train, delay=1, order=3, warmup=198, ridge_reg= 0.0000109, Plotting=True, Printing=False))
-
-
-chua_tesztfuti()
+    NVAR_Time_Series.TS_complete_run(data=data, trainlength=int((traintime + warmup) / dt), delay=1, order=2, warmup=int(warmup / dt - 2), ridge_reg= 2.5e-6, Plotting=False, Printing=True)"""
