@@ -22,7 +22,8 @@ class Differential_Equation():
         sol = solve_ivp(
             self.right_side, y0=x0, t_span=(0.0, maxtime), t_eval=t_eval, **kwargs
         )
-
+        print("data generated:")
+        print(sol.y.T[:-1])
         return sol.y.T[:-1]
 
 class Lorenz63(Differential_Equation):

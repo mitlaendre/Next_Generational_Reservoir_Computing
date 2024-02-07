@@ -13,7 +13,7 @@ Edit: out_test initialization from zeroes() to ones()
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
-import Data_Manipulation
+import Plots
 
 ##
 ## Parameters
@@ -288,8 +288,8 @@ print(x_test[:3, :800].T.shape)
 print("Prediction: ")
 print(x_test[:3, :800].T)
 
-Data_Manipulation.compare_3dData_2dPlot(x[:3, warmtrain_pts:warmtrain_pts + 800].T, x_test[:3, :800].T)
-Data_Manipulation.compare_3dData_3dPlot(x[:3, warmtrain_pts:warmtrain_pts + 800].T, x_test[:3, :800].T)
+Plots.compare_3dData_2dPlot(x[:3, warmtrain_pts:warmtrain_pts + 800].T, x_test[:3, :800].T)
+Plots.compare_3dData_3dPlot(x[:3, warmtrain_pts:warmtrain_pts + 800].T, x_test[:3, :800].T)
 
 """OUTPUT:
 

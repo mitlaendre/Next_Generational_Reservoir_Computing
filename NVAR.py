@@ -77,8 +77,12 @@ class NVAR():
         if not(self.W_out.any == None):
             print("X_train data: ")
             print(self.x_train)
+            print("X_train shape: ")
+            print(self.x_train.shape)
             print("Y_train data: ")
             print(self.y_train)
+            print("Y_train shape: ")
+            print(self.y_train.shape)
             print("Combined x_train data: ")
             print(self.combined_x_train)
             print("W_out matrix: ")

@@ -125,7 +125,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                       "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
                                       "Delay" : 1,
                                       "Order" : 2,
-                                      "Warmup" : 198,
+                                      "Warmup length" : 198,
                                       "Ridge" : 2.5e-6,
                                       "Plotting" : True,
                                       "Printing" : True
@@ -133,6 +133,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                "Paper reproduction 2": {"Train time" : 10.,
                                         "Test time" : 20.,
                                         "Time step length": 0.025,
+                                        "Equation" : "Lorenz",
                                         "Method" : "RK23",
                                         "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
                                         "Delay" : 1,
@@ -150,72 +151,103 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                       "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
                                       "Delay" : 1,
                                       "Order" : 2,
-                                      "Warmup" : 198,
+                                      "Warmup length" : 198,
                                       "Ridge" : 2.5e-6,
                                       "Plotting" : True,
                                       "Printing" : True
                                       },
-               "Chua example": {"Train length" : 600,
-                                "Test length" : 1000,
+               "Chua example": {"Train length" : 400,
+                                "Test length" : 400,
                                 "Equation" : "Chua",
                                 "Time step length" : 0.025,
                                 "Method" : "RK23",
                                 "Starting point" : [0.2,0.1,0.1],
                                 "Delay" : 1,
                                 "Order" : 3,
-                                "Warmup" : 198,
+                                "Warmup length" : 198,
                                 "Ridge" : 0.0000109,
                                 "Plotting" : True,
                                 "Printing" : True
                                 }
                }
 
-def TS_complete_run(dict = {}):         #Still not complete
 
+def dict_has_NVAR_params(dict):
     if "Delay" not in dict:
-        return
+        return False
     if "Order" not in dict:
-        return
+        return False
     if "Ridge" not in dict:
+        return False
+    return True
+
+def dict_has_data(dict):
+    if "Data" in dict:
+        if "Train length" in dict:
+            return True
+    return False
+
+def dict_can_create_data(dict):
+
+    if "Time step length" not in dict:
+        dict["Time step length"] = 0.025
+
+
+    if "Equation" in dict:
+        if "Starting point" not in dict:
+            return False
+
+        if dict["Equation"] == "Lorenz":
+            Current_Equation = Differential_Equation.Lorenz63()
+        elif dict["Equation"] == "Rossler":
+            Current_Equation = Differential_Equation.Rossler()
+        elif dict["Equation"] == "Chua":
+            Current_Equation = Differential_Equation.Chua()
+        else:
+            return False
+
+        if "Method" not in dict:
+            dict["Method"] = ""
+
+        if "Train time" in dict:
+            if "Test time" in dict:
+
+                dict["Data"] = Current_Equation.generate_data(n_timepoints=int((dict["Train time"] + dict["Test time"])/dict["Time step length"]), dt=dict["Time step length"], x0=dict["Starting point"])
+                dict["Train length"] = int(dict["Train time"]/dict["Time step length"])
+
+        elif "Train length" in dict:
+            if "Test length" in dict:
+
+                dict["Data"] = Current_Equation.generate_data(n_timepoints=dict["Train length"] + dict["Test length"], dt=dict["Time step length"], x0=dict["Starting point"])
+
+        else:
+            return False
+
+        #Initialise Warmup
+        if "Warmup time" not in dict:
+            if "Warmup length" not in dict:
+                dict["Warmup length"] = 0
+                dict["Warmup time"] = 0
+            else:
+                dict["Warmup time"] = dict["Warmup length"] * dict["Time step length"]
+        else:
+            dict["Warmup length"] = int(dict["Warmup time"] / dict["Time step length"])
+    else: return False
+    return True
+
+
+def TS_run_on_dict(dict = {}):         #Still not complete
+
+    if not dict_has_NVAR_params(dict):
         return
 
-    if "Data" not in dict:   #We need to make the data
-        dict["Time step length"] = (dict["Time step length"] if ("Time step length" in dict) else 0.025)    #Initialize if not given
-        if "Equation" in dict:
-            if "Starting point" not in dict:
-                return
-
-            if dict["Equation"] == "Lorenz":
-                Current_Equation = Differential_Equation.Lorenz63()
-            elif dict["Equation"] == "Rossler":
-                Current_Equation = Differential_Equation.Rossler()
-            elif dict["Equation"] == "Chua":
-                Current_Equation = Differential_Equation.Chua()
-            else: return
-
-            dict["Method"] = (dict["Method"] if ("Method" in dict) else "")
-            if "Train time" in dict:
-                if "Test time" in dict:
-                    dict["Data"] = Current_Equation.generate_data(maxtime = dict["Train time"] + dict["Test time"], dt = dict["Time step length"],x0=dict["Staring point"])
-                    x_train = dict["Data"]
-            elif "Train length" in dict:
-                if "Test length" in dict:
-                    dict["Data"] = Current_Equation.generate_data(n_timepoints = dict["Train length"] + dict["Test length"], dt = dict["Time step length"],x0=dict["Staring point"])
-            if "Warmup time" not in dict:
-                if "Warmup length" not in dict:
-                    dict["Warmup length"] = 0
-            else: dict["Warmup length"] = int(dict["Warmup time"] * dict["Time step length"])
-
-        else: return
-    else:   #We have some kind of data
-        if "Train length" not in dict:
+    if not dict_has_data(dict):
+        if not dict_can_create_data(dict):
             return
+    #else the "dict_can_create_data(dict)" will create the data
 
-
-
-    x_train = dict["Data"][:dict["Train lenght"]]
-    x_test = dict["Data"][dict["Train lenght"]:]
-
+    x_train = dict["Data"][:dict["Train length"]]
+    x_test = dict["Data"][dict["Train length"]:]
 
     my_nvar = NVAR_Time_Series.Nvar_TS(delay=dict["Delay"],order=dict["Order"],ridge=dict["Ridge"])
     my_nvar.fit(x_train,warmup=dict["Warmup length"])
@@ -244,19 +276,4 @@ def TS_complete_run(dict = {}):         #Still not complete
 
     return error
 
-
-"""def CIKK_reproduction_dt():
-    dt = 0.025
-    # units of time to warm up NVAR. need to have warmup_pts >= 1
-    warmup = 5.
-    # units of time to train for
-    traintime = 10.
-    # units of time to test for
-    testtime = 20.
-    # total time to run for
-    maxtime = warmup + traintime + testtime
-
-    diffegy = Differential_Equation.Lorenz63()
-    data = diffegy.generate_data(maxtime = maxtime,dt = dt, x0=[17.67715816276679, 12.931379185960404, 43.91404334248268], method='RK23')
-
-    NVAR_Time_Series.TS_complete_run(data=data, trainlength=int((traintime + warmup) / dt), delay=1, order=2, warmup=int(warmup / dt - 2), ridge_reg= 2.5e-6, Plotting=False, Printing=True)"""
+TS_run_on_dict(saved_runs["Paper reproduction"])
