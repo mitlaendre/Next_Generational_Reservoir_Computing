@@ -4,7 +4,8 @@ import NVAR
 import Plots
 
 def make_delayed(data, delay):
-    output = np.zeros((data.shape[0],data.shape[1]))
+
+    output = np.zeros((data.shape[0],data.shape[1]),dtype=data.dtype)
     output[delay:,:] = data[:-delay,:]
     return output
 
@@ -48,7 +49,7 @@ class Nvar_TS():
         y_test = delay_data(np.append(initial_data,np.zeros((predict_time,dim)),axis=0),self.delay)
 
         for i in range(predict_time):
-            diff = self.NVAR.run_vector(y_test[initialisation + i - 1,:])
+            diff = self.NVAR.run_on_vector(y_test[initialisation + i - 1,:])
             current_result = y_test[initialisation + i - 1,:dim]  + diff
 
             #Put current result in correct positions:
