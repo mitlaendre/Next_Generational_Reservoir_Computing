@@ -63,12 +63,16 @@ class NVAR():
         if(self.W_out.any == None):
             print("Error: The NVAR has not been trained yet!")
             return
+        if x_data.shape[1] != self.x_train.shape[1]:
+            print("The data dimension is not matching the training data")
+            return
+
 
         #Make combinations:
         combined_x_test = combine_data(x_data,order = self.order)
 
         #Inicialise the result data:
-        y_data = np.zeros((self.y_train.shape[1],x_data.shape[1]))
+        y_data = np.zeros((self.y_train.shape[1],x_data.shape[1]),dtype=x_data.dtype)
 
         #Predict:
         y_data[:,:] = self.W_out @ combined_x_test.T
@@ -101,11 +105,3 @@ class NVAR():
         else:
             print("NVAR not trained yet")
         return
-"""
-x1=sympy.symbols("x1")
-x2=sympy.symbols("x2")
-x3=sympy.symbols("x3")
-x4=sympy.symbols("x4")
-
-print(combine_data(np.array([[x1,x2],[x3,x4]]),2))
-print(combine_data(np.array([x1,x2,x3,x4]),2))"""

@@ -163,7 +163,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                 "Time step length" : 0.025,
                                 "Method" : "RK23",
                                 "Starting point" : [0.2,0.1,0.1],
-                                "Delay" : 4,
+                                "Delay" : 1,
                                 "Order" : 3,
                                 "Warmup length" : 198,
                                 "Ridge" : 0.0000109,
@@ -265,27 +265,15 @@ def TS_run_on_dict(dict = {}):         #Still not complete
             print(x_test)
             print("Predicted data: ")
             print(predictions)
+            print("Symbolic prediction: ")
+            print(my_nvar.get_symbolic_prediction())
 
     if "Plotting" in dict:
         if dict["Plotting"]:
             Plots.compare_3dData_2dPlot(x_test, predictions)
             Plots.compare_3dData_3dPlot(x_test, predictions)
 
-            symbol_data = np.zeros((dict["Delay"]+1,len(dict["Starting point"])),dtype=object)
-            for i in range(dict["Delay"]+1):
-                for j in range(len(dict["Starting point"])):
-                    if i == 0:
-                        symbol_data[i,j] = sympy.symbols("X" + str(j+1))
-                    else:
-                        symbol_data[i,j] = sympy.symbols("P"*i + "X" + str(j+1))
-
-            print(symbol_data)
-
-            res = my_nvar.predict(symbol_data)
-            print(res)
-            labels = ["const"]
-            for i in range(27):
-                labels += "i"
+            labels = my_nvar.get_list_of_symbols()
             Plots.histogram_W_out(my_nvar.NVAR.W_out, labels)
 
     return error

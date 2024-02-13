@@ -1,7 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
-
+import sympy
 def Array_Combination_to_tuple(array = np.array([],dtype=object),combination = np.array([])):
     tuple = ()
     for i in range(array.shape[0]):
@@ -43,4 +42,22 @@ def multidimensional_array_special_averaging(array = np.array([],dtype=object), 
 
     return array
 
+def data_out_of_symbols(delay = 0,dimension = 1):   #make a data, but symbols instead of floats
 
+    low_dimension_names = ["X","Y","Z"] #for dimension <4 we use these instead of X1,X2,X3...
+    delay_prefix = "P"  #this is added before the name for every delaystep backwards
+    delay_suffix = ""   #this is added after  the name for every delaystep backwards
+
+    if dimension > len(low_dimension_names):
+        dimension_names = np.full(dimension,"string")
+        for i in range(dimension):
+            dimension_names[i] = "X" + str(i + 1)
+            print(dimension_names[i])
+    else:
+        dimension_names = low_dimension_names
+
+    symbol_data = np.zeros((delay + 1, dimension), dtype=object)
+    for curr_delay in range(delay + 1):
+        for curr_dimension in range(dimension):
+            symbol_data[curr_delay, curr_dimension] = sympy.symbols(delay_prefix * (delay-curr_delay) + dimension_names[curr_dimension] + delay_suffix * (delay-curr_delay))
+    return symbol_data

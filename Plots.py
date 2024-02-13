@@ -94,78 +94,48 @@ def plot_W_out(arr,row_labels,col_labels):
     return
 
 def histogram_W_out(W_out,labels):
+
+
+    combinators = W_out.shape[1]    #its the input  dimension of W_out (larger)
+    dimensions = W_out.shape[0]     #its the output dimension of W_out (smaller)
+
+    if combinators != len(labels): return
     y_pos = np.arange(W_out.shape[1])
-    colorx = ['b', 'b']
-    colory = ['b', 'b']
-    colorz = ['b', 'b']
-    for ix in range(100):
-        colorx += ['b']
-        colory += ['b']
-        colorz += ['b']
 
-    fig1a, axs1a = plt.subplots(1, 3)
-    fig1a.set_figheight(7.)
-    fig1a.set_figwidth(6.)
+    #make the coloring
+    colors = np.full((dimensions,combinators),'b')
 
-    axs1a[0].barh(y_pos, W_out[0, :], color=colorx)
-    axs1a[0].set_yticks(y_pos)
-    #axs1a[0].set_yticklabels(labels)
-    axs1a[0].set_ylim(26.5 + 1, -.5)
-    axs1a[0].set_xlabel('$[W_{out}]_x$')
-    axs1a[0].grid()
+    #scaled to biggest component
+    fig, axs = plt.subplots(1, dimensions)
+    fig.set_figheight(7.)
+    fig.set_figwidth(6.)
 
-    axs1a[1].barh(y_pos, W_out[1, :], color=colory)
-    axs1a[1].set_yticks(y_pos)
-    axs1a[1].axes.set_yticklabels([])
-    axs1a[1].set_ylim(26.5 + 1, -.5)
-    axs1a[1].set_xlabel('$[W_{out}]_y$')
-    axs1a[1].grid()
-
-    axs1a[2].barh(y_pos, W_out[2, :], color=colorz)
-    axs1a[2].set_yticks(y_pos)
-    axs1a[2].axes.set_yticklabels([])  # ,rotation='vertical')
-    axs1a[2].set_ylim(26.5 + 1, -.5)
-    # axs1a[2].set_xlim(-.09,.1)
-    # axs1a[2].set_xticks([-.08,0.,.08])
-    axs1a[2].set_xlabel('$[W_{out}]_z$')
-    axs1a[2].grid()
-
+    for dimension in range(dimensions):
+        axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension])
+        axs[dimension].set_yticks(y_pos)
+        axs[dimension].set_yticklabels(labels)
+        axs[dimension].set_ylim(combinators-0.5, -.5)
+        axs[dimension].set_xlabel("Pred. " + str(labels[1+dimension]))
+        axs[dimension].grid()
     plt.show()
 
-    ##### zoom in ####
 
-    fig1b, axs1b = plt.subplots(1, 3)
-    fig1b.set_figheight(7.)
-    fig1b.set_figwidth(6.)
+    #scaled to (-1,+1)
+    fig, axs = plt.subplots(1, dimensions)
+    fig.set_figheight(7.)
+    fig.set_figwidth(6.)
 
-    axs1b[0].barh(y_pos, W_out[0, :], color=colorx)
-    axs1b[0].set_yticks(y_pos)
-    #axs1b[0].set_yticklabels(labels)
-    axs1b[0].set_ylim(26.5 + 1, -.5)
-    axs1b[0].set_xlim(-.2, .2)
-    axs1b[0].set_xticks([-0.1, 0., .1])
-    axs1b[0].set_xlabel('$[W_{out}]_x$')
-    axs1b[0].grid()
-
-    axs1b[1].barh(y_pos, W_out[1, :], color=colory)
-    axs1b[1].set_yticks(y_pos)
-    #axs1b[1].axes.set_yticklabels([])
-    axs1b[1].set_ylim(26.5 + 1, -.5)
-    axs1b[1].set_xlim(-.3, .3)
-    axs1b[1].set_xticks([-0.2, 0., .2])
-    axs1b[1].set_xlabel('$[W_{out}]_y$')
-    axs1b[1].grid()
-
-    axs1b[2].barh(y_pos, W_out[2, :], color=colorz)
-    axs1b[2].set_yticks(y_pos)
-    #axs1b[2].axes.set_yticklabels([])  # ,rotation='vertical')
-    axs1b[2].set_ylim(26.5 + 1, -.5)
-    axs1b[2].set_xlim(-.07, .07)
-    axs1b[2].set_xticks([-0.05, 0., .05])
-    axs1b[2].set_xlabel('$[W_{out}]_z$')
-    axs1b[2].grid()
-
+    for dimension in range(dimensions):
+        axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension])
+        axs[dimension].set_yticks(y_pos)
+        axs[dimension].set_yticklabels(labels)
+        axs[dimension].set_ylim(combinators - 0.5, -.5)
+        axs[dimension].set_xlim(-1.05,1.05)
+        axs[dimension].set_xlabel("Pred. " + str(labels[1 + dimension]))
+        axs[dimension].grid()
     plt.show()
+
+
     return
 
 
@@ -207,4 +177,4 @@ def bifurcate_plot(fix_param: float, n_skip: int, n_shown_iter: int, step: int =
     plt.savefig('bifurcation_' + str(param_interval_min) + '-' + str(param_interval_max) + '_z_' + str(step) + '.png',dpi=dpi)
 
     return
-#bifurcate_plot(seed = 14,n_skip= 100000,n_iter= 100, r_min=6, r_max=14,step=200)
+    #bifurcate_plot(seed = 14,n_skip= 100000,n_iter= 100, r_min=6, r_max=14,step=200)
