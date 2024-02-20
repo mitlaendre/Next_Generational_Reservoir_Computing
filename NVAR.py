@@ -43,13 +43,26 @@ class NVAR():
         self.W_out = None               #trained W_out matrix
         self.order = order              #order of the combinations
         self.ridge = ridge              #ridge parameter
+        self.norm_data = False
         return
 
 
-    def fit(self, x_train: np.array([]), y_train: np.array([])) -> None:
-        self.x_train = x_train
-        self.y_train = y_train
+    def fit(self, x_train: np.array([]), y_train: np.array([]), norm_data = False) -> None:
+        if norm_data:
+            self.norm_data = True
+            self.x_deviation = x_train.std(0)
+            self.x_mean = x_train.mean(0)
+            self.y_deviation = y_train.std(0)
+            self.y_mean = y_train.mean(0)
 
+            self.x_train = (x_train-self.x_mean)/self.x_deviation
+            self.y_train = (y_train - self.y_mean) / self.y_deviation
+        else:
+            self.x_train = x_train
+            self.y_train = y_train
+
+        print("y_train shape:")
+        print(y_train.shape)
         #Make combinations:
         self.combined_x_train = combine_data(self.x_train,order = self.order)
 
@@ -67,15 +80,22 @@ class NVAR():
             print("The data dimension is not matching the training data")
             return
 
+        if self.norm_data:
+            x_data1 = (x_data-self.x_mean)/self.x_deviation
+        else:
+            x_data1 = x_data
 
         #Make combinations:
-        combined_x_test = combine_data(x_data,order = self.order)
+        combined_x_test = combine_data(x_data1,order = self.order)
 
         #Inicialise the result data:
-        y_data = np.zeros((self.y_train.shape[1],x_data.shape[1]),dtype=x_data.dtype)
+        y_data = np.zeros((self.y_train.shape[1],x_data1.shape[1]),dtype=x_data1.dtype)
 
         #Predict:
         y_data[:,:] = self.W_out @ combined_x_test.T
+
+        if self.norm_data:
+            y_data = (y_data.T*self.y_deviation+self.y_mean).T
 
         return y_data
 

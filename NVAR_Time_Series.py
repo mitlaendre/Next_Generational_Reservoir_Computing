@@ -28,7 +28,7 @@ class Nvar_TS():
         return
 
 
-    def fit(self,TS_data, warmup=0) -> None:
+    def fit(self,TS_data, warmup=0, norm_data = False) -> None:
         self.warmup = warmup
 
         self.dim = TS_data.shape[1]
@@ -37,7 +37,7 @@ class Nvar_TS():
         x_train = delay_data(data = TS_data,delay = self.delay)[self.delay+warmup:-1,:]
         y_train = TS_data[self.delay+warmup+1:,:] - TS_data[self.delay+warmup:-1,:]
 
-        self.NVAR.fit(x_train=x_train,y_train=y_train)
+        self.NVAR.fit(x_train=x_train,y_train=y_train, norm_data= norm_data)
         return
 
     def predict(self,initial_data = np.array([]), predict_time = 1):

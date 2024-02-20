@@ -1,11 +1,15 @@
-import Kombi
 import Data_Manipulation
 import numpy as np
 from joblib import Parallel, delayed
 import Plots
 import NVAR_Time_Series
 import Differential_Equation
-import sympy
+import itertools
+"""
+from skopt import Optimizer
+from skopt.space import Real
+from joblib import Parallel, delayed
+from skopt.benchmarks import branin"""
 
 def best_parameters_finder(
         function,
@@ -22,9 +26,12 @@ def best_parameters_finder(
         for i in range(array_sizes.size):
             number_of_runs *= array_sizes[i]
 
+        help_array = []
+        for i in range(array_sizes.shape[0]):
+            help_array.append(np.array(range(array_sizes[i])))
 
         results = Parallel(n_jobs=threads)(delayed(function)(
-            *Data_Manipulation.Array_Combination_to_tuple(array, Kombi.kulonbozoSzamjegyuSzam(array_sizes, i))) for i in
+            *Data_Manipulation.Array_Combination_to_tuple(array, np.array(list(itertools.product(*help_array))[i]))) for i in
                                            range(number_of_runs))
         results = np.array(results).reshape(*Data_Manipulation.Array_to_tuple(array_sizes))
         return results
@@ -157,8 +164,8 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                       "Plotting" : True,
                                       "Printing" : True
                                       },
-               "Chua example": {"Train length" : 400,
-                                "Test length" : 400,
+               "Chua example": {"Train length" : 500,
+                                "Test length" : 1000,
                                 "Equation" : "Chua",
                                 "Time step length" : 0.025,
                                 "Method" : "RK23",
@@ -168,7 +175,8 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                 "Warmup length" : 198,
                                 "Ridge" : 0.0000109,
                                 "Plotting" : True,
-                                "Printing" : True
+                                "Printing" : True,
+                                "Norm data" : True
                                 }
                }
 
@@ -247,35 +255,71 @@ def TS_run_on_dict(dict = {}):         #Still not complete
             return
     #else the "dict_can_create_data(dict)" will create the data
 
+
+    if "Norm data" not in dict:
+        dict["Norm data"] = False
+    if "Printing" not in dict:
+        dict["Printing"] = False
+    if "Plotting" not in dict:
+        dict["Plotting"] = False
+
     x_train = dict["Data"][:dict["Train length"]]
     x_test = dict["Data"][dict["Train length"]:]
 
-    my_nvar = NVAR_Time_Series.Nvar_TS(delay=dict["Delay"],order=dict["Order"],ridge=dict["Ridge"])
-    my_nvar.fit(x_train,warmup=dict["Warmup length"])
+    return TS_run(delay=dict["Delay"],order=dict["Order"],ridge=dict["Ridge"],TS_data_train=x_train,TS_data_test=x_test,warmup=dict["Warmup length"],norm_data=dict["Norm data"],Printing=dict["Printing"],Plotting=dict["Plotting"])
 
+def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warmup=0, norm_data = False, Printing = False, Plotting = False):
+    my_nvar = NVAR_Time_Series.Nvar_TS(delay=delay, order=order, ridge=ridge)
+    my_nvar.fit(TS_data_train, warmup=warmup, norm_data=norm_data)
 
-    initialization = x_train[-dict["Delay"] - 1:]
-    predictions = my_nvar.predict(initialization, predict_time=x_test.shape[0])
-    error = Data_Manipulation.error_func_mse(x_test, predictions)
+    initialization = TS_data_train[-delay - 1:]
+    predictions = my_nvar.predict(initialization, predict_time=TS_data_test.shape[0])
+    error = Data_Manipulation.error_func_mse(TS_data_test, predictions)
 
-    if "Printing" in dict:
+    if Printing:
         if dict["Printing"]:
             my_nvar.NVAR.debug_print()
             print("Ground truth: ")
-            print(x_test)
+            print(TS_data_test)
             print("Predicted data: ")
             print(predictions)
             print("Symbolic prediction: ")
             print(my_nvar.get_symbolic_prediction())
 
-    if "Plotting" in dict:
+    if Plotting:
         if dict["Plotting"]:
-            Plots.compare_3dData_2dPlot(x_test, predictions)
-            Plots.compare_3dData_3dPlot(x_test, predictions)
+            Plots.compare_3dData_2dPlot(TS_data_test, predictions)
+            Plots.compare_3dData_3dPlot(TS_data_test, predictions)
 
             labels = my_nvar.get_list_of_symbols()
             Plots.histogram_W_out(my_nvar.NVAR.W_out, labels)
 
     return error
+
+
+
+
+
+#https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer
+"""def best_parameters_finder_skopt(
+        function,
+        dimensions = [Real(-1.0,1.0)],
+        #parameters_intervals = np.array([],dtype=object),
+        threads: int = 4,
+        #parameters_IS_Needs_averageing = np.array([False],dtype=bool), # a "parameters" long bool array, or a 1 long with a False
+        ):
+
+    optimizer = Optimizer(
+        dimensions=dimensions,
+        random_state=1,
+        base_estimator='gp'
+    )
+
+    for i in range(10):
+        x = optimizer.ask(n_points=threads)  # x is a list of n_points points
+        y = Parallel(n_jobs=threads)(delayed(branin)(v) for v in x)  # evaluate points in parallel
+        optimizer.tell(x, y)
+
+    return"""
 
 TS_run_on_dict(saved_runs["Chua example"])

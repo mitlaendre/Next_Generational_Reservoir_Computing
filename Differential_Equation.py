@@ -1,5 +1,7 @@
 import numpy as np
 from typing import Union
+
+import scipy.integrate
 from scipy.integrate import solve_ivp
 class Differential_Equation():
     def __init__(self, function = None):
@@ -55,3 +57,4 @@ class Chua(Differential_Equation):
             return a*(y-f_function(x)), x - y + z, -b*y
         super().__init__(fx)
         return
+
