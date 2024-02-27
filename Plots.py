@@ -142,7 +142,6 @@ def histogram_W_out(W_out,labels):
 #unfinished; example run below
 def bifurcate_plot(fix_param: float, n_skip: int, n_shown_iter: int, step: int = 1, param_interval_min: float = 0.0, param_interval_max: float = 0.1):
     interval = np.linspace(param_interval_min, param_interval_max, step)
-
     def func(atadott):
         diffegy = Differential_Equation.Chua(a=atadott, b=fix_param)
         kezdo = [random.randrange(-1,1),random.randrange(-1,1),random.randrange(-1,1)]
