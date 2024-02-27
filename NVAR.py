@@ -44,10 +44,11 @@ class NVAR():
         self.order = order              #order of the combinations
         self.ridge = ridge              #ridge parameter
         self.norm_data = False
+        self.cutoff_small_weights = 0.
         return
 
 
-    def fit(self, x_train: np.array([]), y_train: np.array([]), norm_data = False) -> None:
+    def fit(self, x_train: np.array([]), y_train: np.array([]), norm_data = False, cutoff_small_weights = 0.) -> None:
         if norm_data:
             self.norm_data = True
             self.x_deviation = x_train.std(0)
@@ -60,6 +61,7 @@ class NVAR():
         else:
             self.x_train = x_train
             self.y_train = y_train
+        self.cutoff_small_weights = cutoff_small_weights
 
         print("y_train shape:")
         print(y_train.shape)
@@ -68,6 +70,12 @@ class NVAR():
 
         #Fit the W_out matrix:
         self.W_out = self.y_train.T @ self.combined_x_train @ np.linalg.pinv(self.combined_x_train.T @ self.combined_x_train + self.ridge * np.identity(self.combined_x_train.shape[1]))
+
+        if self.cutoff_small_weights != 0.:
+            for i in range(self.W_out.shape[0]):
+                for j in range(self.W_out.shape[1]):
+                    if np.abs(self.W_out[i,j]) <= self.cutoff_small_weights:
+                        self.W_out[i,j] = 0.
 
         return
 

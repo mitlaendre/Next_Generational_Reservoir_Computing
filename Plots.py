@@ -146,7 +146,7 @@ def bifurcate_plot(fix_param: float, n_skip: int, n_shown_iter: int, step: int =
     def func(atadott):
         diffegy = Differential_Equation.Chua(a=atadott, b=fix_param)
         kezdo = [random.randrange(-1,1),random.randrange(-1,1),random.randrange(-1,1)]
-        data = diffegy.generate_data(n_timepoints=n_skip + n_shown_iter, dt=0.1, x0=kezdo)
+        data = diffegy.generate_data(x0=kezdo, n_timepoints=n_skip + n_shown_iter, dt=0.1)
         X = data[n_skip:, 0]
         Y = data[n_skip:, 1]
         Z = data[n_skip:, 2]

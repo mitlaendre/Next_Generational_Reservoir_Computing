@@ -5,11 +5,9 @@ import Plots
 import NVAR_Time_Series
 import Differential_Equation
 import itertools
-"""
-from skopt import Optimizer
-from skopt.space import Real
-from joblib import Parallel, delayed
-from skopt.benchmarks import branin"""
+import nevergrad as ng
+from concurrent import futures
+
 
 def best_parameters_finder(
         function,
@@ -164,53 +162,70 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                       "Plotting" : True,
                                       "Printing" : True
                                       },
-               "Chua example": {"Train length" : 500,
-                                "Test length" : 1000,
-                                "Equation" : "Chua",
-                                "Time step length" : 0.025,
-                                "Method" : "RK23",
-                                "Starting point" : [0.2,0.1,0.1],
-                                "Delay" : 1,
-                                "Order" : 3,
-                                "Warmup length" : 198,
-                                "Ridge" : 0.0000109,
-                                "Plotting" : True,
-                                "Printing" : True,
-                                "Norm data" : True
-                                }
+               "Chua example": {
+                                "NVAR":{
+                                    "Delay" : ng.p.Scalar(lower=0, upper=5).set_integer_casting(),
+                                    "Order" : 3,
+                                    "Warmup length" : 10,
+                                    "Ridge" : 0.1
+                                    },
+
+                                "Equation": {
+                                    "Starting point" : [0.2,0.1,0.1],
+                                    "Method" : "Midpoint",
+                                    "Time step length" : 0.025,
+                                    "Equation type" : "Chua",
+                                    "Train length" : 10000,
+                                    "Test length" : 1000
+                                    },
+                                "Other": {
+                                    "Plotting": False,
+                                    "Printing": True,
+                                    "Norm data": False,
+                                    "Cutoff small weights": 0.
+                                }#,
+                                #"Data":{
+                                #    "X_train" : np.array([])
+                                #    "Y_train" : np.array([])
+                                #}
+
+
                }
+           }
 
 
 def dict_has_NVAR_params(dict):
-    if "Delay" not in dict:
+    if "NVAR" not in dict:
         return False
-    if "Order" not in dict:
+    if "Delay" not in dict["NVAR"]:
         return False
-    if "Ridge" not in dict:
+    if "Order" not in dict["NVAR"]:
+        return False
+    if "Ridge" not in dict["NVAR"]:
         return False
     return True
 
+
 def dict_has_data(dict):
-    if "Data" in dict:
-        if "Train length" in dict:
-            return True
+    if ("Data" in dict) and ("X_train" in dict) and ("Y_train" in dict):
+        return True
     return False
 
-def dict_can_create_data(dict):
+def dict_equation_generate_data(dict):
 
     if "Time step length" not in dict:
         dict["Time step length"] = 0.025
 
 
-    if "Equation" in dict:
+    if "Equation type" in dict:
         if "Starting point" not in dict:
             return False
 
-        if dict["Equation"] == "Lorenz":
+        if dict["Equation type"] == "Lorenz":
             Current_Equation = Differential_Equation.Lorenz63()
-        elif dict["Equation"] == "Rossler":
+        elif dict["Equation type"] == "Rossler":
             Current_Equation = Differential_Equation.Rossler()
-        elif dict["Equation"] == "Chua":
+        elif dict["Equation type"] == "Chua":
             Current_Equation = Differential_Equation.Chua()
         else:
             return False
@@ -221,13 +236,17 @@ def dict_can_create_data(dict):
         if "Train time" in dict:
             if "Test time" in dict:
 
-                dict["Data"] = Current_Equation.generate_data(n_timepoints=int((dict["Train time"] + dict["Test time"])/dict["Time step length"]), dt=dict["Time step length"], x0=dict["Starting point"])
+                dict["Data"] = Current_Equation.generate_data(x0=dict["Starting point"], n_timepoints=int(
+                    (dict["Train time"] + dict["Test time"]) / dict["Time step length"]), dt=dict["Time step length"],
+                                                              method=dict["Method"])
                 dict["Train length"] = int(dict["Train time"]/dict["Time step length"])
 
         elif "Train length" in dict:
             if "Test length" in dict:
 
-                dict["Data"] = Current_Equation.generate_data(n_timepoints=dict["Train length"] + dict["Test length"], dt=dict["Time step length"], x0=dict["Starting point"])
+                dict["Data"] = Current_Equation.generate_data(x0=dict["Starting point"],
+                                                              n_timepoints=dict["Train length"] + dict["Test length"],
+                                                              dt=dict["Time step length"], method=dict["Method"])
 
         else:
             return False
@@ -244,55 +263,88 @@ def dict_can_create_data(dict):
     else: return False
     return True
 
+def dict_initialise_other_parameters(dict):
+    if "Other" not in dict:
+        dict["Other"] : {}
+    if "Norm data" not in dict["Other"]:
+        dict["Norm data"] = False
+    if "Printing" not in dict["Other"]:
+        dict["Printing"] = False
+    if "Plotting" not in dict["Other"]:
+        dict["Plotting"] = False
+    if "Cutoff small weights" not in dict["Other"]:
+        dict["Cutoff small weights"] = 0.
 
 def TS_run_on_dict(dict = {}):         #Still not complete
 
+    if not dict_has_data(dict):
+        if "Equation" not in dict:
+            return #no data and no equation to begin with
+        elif not dict_equation_generate_data(dict["Equation"]): #try to generate data
+            return
+
+    dict_initialise_other_parameters(dict)
+
+    x_train = dict["Equation"]["Data"][:dict["Equation"]["Train length"]]
+    x_test = dict["Equation"]["Data"][dict["Equation"]["Train length"]:]
     if not dict_has_NVAR_params(dict):
         return
 
-    if not dict_has_data(dict):
-        if not dict_can_create_data(dict):
-            return
-    #else the "dict_can_create_data(dict)" will create the data
 
+    parametrization = ng.p.Instrumentation(
+        delay = dict["NVAR"]["Delay"],
+        order = dict["NVAR"]["Order"],
+        ridge = dict["NVAR"]["Ridge"],
+        TS_data_train=x_train,
+        TS_data_test=x_test,
+        warmup=dict["NVAR"]["Warmup length"],
+        norm_data=dict["Other"]["Norm data"],
+        Printing=dict["Other"]["Printing"],
+        Plotting=dict["Other"]["Plotting"],
+        Cutoff_small_weights=dict["Other"]["Cutoff small weights"]
+    )
+    try:
+        #https://facebookresearch.github.io/nevergrad/optimization.html
+        optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=100,num_workers=10)
+        with futures.ThreadPoolExecutor(max_workers=optimizer.num_workers) as executor:
+            recommendation = optimizer.minimize(TS_run, executor=executor, batch_mode=True)
 
-    if "Norm data" not in dict:
-        dict["Norm data"] = False
-    if "Printing" not in dict:
-        dict["Printing"] = False
-    if "Plotting" not in dict:
-        dict["Plotting"] = False
+    except ValueError as e:
+        return TS_run(delay = dict["NVAR"]["Delay"],
+        order = dict["NVAR"]["Order"],
+        ridge = dict["NVAR"]["Ridge"],
+        TS_data_train=x_train,
+        TS_data_test=x_test,
+        warmup=dict["NVAR"]["Warmup length"],
+        norm_data=dict["Other"]["Norm data"],
+        Printing=dict["Other"]["Printing"],
+        Plotting=dict["Other"]["Plotting"],
+        Cutoff_small_weights=dict["Other"]["Cutoff small weights"])
+    return  recommendation
 
-    x_train = dict["Data"][:dict["Train length"]]
-    x_test = dict["Data"][dict["Train length"]:]
-
-    return TS_run(delay=dict["Delay"],order=dict["Order"],ridge=dict["Ridge"],TS_data_train=x_train,TS_data_test=x_test,warmup=dict["Warmup length"],norm_data=dict["Norm data"],Printing=dict["Printing"],Plotting=dict["Plotting"])
-
-def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warmup=0, norm_data = False, Printing = False, Plotting = False):
+def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warmup=0, norm_data = False, Printing = False, Plotting = False, Cutoff_small_weights = 0.):
     my_nvar = NVAR_Time_Series.Nvar_TS(delay=delay, order=order, ridge=ridge)
-    my_nvar.fit(TS_data_train, warmup=warmup, norm_data=norm_data)
+    my_nvar.fit(TS_data_train, warmup=warmup, norm_data=norm_data, cutoff_small_weights=Cutoff_small_weights)
 
     initialization = TS_data_train[-delay - 1:]
     predictions = my_nvar.predict(initialization, predict_time=TS_data_test.shape[0])
     error = Data_Manipulation.error_func_mse(TS_data_test, predictions)
 
     if Printing:
-        if dict["Printing"]:
-            my_nvar.NVAR.debug_print()
-            print("Ground truth: ")
-            print(TS_data_test)
-            print("Predicted data: ")
-            print(predictions)
-            print("Symbolic prediction: ")
-            print(my_nvar.get_symbolic_prediction())
+        my_nvar.NVAR.debug_print()
+        print("Ground truth: ")
+        print(TS_data_test)
+        print("Predicted data: ")
+        print(predictions)
+        print("Symbolic prediction: ")
+        print(my_nvar.get_symbolic_prediction())
 
     if Plotting:
-        if dict["Plotting"]:
-            Plots.compare_3dData_2dPlot(TS_data_test, predictions)
-            Plots.compare_3dData_3dPlot(TS_data_test, predictions)
+        Plots.compare_3dData_2dPlot(TS_data_test, predictions)
+        Plots.compare_3dData_3dPlot(TS_data_test, predictions)
 
-            labels = my_nvar.get_list_of_symbols()
-            Plots.histogram_W_out(my_nvar.NVAR.W_out, labels)
+        labels = my_nvar.get_list_of_symbols()
+        Plots.histogram_W_out(my_nvar.NVAR.W_out, labels)
 
     return error
 

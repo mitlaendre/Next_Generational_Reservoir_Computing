@@ -7,7 +7,7 @@ from datetime import datetime
 
 def generate_data(length_train, length_test):
     dif = Differential_Equation.Lorenz63()
-    x = dif.generate_data(n_timepoints=length_train + length_test,dt = 0.01)
+    x = dif.generate_data(n_timepoints=length_train + length_test, dt=0.01)
     x_train = x[:length_train]
     y_train = x[1:length_train + 1]
     x_test = x[length_train:-1]
