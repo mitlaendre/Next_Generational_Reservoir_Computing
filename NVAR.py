@@ -63,8 +63,6 @@ class NVAR():
             self.y_train = y_train
         self.cutoff_small_weights = cutoff_small_weights
 
-        print("y_train shape:")
-        print(y_train.shape)
         #Make combinations:
         self.combined_x_train = combine_data(self.x_train,order = self.order)
 

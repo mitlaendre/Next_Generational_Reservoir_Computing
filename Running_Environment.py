@@ -76,8 +76,26 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                 #}
 
 
-               }
-           }
+               },
+                "Test": {
+                                "NVAR":{
+                                    "Delay" : 1,
+                                    "Order" : 1,
+                                    "Warmup length" : 10,
+                                    "Ridge" : ng.p.Scalar(lower=0., upper=1.)
+                                    },
+                                "Other": {
+                                    "Plotting": False,
+                                    "Printing": False,
+                                    "Norm data": False,
+                                    "Cutoff small weights": 0.1
+                                    },
+                                "Data": {
+                                    "X_train": np.full((200,1),1.),
+                                    "X_test": np.full((200,1),8.)
+                                }
+                        }
+              }
 
 
 def dict_has_NVAR_params(dict):
@@ -93,7 +111,7 @@ def dict_has_NVAR_params(dict):
 
 
 def dict_has_data(dict):
-    if ("Data" in dict) and ("X_train" in dict) and ("Y_train" in dict):
+    if ("Data" in dict) and ("X_train" in dict["Data"]) and ("X_test" in dict["Data"]):
         return True
     return False
 
@@ -163,19 +181,21 @@ def dict_initialise_other_parameters(dict):
 
 def TS_run_on_dict(dict = {}):         #Still not complete
 
-    if not dict_has_data(dict):
+    if dict_has_data(dict):
+        x_train = dict["Data"]["X_train"]
+        x_test = dict["Data"]["X_test"]
+    else:
         if "Equation" not in dict:
             return #no data and no equation to begin with
         elif not dict_equation_generate_data(dict["Equation"]): #try to generate data
             return
 
-    dict_initialise_other_parameters(dict)
+        x_train = dict["Equation"]["Data"][:dict["Equation"]["Train length"]]
+        x_test = dict["Equation"]["Data"][dict["Equation"]["Train length"]:]
 
-    x_train = dict["Equation"]["Data"][:dict["Equation"]["Train length"]]
-    x_test = dict["Equation"]["Data"][dict["Equation"]["Train length"]:]
+    dict_initialise_other_parameters(dict)
     if not dict_has_NVAR_params(dict):
         return
-
 
     parametrization = ng.p.Instrumentation(
         delay = dict["NVAR"]["Delay"],
@@ -193,7 +213,7 @@ def TS_run_on_dict(dict = {}):         #Still not complete
         #https://facebookresearch.github.io/nevergrad/optimization.html
         optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=100,num_workers=10)
         with futures.ThreadPoolExecutor(max_workers=optimizer.num_workers) as executor:
-            recommendation = optimizer.minimize(TS_run, executor=executor, batch_mode=True)
+            recommendation = optimizer.minimize(TS_run, executor=executor, batch_mode=True, verbosity=2)
 
     except ValueError as e:
         return TS_run(delay = dict["NVAR"]["Delay"],
@@ -235,4 +255,4 @@ def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warm
     return error
 
 
-TS_run_on_dict(saved_runs["Chua example"])
+TS_run_on_dict(saved_runs["Test"])
