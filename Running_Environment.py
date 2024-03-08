@@ -82,7 +82,8 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Delay" : 1,
                                     "Order" : 1,
                                     "Warmup length" : 10,
-                                    "Ridge" : ng.p.Scalar(lower=0., upper=1.)
+                                    #"Ridge" : ng.p.Scalar(lower=0., upper=1.)
+                                    "Ridge" : 0.5
                                     },
                                 "Other": {
                                     "Plotting": False,
@@ -201,21 +202,24 @@ def TS_run_on_dict(dict = {}):         #Still not complete
         delay = dict["NVAR"]["Delay"],
         order = dict["NVAR"]["Order"],
         ridge = dict["NVAR"]["Ridge"],
-        TS_data_train=x_train,
-        TS_data_test=x_test,
+        #TS_data_train=x_train,
+        #TS_data_test=x_test,
         warmup=dict["NVAR"]["Warmup length"],
         norm_data=dict["Other"]["Norm data"],
         Printing=dict["Other"]["Printing"],
         Plotting=dict["Other"]["Plotting"],
         Cutoff_small_weights=dict["Other"]["Cutoff small weights"]
     )
+    def TS_run_fixed_params(delay,order,ridge,warmup,norm_data,Cutoff_small_weights): return TS_run(delay=delay,order=order,ridge=ridge,TS_data_test=x_test,TS_data_train=x_train,warmup=warmup,norm_data=norm_data,Printing=False,Plotting=False,Cutoff_small_weights=Cutoff_small_weights)
+
     try:
-        #https://facebookresearch.github.io/nevergrad/optimization.html
         optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=100,num_workers=10)
         with futures.ThreadPoolExecutor(max_workers=optimizer.num_workers) as executor:
-            recommendation = optimizer.minimize(TS_run, executor=executor, batch_mode=True, verbosity=2)
+            recommendation = optimizer.minimize(TS_run_fixed_params, executor=executor, batch_mode=True, verbosity=2)
 
     except ValueError as e:
+        print(e)
+        print("Executing single run:")
         return TS_run(delay = dict["NVAR"]["Delay"],
         order = dict["NVAR"]["Order"],
         ridge = dict["NVAR"]["Ridge"],
