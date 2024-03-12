@@ -82,8 +82,8 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Delay" : 1,
                                     "Order" : 1,
                                     "Warmup length" : 10,
-                                    #"Ridge" : ng.p.Scalar(lower=0., upper=1.)
-                                    "Ridge" : 0.5
+                                    "Ridge" : ng.p.Scalar(lower=0., upper=1.)
+                                    #"Ridge" : 0.5
                                     },
                                 "Other": {
                                     "Plotting": False,
@@ -180,7 +180,7 @@ def dict_initialise_other_parameters(dict):
     if "Cutoff small weights" not in dict["Other"]:
         dict["Cutoff small weights"] = 0.
 
-def TS_run_on_dict(dict = {}):         #Still not complete
+def TS_run_on_dict(dict = {}):
 
     if dict_has_data(dict):
         x_train = dict["Data"]["X_train"]
@@ -198,24 +198,37 @@ def TS_run_on_dict(dict = {}):         #Still not complete
     if not dict_has_NVAR_params(dict):
         return
 
-    parametrization = ng.p.Instrumentation(
-        delay = dict["NVAR"]["Delay"],
-        order = dict["NVAR"]["Order"],
-        ridge = dict["NVAR"]["Ridge"],
-        #TS_data_train=x_train,
-        #TS_data_test=x_test,
-        warmup=dict["NVAR"]["Warmup length"],
-        norm_data=dict["Other"]["Norm data"],
-        Printing=dict["Other"]["Printing"],
-        Plotting=dict["Other"]["Plotting"],
-        Cutoff_small_weights=dict["Other"]["Cutoff small weights"]
-    )
-    def TS_run_fixed_params(delay,order,ridge,warmup,norm_data,Cutoff_small_weights): return TS_run(delay=delay,order=order,ridge=ridge,TS_data_test=x_test,TS_data_train=x_train,warmup=warmup,norm_data=norm_data,Printing=False,Plotting=False,Cutoff_small_weights=Cutoff_small_weights)
+    all_parameters = {
+        "delay" : dict["NVAR"]["Delay"],
+        "order" : dict["NVAR"]["Order"],
+        "ridge" : dict["NVAR"]["Ridge"],
+        "TS_data_train" : x_train,
+        "TS_data_test" : x_test,
+        "warmup" : dict["NVAR"]["Warmup length"],
+        "norm_data" : dict["Other"]["Norm data"],
+        "Printing" : dict["Other"]["Printing"],
+        "Plotting" : dict["Other"]["Plotting"],
+        "Cutoff_small_weights" : dict["Other"]["Cutoff small weights"]
+    }
+    fix_parameters = {
+    }
+    optim_parameters = {
+    }
+
+    for i in all_parameters.keys():
+        if type(all_parameters[i])==type(ng.p.Scalar()):
+            optim_parameters[i] = all_parameters[i]
+        else:
+            fix_parameters[i] = all_parameters[i]
+    def TS_fixed(**kwargs):
+        TS_run(**kwargs,**fix_parameters)
+
+    parametrization = ng.p.Instrumentation(**optim_parameters)
 
     try:
         optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=100,num_workers=10)
         with futures.ThreadPoolExecutor(max_workers=optimizer.num_workers) as executor:
-            recommendation = optimizer.minimize(TS_run_fixed_params, executor=executor, batch_mode=True, verbosity=2)
+            recommendation = optimizer.minimize(TS_fixed, executor=executor, batch_mode=True, verbosity=2)
 
     except ValueError as e:
         print(e)
