@@ -4,29 +4,45 @@ import Differential_Equation
 from joblib import Parallel, delayed
 import random
 
-def plot_3dData_3dPlot(x):
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.plot(*x.T, lw=0.5)
-    ax.set_xlabel("X Axis")
-    ax.set_ylabel("Y Axis")
-    ax.set_zlabel("Z Axis")
-    ax.set_title("Lorenz Attractor")
-    plt.show()
+def universal_Data_Plot(data,labels = None,title = "", verbosity = 3):
+    if len(data.shape) > 2:
+        print("Data is not in 2D array form")
+        return
+    if data.shape[0] > data.shape[1]:
+        data = data.T       #The data should be "longer" than the dimensions. This helps with universality
+    if labels == None:
+        labels = {"X Axis", "Y Axis", "Z Axis"}
 
-def plot_3dData_2dPlot(x):
-    plt.plot(np.transpose(x)[0],"r-",legend = "x")
-    plt.plot(np.transpose(x)[1],"g-",legend = "y")
-    plt.plot(np.transpose(x)[2],"b-",legend = "z")
-    plt.show()
+    if verbosity >= 1:
+        color = plt.cm.rainbow(np.linspace(0, 1, data.shape[0]))
+        for i, c in enumerate(color):
+            plt.plot(data[i], c=c,label=labels[i],title=title)
+        plt.show()
 
-    x1 = np.full((x.shape[0],2),0)
-    for i in range(x1.shape[0]):
-        x1[i,0] = x[i,0]+x[i,1]
-        x1[i,1] = x[i,2]
-    plt.plot(np.transpose(x1)[0],np.transpose(x1)[1])
-    plt.show()
+    if data.shape[0] == 1:          #1D data
+        print()
+    elif data.shape[0] == 2:        #2D data
+        plt.figure()
+        plt.plot(data[0], data[1], lw=0.5)
+        plt.xlabel(labels[0])
+        plt.ylabel(labels[1])
+        plt.title(title)
+        plt.grid(True)
+        plt.show()
+    elif data.shape[0] == 3:        #3D data
+        ax = plt.figure().add_subplot(projection='3d')
+        ax.plot(*data.T, lw=0.5)
+        ax.set_xlabel(labels[0])
+        ax.set_ylabel(labels[1])
+        ax.set_zlabel(labels[2])
+        ax.set_title(title)
+        plt.show()
+    else:                           #Multidim data
+        print()
 
-    return
+
+
+
 
 def compare_3dData_3dPlot(ground_truth, prediction):
     ax = plt.figure().add_subplot(projection='3d')
@@ -50,19 +66,6 @@ def compare_3dData_2dPlot(ground_truth, prediction):
     plt.plot(np.transpose(prediction)[2], "b--", label="Prediciton z")
     plt.show()
     return
-
-def plot_errors_surface(input_errors = np.array([]),Reservoir_sizes = np.array([]),Leaking_Rates = np.array([]),Spectral_Radiuses = np.array([])):
-    for i in range(input_errors.shape[0]):
-        hf = plt.figure()
-        ha = hf.add_subplot(111, projection='3d')
-
-        X, Y = np.meshgrid(Leaking_Rates, Spectral_Radiuses)  # `plot_surface` expects `x` and `y` data to be 2D
-        ha.plot_surface(X, Y, input_errors[i])
-        ha.set_xlabel('$Leaking Rate$')
-        ha.set_ylabel('$Spectral Radius$')
-        ha.set_zlabel(r'$Average error$')
-        plt.show()
-        return
 
 
 def plot_W_out(arr,row_labels,col_labels):
@@ -93,11 +96,21 @@ def plot_W_out(arr,row_labels,col_labels):
     plt.show()
     return
 
-def histogram_W_out(W_out,labels):
+def histogram_W_out(W_out,labels,cutoff_small_weights = 0.):
 
+    i = W_out.shape[0]+1
+    while i < W_out.shape[1]:
+        delete = True
+        for j in range(W_out.shape[0]):
+            if abs(W_out[j,i]) > cutoff_small_weights:
+                delete = False
+        if delete:
+            W_out = np.delete(W_out, i, axis=1)
+            labels = np.delete(labels, i, axis=0)
+        else: i+=1
 
-    combinators = W_out.shape[1]    #its the input  dimension of W_out (larger)
-    dimensions = W_out.shape[0]     #its the output dimension of W_out (smaller)
+    combinators = W_out.shape[1]  # its the input  dimension of W_out (larger)
+    dimensions = W_out.shape[0]  # its the output dimension of W_out (smaller)
 
     if combinators != len(labels): return
     y_pos = np.arange(W_out.shape[1])

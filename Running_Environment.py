@@ -50,7 +50,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                       },
                "Chua example": {
                                 "NVAR":{
-                                    "Delay" : ng.p.Scalar(lower=0, upper=5).set_integer_casting(),
+                                    "Delay" : 1,
                                     "Order" : 3,
                                     "Warmup length" : 10,
                                     "Ridge" : 0.1
@@ -61,14 +61,15 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Method" : "Midpoint",
                                     "Time step length" : 0.025,
                                     "Equation type" : "Chua",
-                                    "Train length" : 10000,
+                                    "Train length" : 1000,
                                     "Test length" : 1000
                                     },
                                 "Other": {
-                                    "Plotting": False,
+                                    "Plotting": True,
                                     "Printing": True,
                                     "Norm data": False,
-                                    "Cutoff small weights": 0.
+                                    "Cutoff small weights": 0.,
+                                    "Cutoff W_out": 0.01
                                 }#,
                                 #"Data":{
                                 #    "X_train" : np.array([])
@@ -77,27 +78,49 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
 
 
                },
-                "Test": {
+                "Test_optim": {
                                 "NVAR":{
                                     "Delay" : 1,
                                     "Order" : 1,
                                     "Warmup length" : 10,
                                     "Ridge" : ng.p.Scalar(lower=0., upper=1.)
-                                    #"Ridge" : 0.5
                                     },
                                 "Other": {
-                                    "Plotting": False,
-                                    "Printing": False,
+                                    "Plotting": True,
+                                    "Printing": True,
                                     "Norm data": False,
                                     "Cutoff small weights": 0.1
                                     },
                                 "Data": {
                                     "X_train": np.full((200,1),1.),
                                     "X_test": np.full((200,1),8.)
+                                },
+                                "Optimizer":{
+                                    "Budget": 100,
+                                    "Num_workers": 10,
+                                    "Batch mode": True,
+                                    "Verbosity": 2
+                                }
+                        },
+                "Test_single": {
+                                "NVAR":{
+                                    "Delay" : 1,
+                                    "Order" : 1,
+                                    "Warmup length" : 10,
+                                    "Ridge" : 0.5
+                                    },
+                                "Other": {
+                                    "Plotting": True,
+                                    "Printing": True,
+                                    "Norm data": False,
+                                    "Cutoff small weights": 0.1
+                                    },
+                                "Data": {
+                                    "X_train": np.full((200,3),1.),
+                                    "X_test": np.full((200,3),8.)
                                 }
                         }
               }
-
 
 def dict_has_NVAR_params(dict):
     if "NVAR" not in dict:
@@ -179,6 +202,21 @@ def dict_initialise_other_parameters(dict):
         dict["Plotting"] = False
     if "Cutoff small weights" not in dict["Other"]:
         dict["Cutoff small weights"] = 0.
+    if "Cutoff W_out" not in dict["Other"]:
+        dict["Other"]["Cutoff W_out"] = 0.
+
+    if "Optimizer" not in dict:
+        dict["Optimizer"] = {}
+    if "Budget" not in dict["Optimizer"]:
+        dict["Optimizer"]["Budget"] = 100
+    if "Num_workers" not in dict["Optimizer"]:
+        dict["Optimizer"]["Num_workers"] = 10
+    if "Batch mode" not in dict["Optimizer"]:
+        dict["Optimizer"]["Batch mode"] = True
+    if "Verbosity" not in dict["Optimizer"]:
+        dict["Optimizer"]["Verbosity"] = 0
+
+
 
 def TS_run_on_dict(dict = {}):
 
@@ -206,46 +244,34 @@ def TS_run_on_dict(dict = {}):
         "TS_data_test" : x_test,
         "warmup" : dict["NVAR"]["Warmup length"],
         "norm_data" : dict["Other"]["Norm data"],
-        "Printing" : dict["Other"]["Printing"],
-        "Plotting" : dict["Other"]["Plotting"],
-        "Cutoff_small_weights" : dict["Other"]["Cutoff small weights"]
+        "Cutoff_small_weights" : dict["Other"]["Cutoff small weights"],
+        "Cutoff_W_out_plot" : dict["Other"]["Cutoff W_out"]
     }
-    fix_parameters = {
-    }
-    optim_parameters = {
-    }
-
+    fix_parameters = {}
+    optim_parameters = {}
     for i in all_parameters.keys():
-        if type(all_parameters[i])==type(ng.p.Scalar()):
-            optim_parameters[i] = all_parameters[i]
-        else:
-            fix_parameters[i] = all_parameters[i]
-    def TS_fixed(**kwargs):
-        TS_run(**kwargs,**fix_parameters)
+        if i != "Printing" and i != "Plotting":
+            if issubclass(type(all_parameters[i]),ng.p.Data):
+                optim_parameters[i] = all_parameters[i]
+            else:
+                fix_parameters[i] = all_parameters[i]
 
     parametrization = ng.p.Instrumentation(**optim_parameters)
 
+
     try:
-        optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=100,num_workers=10)
+        optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=dict["Optimizer"]["Budget"],num_workers=dict["Optimizer"]["Num_workers"])
         with futures.ThreadPoolExecutor(max_workers=optimizer.num_workers) as executor:
-            recommendation = optimizer.minimize(TS_fixed, executor=executor, batch_mode=True, verbosity=2)
+            recommendation = optimizer.minimize(lambda **kwargs: TS_run(**kwargs,**fix_parameters), executor=executor, batch_mode=dict["Optimizer"]["Batch mode"], verbosity=dict["Optimizer"]["Verbosity"]).value[1]
 
     except ValueError as e:
         print(e)
         print("Executing single run:")
-        return TS_run(delay = dict["NVAR"]["Delay"],
-        order = dict["NVAR"]["Order"],
-        ridge = dict["NVAR"]["Ridge"],
-        TS_data_train=x_train,
-        TS_data_test=x_test,
-        warmup=dict["NVAR"]["Warmup length"],
-        norm_data=dict["Other"]["Norm data"],
-        Printing=dict["Other"]["Printing"],
-        Plotting=dict["Other"]["Plotting"],
-        Cutoff_small_weights=dict["Other"]["Cutoff small weights"])
-    return  recommendation
+        recommendation = optim_parameters
 
-def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warmup=0, norm_data = False, Printing = False, Plotting = False, Cutoff_small_weights = 0.):
+    return TS_run(**fix_parameters,**recommendation,Plotting=dict["Other"]["Plotting"],Printing=dict["Other"]["Printing"])
+
+def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warmup=0, norm_data = False, Printing = False, Plotting = False, Cutoff_small_weights = 0., Cutoff_W_out_plot = 0.):
     my_nvar = NVAR_Time_Series.Nvar_TS(delay=delay, order=order, ridge=ridge)
     my_nvar.fit(TS_data_train, warmup=warmup, norm_data=norm_data, cutoff_small_weights=Cutoff_small_weights)
 
@@ -267,9 +293,10 @@ def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warm
         Plots.compare_3dData_3dPlot(TS_data_test, predictions)
 
         labels = my_nvar.get_list_of_symbols()
-        Plots.histogram_W_out(my_nvar.NVAR.W_out, labels)
+        Plots.histogram_W_out(my_nvar.NVAR.W_out, labels,cutoff_small_weights=Cutoff_W_out_plot)
 
     return error
 
 
-TS_run_on_dict(saved_runs["Test"])
+#TS_run_on_dict(saved_runs["Test_optim"])
+TS_run_on_dict(saved_runs["Chua example"])
