@@ -1,5 +1,4 @@
 import numpy as np
-
 import Data_Manipulation
 import NVAR
 import sympy
@@ -21,44 +20,73 @@ def delay_data( data = np.array([]), delay=1):
 
 class Nvar_TS():
 
-    def __init__(self, delay: int, order: int, ridge: float):
-        self.NVAR = NVAR.NVAR(order= order, ridge= ridge)
-        self.delay = delay      #delay = 0 is when just current datapoint is given
+    def __init__(self, delay = 0, order = 0, ridge = 0., dict = {}):
+        if "NVAR_TS" in dict:
+            dict = dict["NVAR_TS"]
+        if "NVAR" not in dict:
+            dict["NVAR"] = {}
+        if "Delay" not in dict:
+            dict["Delay"] = delay
+        if "Order" not in dict["NVAR"]:
+            dict["NVAR"]["Order"] = order
+        if "Ridge" not in dict["NVAR"]:
+            dict["NVAR"]["Ridge"] = ridge
+
+        self.NVAR = NVAR.NVAR(dict = dict["NVAR"])
+        self.delay = dict["Delay"]      #delay = 0 is when just current datapoint is given
         self.warmup = 0
         return
 
 
-    def fit(self,TS_data, warmup=0, norm_data = False, cutoff_small_weights = 0.) -> None:
-        self.warmup = warmup
+    def fit(self,TS_data = np.array([]), warmup=0, norm_data = False, cutoff_small_weights = 0., dict = {}) -> None:
+        if "NVAR_TS" in dict:
+            dict = dict["NVAR_TS"]
+        if "NVAR" not in dict:
+            dict["NVAR"] = {}
+        if "TS_data" not in dict:
+            dict["TS_data"] = TS_data
+        if "Warmup" not in dict:
+            dict["Warmup"] = warmup
+        if "Norm data" not in dict["NVAR"]:
+            dict["NVAR"]["Norm data"] = norm_data
+        if "Cutoff small weights" not in dict["NVAR"]:
+            dict["NVAR"]["Cutoff small weights"] = cutoff_small_weights
 
-        self.dim = TS_data.shape[1]
+        self.warmup = dict["Warmup"]
+
+        self.dim = dict["TS_data"].shape[1]
 
         #Initialise x_train and y_train as differentials
-        x_train = delay_data(data = TS_data,delay = self.delay)[self.delay+warmup:-1,:]
-        y_train = TS_data[self.delay+warmup+1:,:] - TS_data[self.delay+warmup:-1,:]
+        dict["NVAR"]["X_train"] = delay_data(data = dict["TS_data"],delay = self.delay)[self.delay+dict["Warmup"]:-1,:]
+        dict["NVAR"]["Y_train"] = dict["TS_data"][self.delay+dict["Warmup"]+1:,:] - dict["TS_data"][self.delay+dict["Warmup"]:-1,:]
 
-        self.NVAR.fit(x_train=x_train,y_train=y_train, norm_data= norm_data,cutoff_small_weights=cutoff_small_weights)
+        self.NVAR.fit(dict = dict["NVAR"])
         return
 
-    def predict(self,initial_data = np.array([]), predict_time = 1):
+    def predict(self,initial_data = np.array([]), predict_time = 1, dict = {}):
+        if "Initial data" not in dict:
+            dict["Initial data"] = initial_data
+        if "Predict time" not in dict:
+            dict["Predict time"] = predict_time
 
-        if initial_data.shape[0] < self.delay:
+
+        if dict["Initial data"].shape[0] < self.delay:
             return
-        if self.dim != initial_data.shape[1]:
+        if self.dim != dict["Initial data"].shape[1]:
             return
 
 
-        initialisation = initial_data.shape[0]
+        initialisation = dict["Initial data"].shape[0]
 
         #Make extended data with the initial data, and add the already known delays:
-        y_test = delay_data(np.append(initial_data,np.zeros((predict_time,self.dim)),axis=0),self.delay)
+        y_test = delay_data(np.append(dict["Initial data"],np.zeros((dict["Predict time"],self.dim)),axis=0),self.delay)
 
-        for i in range(predict_time):
+        for i in range(dict["Predict time"]):
             diff = self.NVAR.run_on_vector(y_test[initialisation + i - 1,:])
             current_result = y_test[initialisation + i - 1,:self.dim]  + diff
 
             #Put current result in correct positions:
-            for shift in range(min(self.delay,predict_time-i-1)+1):
+            for shift in range(min(self.delay,dict["Predict time"]-i-1)+1):
                 y_test[ (initialisation + i) + shift,self.dim * shift: self.dim * (shift+1)] = current_result
 
 

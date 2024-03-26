@@ -1,13 +1,15 @@
 import Data_Manipulation
 import numpy as np
-from joblib import Parallel, delayed
 import Plots
 import NVAR_Time_Series
 import Differential_Equation
-import itertools
 import nevergrad as ng
 from concurrent import futures
+import sympy
 
+x = sympy.symbols('x')
+y = sympy.symbols('y')
+z = sympy.symbols('z')
 
 saved_runs = {"Paper reproduction": {"Train length" : 600,
                                       "Test length" : 799,
@@ -53,12 +55,14 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Delay" : 1,
                                     "Order" : 3,
                                     "Warmup length" : 10,
-                                    "Ridge" : 0.1
+                                    "Ridge" : 0.01,
+                                    "Input symbols" : [x,y,z],
+                                    "Combine symbols" : [x,y,z,x**2,y**2]
                                     },
 
                                 "Equation": {
                                     "Starting point" : [0.2,0.1,0.1],
-                                    "Method" : "Midpoint",
+                                    "Method" : "Euler",
                                     "Time step length" : 0.025,
                                     "Equation type" : "Chua",
                                     "Train length" : 1000,
@@ -83,7 +87,9 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Delay" : 1,
                                     "Order" : 1,
                                     "Warmup length" : 10,
-                                    "Ridge" : ng.p.Scalar(lower=0., upper=1.)
+                                    "Ridge" : ng.p.Scalar(lower=0., upper=1.),
+                                    "Input symbols" : [x,y,z],
+                                    "Combine symbols" : [1,x,y,z,x**2,y**2]
                                     },
                                 "Other": {
                                     "Plotting": True,
@@ -131,6 +137,11 @@ def dict_has_NVAR_params(dict):
         return False
     if "Ridge" not in dict["NVAR"]:
         return False
+    if "Input symbols" not in dict["NVAR"]:
+        dict["NVAR"]["Input symbols"] = []
+    if "Combine symbols" not in dict["NVAR"]:
+        dict["NVAR"]["Combine symbols"] = []
+
     return True
 
 
@@ -242,6 +253,8 @@ def TS_run_on_dict(dict = {}):
         "ridge" : dict["NVAR"]["Ridge"],
         "TS_data_train" : x_train,
         "TS_data_test" : x_test,
+        "input_symbols" : dict["NVAR"]["Input symbols"],
+        "combine_symbols" : dict["NVAR"]["Combine symbols"],
         "warmup" : dict["NVAR"]["Warmup length"],
         "norm_data" : dict["Other"]["Norm data"],
         "Cutoff_small_weights" : dict["Other"]["Cutoff small weights"],
@@ -271,9 +284,22 @@ def TS_run_on_dict(dict = {}):
 
     return TS_run(**fix_parameters,**recommendation,Plotting=dict["Other"]["Plotting"],Printing=dict["Other"]["Printing"])
 
-def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warmup=0, norm_data = False, Printing = False, Plotting = False, Cutoff_small_weights = 0., Cutoff_W_out_plot = 0.):
-    my_nvar = NVAR_Time_Series.Nvar_TS(delay=delay, order=order, ridge=ridge)
-    my_nvar.fit(TS_data_train, warmup=warmup, norm_data=norm_data, cutoff_small_weights=Cutoff_small_weights)
+def TS_run(delay: int, order: int, ridge: float, TS_data_train,TS_data_test,warmup=0, norm_data = False, Printing = False, Plotting = False, Cutoff_small_weights = 0., Cutoff_W_out_plot = 0.,input_symbols = None, combine_symbols = None):
+
+    dict = {"NVAR" : {}}
+    dict["TS_data"] = TS_data_train
+
+    dict["NVAR"]["Delay"] = delay
+    dict["NVAR"]["Order"] = order
+    dict["NVAR"]["Ridge"] = ridge
+
+    dict["NVAR"]["Norm data"] = norm_data
+    dict["NVAR"]["Cutoff small weights"] = Cutoff_small_weights
+    dict["NVAR"]["Input symbols"] = input_symbols
+    dict["NVAR"]["Combine symbols"] = combine_symbols
+
+    my_nvar = NVAR_Time_Series.Nvar_TS(dict = dict)
+    my_nvar.fit(dict = dict)
 
     initialization = TS_data_train[-delay - 1:]
     predictions = my_nvar.predict(initialization, predict_time=TS_data_test.shape[0])
