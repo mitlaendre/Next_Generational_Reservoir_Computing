@@ -42,7 +42,7 @@ def custom_combine_data(in_data = np.array([[]]),input_symbols = [],combine_symb
     if data.shape[1] != len(input_symbols):
         return
 
-    out_data = np.full((data.shape[0], len(combine_symbols)), 0., dtype=object)
+    out_data = np.full((data.shape[0], len(combine_symbols)), 0.)
     for i in range(data.shape[0]):
         for j in range(len(combine_symbols)):
             if (type(combine_symbols[j]) == type(0.)) or (type(combine_symbols[j]) == type(0)):
