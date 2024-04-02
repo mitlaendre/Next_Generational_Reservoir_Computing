@@ -30,7 +30,6 @@ def data_out_of_symbols(delay = 0,dimension = 1):   #make a data, but symbols in
         dimension_names = np.full(dimension,"string")
         for i in range(dimension):
             dimension_names[i] = "X" + str(i + 1)
-            print(dimension_names[i])
     else:
         dimension_names = low_dimension_names
 

@@ -4,7 +4,7 @@ import Differential_Equation
 from joblib import Parallel, delayed
 import random
 
-def universal_Data_Plot(data,labels = None,title = "", verbosity = 3):
+def universal_Data_Plot(data,labels = None,title = "", verbosity = 3,**kwargs):
     if len(data.shape) > 2:
         print("Data is not in 2D array form")
         return
@@ -44,7 +44,7 @@ def universal_Data_Plot(data,labels = None,title = "", verbosity = 3):
 
 
 
-def compare_3dData_3dPlot(ground_truth, prediction):
+def compare_3dData_3dPlot(ground_truth, prediction,**kwargs):
     ax = plt.figure().add_subplot(projection='3d')
     ax.plot(*ground_truth.T, lw=0.5, label="ground truth")
     ax.set_xlabel("X Axis")
@@ -57,7 +57,7 @@ def compare_3dData_3dPlot(ground_truth, prediction):
     plt.show()
     return
 
-def compare_3dData_2dPlot(ground_truth, prediction):
+def compare_3dData_2dPlot(ground_truth, prediction,**kwargs):
     plt.plot(np.transpose(ground_truth)[0], "r-", label="x")
     plt.plot(np.transpose(ground_truth)[1], "g-", label="y")
     plt.plot(np.transpose(ground_truth)[2], "b-", label="z")
@@ -68,7 +68,7 @@ def compare_3dData_2dPlot(ground_truth, prediction):
     return
 
 
-def plot_W_out(arr,row_labels,col_labels):
+def plot_W_out(arr,row_labels,col_labels,**kwargs):
     fig, ax = plt.subplots()
 
     # Create the heatmap
@@ -96,7 +96,7 @@ def plot_W_out(arr,row_labels,col_labels):
     plt.show()
     return
 
-def histogram_W_out(W_out,labels,cutoff_small_weights = 0.):
+def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,**kwargs):
 
     i = W_out.shape[0]+1
     while i < W_out.shape[1]:
@@ -153,7 +153,7 @@ def histogram_W_out(W_out,labels,cutoff_small_weights = 0.):
 
 
 #unfinished; example run below
-def bifurcate_plot(fix_param: float, n_skip: int, n_shown_iter: int, step: int = 1, param_interval_min: float = 0.0, param_interval_max: float = 0.1):
+def bifurcate_plot(fix_param: float, n_skip: int, n_shown_iter: int, step: int = 1, param_interval_min: float = 0.0, param_interval_max: float = 0.1,**kwargs):
     interval = np.linspace(param_interval_min, param_interval_max, step)
     def func(atadott):
         diffegy = Differential_Equation.Chua(a=atadott, b=fix_param)
