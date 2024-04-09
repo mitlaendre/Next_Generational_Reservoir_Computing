@@ -96,7 +96,7 @@ def plot_W_out(arr,row_labels,col_labels,**kwargs):
     plt.show()
     return
 
-def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,**kwargs):
+def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,figheight = 8.,figwidth = 8.,**kwargs):
 
     i = W_out.shape[0]+1
     while i < W_out.shape[1]:
@@ -109,19 +109,19 @@ def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,**kwargs):
             labels = np.delete(labels, i, axis=0)
         else: i+=1
 
-    combinators = W_out.shape[1]  # its the input  dimension of W_out (larger)
-    dimensions = W_out.shape[0]  # its the output dimension of W_out (smaller)
+    combinators = W_out.shape[1]  # it's the input  dimension of W_out (larger)
+    dimensions = W_out.shape[0]  # it's the output dimension of W_out (smaller)
 
     if combinators != len(labels): return
-    y_pos = np.arange(W_out.shape[1])
+    y_pos = np.arange(combinators)
 
     #make the coloring
     colors = np.full((dimensions,combinators),'b')
 
     #scaled to biggest component
     fig, axs = plt.subplots(1, dimensions)
-    fig.set_figheight(7.)
-    fig.set_figwidth(6.)
+    fig.set_figheight(figheight)
+    fig.set_figwidth(figwidth)
 
     for dimension in range(dimensions):
         axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension])
@@ -135,8 +135,8 @@ def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,**kwargs):
 
     #scaled to (-1,+1)
     fig, axs = plt.subplots(1, dimensions)
-    fig.set_figheight(7.)
-    fig.set_figwidth(6.)
+    fig.set_figheight(figheight)
+    fig.set_figwidth(figwidth)
 
     for dimension in range(dimensions):
         axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension])
@@ -150,6 +150,65 @@ def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,**kwargs):
 
 
     return
+
+def compare_histogram_W_out(A_W_out,B_W_out,labels,cutoff_small_weights = 0.,figheight = 8.,figwidth = 8.,**kwargs):
+    #Prework on data
+    if A_W_out.shape != B_W_out.shape: return
+    i = A_W_out.shape[0] + 1
+    while i < A_W_out.shape[1]:
+        delete = True
+        for j in range(A_W_out.shape[0]):
+            if abs(A_W_out[j, i]) > cutoff_small_weights:
+                delete = False
+            if abs(B_W_out[j, i]) > cutoff_small_weights:
+                delete = False
+        if delete:
+            A_W_out = np.delete(A_W_out, i, axis=1)
+            B_W_out = np.delete(B_W_out, i, axis=1)
+            labels = np.delete(labels, i, axis=0)
+        else:
+            i += 1
+
+    combinators = A_W_out.shape[1]  # it's the input  dimension of W_out (larger)
+    dimensions = A_W_out.shape[0]  # it's the output dimension of W_out (smaller)
+
+    if combinators != len(labels): return
+    #Plotting starts here
+    y_pos = np.arange(combinators)
+
+    # make the coloring
+    colors1 = np.full((dimensions, combinators), 'b')
+    colors2 = np.full((dimensions, combinators), 'r')
+    # scaled to biggest component
+    fig, axs = plt.subplots(1, dimensions)
+    fig.set_figheight(figheight)
+    fig.set_figwidth(figwidth)
+
+    for dimension in range(dimensions):
+        axs[dimension].barh(y_pos, A_W_out[dimension, :], color=colors1[dimension],alpha = 1)
+        axs[dimension].barh(y_pos, B_W_out[dimension, :], color=colors2[dimension],alpha = 0.6)
+        axs[dimension].set_yticks(y_pos)
+        axs[dimension].set_yticklabels(labels)
+        axs[dimension].set_ylim(combinators - 0.5, -.5)
+        axs[dimension].set_xlabel("Pred. " + str(labels[1 + dimension]))
+        axs[dimension].grid()
+    plt.show()
+
+    # scaled to (-1,+1)
+    fig, axs = plt.subplots(1, dimensions)
+    fig.set_figheight(figheight)
+    fig.set_figwidth(figwidth)
+
+    for dimension in range(dimensions):
+        axs[dimension].barh(y_pos, A_W_out[dimension, :], color=colors1[dimension], alpha=1)
+        axs[dimension].barh(y_pos, B_W_out[dimension, :], color=colors2[dimension], alpha=0.6)
+        axs[dimension].set_yticks(y_pos)
+        axs[dimension].set_yticklabels(labels)
+        axs[dimension].set_ylim(combinators - 0.5, -.5)
+        axs[dimension].set_xlim(-1.05, 1.05)
+        axs[dimension].set_xlabel("Pred. " + str(labels[1 + dimension]))
+        axs[dimension].grid()
+    plt.show()
 
 
 #unfinished; example run below

@@ -126,18 +126,18 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                 "Test_single2": {
                                 "NVAR":{
                                     "Delay" : 1,
-                                    "Order" : 1,
+                                    "Order" : 2,
                                     "Warmup_length" : 10,
                                     "Ridge" : 0.5,
                                     "Input_symbols" : [x,y,z],
-                                    "Combine_symbols" : [x,y,z,x**2,y**2,sympy.symbols('Py')],
+                                    "Combine_symbols" : [x,y,z,x**2,y**2,z**2,x**3,y**3,z**3],
                                     "Norm_data": False,
-                                    "Cutoff_small_weights": 0.1
+                                    "Cutoff_small_weights": 0.
                                     },
                                 "Feedback":{
                                     "Plotting": {
                                         "Enable_plotting": True,
-                                        "Cutoff_small_weights": 0.01
+                                        "Cutoff_small_weights": 0.
                                     },
                                     "Printing": {
                                         "Enable_printing": True
@@ -156,7 +156,8 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                         "Time_step_length" : 0.025,
                                         "Equation_type" : "Chua",
                                         "Train_length" : 1000,
-                                        "Test_length" : 1000
+                                        "Test_length" : 1000,
+                                        "Generate_symbolic_W_out" : True
                                     },
                                     #"TS_data_train": np.full((200,3),1.),
                                     #"TS_data_test": np.full((200,3),8.)
@@ -165,7 +166,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
               }
 
 def dict_has_data(dict):
-    if ("X_train" in dict["Data"]) and ("X_test" in dict["Data"]):
+    if ("TS_data_train" in dict["Data"]) and ("TS_data_test" in dict["Data"]):
         return True
     return False
 
@@ -182,7 +183,8 @@ def generate_equation_data(Equation_type: str, Train_length: int, Test_length: i
         return False
 
     data = Current_Equation.generate_data(x0=Starting_point, n_timepoints=Train_length + Test_length, dt=Time_step_length, method=Method)
-    return {"TS_data_train": data[:Train_length],"TS_data_test": data[Train_length:]}
+    dict_return = {"TS_data_train": data[:Train_length],"TS_data_test": data[Train_length:],"Differential_Equation" : Current_Equation}
+    return dict_return
 
 
 def TS_run_on_dict(dict = {}):
@@ -231,8 +233,15 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
     predictions = my_nvar.predict(initialization, predict_time=TS_data_test.shape[0])
     error = Data_Manipulation.error_func_mse(TS_data_test, predictions)
 
+    if ("Differential_Equation" in kwargs):
+        Gen_W_out = Differential_Equation.W_out_generator(kwargs["Input_symbols"], kwargs["Combine_symbols"],kwargs["Differential_Equation"].right_side(sympy.symbols("t"),kwargs["Input_symbols"]),kwargs["Differential_Equation"].dt)
+
     if ("Enable_printing" in Printing) and Printing["Enable_printing"]:
+
         my_nvar.NVAR.debug_print()
+        if "Differential_Equation" in kwargs:
+            print("Generator W_out matrix: ")
+            print(Gen_W_out)
         print("Ground truth: ")
         print(TS_data_test)
         print("Predicted data: ")
@@ -244,7 +253,9 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
         Plots.compare_3dData_2dPlot(TS_data_test, predictions)
         Plots.compare_3dData_3dPlot(TS_data_test, predictions)
         Plots.histogram_W_out(my_nvar.NVAR.W_out, my_nvar.NVAR.combine_symbols,**Plotting)
-
+        if "Differential_Equation" in kwargs:
+            Plots.histogram_W_out(Gen_W_out,my_nvar.NVAR.combine_symbols,**Plotting)
+            Plots.compare_histogram_W_out(Gen_W_out,my_nvar.NVAR.W_out,my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 
 

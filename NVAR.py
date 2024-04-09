@@ -153,6 +153,13 @@ class NVAR():
         print("Order: ")
         print(self.order)
 
+        print("input symbols:")
+        print(self.input_symbols)
+        print("combine symbols:")
+        print(self.combine_symbols)
+        print("Custom combination:")
+        print(self.custom_combinations)
+
         if not(self.W_out.any == None):
             print("X_train data: ")
             print(self.x_train)
@@ -168,11 +175,4 @@ class NVAR():
             print(self.W_out)
         else:
             print("NVAR not trained yet")
-
-        print("input symbols:")
-        print(self.input_symbols)
-        print("combine symbols:")
-        print(self.combine_symbols)
-        print("Custom combination:")
-        print(self.custom_combinations)
         return

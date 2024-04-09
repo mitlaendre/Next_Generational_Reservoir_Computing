@@ -4,7 +4,7 @@ from typing import Union
 import scipy.integrate
 from scipy.integrate import solve_ivp
 
-def Implemented_Steps(right_side,tn,Yn,dt,method = ""):
+def Implemented_Steps(right_side,tn,Yn,dt,method = "",data_for_multistep = np.array([])):
 
     if method == "Euler":
         fx = np.array(right_side(tn, Yn))
@@ -31,13 +31,38 @@ def Implemented_Steps(right_side,tn,Yn,dt,method = ""):
         # k3 = fx(tn + h/2,Yn + h/2 * k2)
         # k4 = fx(tn + h,Yn + h * k3)
 
-
+    elif method in {"Adams-Bashforth","Adams-Bashforth 1","Adams-Bashforth 2","Adams-Bashforth 3","Adams-Bashforth 4","Adams-Bashforth 5"}:
+        if (data_for_multistep.shape[1]<=1) or (method == "Adams-Bashforth 1"):
+            fx = np.array(right_side(tn, Yn))
+            return Yn + dt * fx
+        elif (data_for_multistep.shape[1]==2) or (method == "Adams-Bashforth 2"):
+            fx = (1.5*np.array(right_side(tn,data_for_multistep[:,-1]))-0.5*np.array(right_side(tn-dt,data_for_multistep[:,-2])))
+            return Yn + dt*fx
+        elif (data_for_multistep.shape[1] == 3) or (method == "Adams-Bashforth 3"):
+            fx = (23. * np.array(right_side(tn,data_for_multistep[:,-1])) - 16.*np.array(right_side(tn-dt,data_for_multistep[:,-2])) + 5.*np.array(right_side(tn-2*dt, data_for_multistep[:,-3])))/12.
+            return Yn + dt * fx
+        elif (data_for_multistep.shape[1] == 4) or (method == "Adams-Bashforth 4"):
+            fx = (55.*np.array(right_side(tn,data_for_multistep[:,-1])) - 59.*np.array(right_side(tn-dt,data_for_multistep[:,-2])) + 37.*np.array(right_side(tn-2*dt,data_for_multistep[:,-2])) - 9.*np.array(right_side(tn-3*dt,data_for_multistep[:,-3])))/24.
+            return Yn + dt * fx
+        elif (data_for_multistep.shape[1] >= 5) or (method == "Adams-Bashforth 5"):
+            fx = (1901.*np.array(right_side(tn,data_for_multistep[:,-1])) - 2774.*np.array(right_side(tn-dt,data_for_multistep[:,-2])) + 2616.*np.array(right_side(tn-2*dt,data_for_multistep[:,-3])) - 1274.*np.array(right_side(tn-3*dt,data_for_multistep[:,-4])) + 251.*np.array(right_side(tn-4*dt,data_for_multistep[:,-5])))/720.
+            return Yn + dt * fx
     return
+
+
+def W_out_generator(input_symbols, combine_symbols, combination_vector,dt):
+    W_out = np.zeros((len(input_symbols), len(combine_symbols)))
+    for i in range(W_out.shape[0]):
+        for j in range(W_out.shape[1]):
+            W_out[i, j] = combination_vector[i].coeff(combine_symbols[j])*dt
+
+    return W_out
 
 
 class Differential_Equation():
     def __init__(self, function = None):
         self.right_side = function
+        self.dt = 0.
         return
 
     def generate_data(self,
@@ -47,6 +72,7 @@ class Differential_Equation():
             dt: float = 0.01,                               # delta time
             method = ""                                     # method of the solution
     ):
+        self.dt = dt
         if n_timepoints == None:
             n_timepoints = int(maxtime / dt + 1)
         else:
@@ -63,7 +89,8 @@ class Differential_Equation():
             sol[:, 0] = x0
             for i, t in enumerate(t_eval):
                 if i > 0:
-                    sol[:, i] = Implemented_Steps(right_side=self.right_side,tn=t,Yn=sol[:,i-1],dt=dt,method=method)
+                    sol[:, i] = Implemented_Steps(right_side=self.right_side,tn=t,Yn=sol[:,i-1],dt=dt,method=method,data_for_multistep=sol[:,:i-1])
+                    print(sol[:,i])
         print("data generated:")
         print(sol.T[:-1])
         return sol.T[:-1]
