@@ -7,7 +7,11 @@ import nevergrad as ng
 from concurrent import futures
 import sympy
 
-x,y,z = sympy.symbols('x y z')
+#Making some symbols to work with
+x,y,z,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10 = sympy.symbols('x y z x1 x2 x3 x4 x5 x6 x7 x8 x9 x10')
+Px,Py,Pz,Px1,Px2,Px3,Px4,Px5,Px6,Px7,Px8,Px9,Px10 = sympy.symbols('Px Py Pz Px1 Px2 Px3 Px4 Px5 Px6 Px7 Px8 Px9 Px10')
+PPx,PPy,PPz,PPx1,PPx2,PPx3,PPx4,PPx5,PPx6,PPx7,PPx8,PPx9,PPx10 = sympy.symbols('PPx PPy PPz PPx1 PPx2 PPx3 PPx4 PPx5 PPx6 PPx7 PPx8 PPx9 PPx10')
+PPPx,PPPy,PPPz,PPPx1,PPPx2,PPPx3,PPPx4,PPPx5,PPPx6,PPPx7,PPPx8,PPPx9,PPPx10 = sympy.symbols('PPPx PPPy PPPz PPPx1 PPPx2 PPPx3 PPPx4 PPPx5 PPPx6 PPPx7 PPPx8 PPPx9 PPPx10')
 
 saved_runs = {"Paper reproduction": {"Train length" : 600,
                                       "Test length" : 799,
@@ -130,7 +134,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Warmup_length" : 10,
                                     "Ridge" : 0.5,
                                     "Input_symbols" : [x,y,z],
-                                    "Combine_symbols" : [x,y,z,x**2,y**2,z**2,x**3,y**3,z**3],
+                                    "Combine_symbols" : [],
                                     "Norm_data": False,
                                     "Cutoff_small_weights": 0.
                                     },
@@ -140,7 +144,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                         "Cutoff_small_weights": 0.
                                     },
                                     "Printing": {
-                                        "Enable_printing": True
+                                        "Enable_printing": False
                                     }
                                 },
                                 "Optimizer":{
@@ -152,7 +156,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                 "Data": {
                                     "Equation":{
                                         "Starting_point" : [0.2,0.1,0.1],
-                                        "Method" : "Euler",
+                                        "Method" : "Adams-Bashforth",
                                         "Time_step_length" : 0.025,
                                         "Equation_type" : "Chua",
                                         "Train_length" : 1000,
@@ -164,11 +168,6 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                 }
                         }
               }
-
-def dict_has_data(dict):
-    if ("TS_data_train" in dict["Data"]) and ("TS_data_test" in dict["Data"]):
-        return True
-    return False
 
 def generate_equation_data(Equation_type: str, Train_length: int, Test_length: int,  Starting_point: np.array([]), Method = "Euler", Time_step_length = 0.025,**kwargs):
 
@@ -182,60 +181,65 @@ def generate_equation_data(Equation_type: str, Train_length: int, Test_length: i
         print("Invalid Equation_type")
         return False
 
-    data = Current_Equation.generate_data(x0=Starting_point, n_timepoints=Train_length + Test_length, dt=Time_step_length, method=Method)
+    data = Current_Equation.generate_data(x0=Starting_point, n_timepoints=Train_length + Test_length, dt=Time_step_length, method=Method,**kwargs)
+    print("Data generated: ")
+    print(data)
     dict_return = {"TS_data_train": data[:Train_length],"TS_data_test": data[Train_length:],"Differential_Equation" : Current_Equation}
     return dict_return
 
 
-def TS_run_on_dict(dict = {}):
-
-    if not dict_has_data(dict):
+def TS_run_on_dict(dict):
+    #Making sure there is some data
+    if ("TS_data_train" not in dict["Data"]) or ("TS_data_test" not in dict["Data"]):
         if "Equation" not in dict["Data"]:
-            print("No data or equation")
+            print("No data or equation found")
             return
         else:
+            if "Input_symbols" in dict["NVAR"]:
+                dict["Data"]["Equation"]["equation_symbols"] = dict["NVAR"]["Input_symbols"]
             dict["Data"] = generate_equation_data(**dict["Data"]["Equation"])
 
+    #Dealing with the optimizer parameters
     all_parameters = {**dict["NVAR"],**dict["Data"],**dict["Feedback"]}
     optim_parameters = {}
     fix_parameters = {}
 
     for i in all_parameters.keys():
-        if issubclass(type(all_parameters[i]),ng.p.Data):
+        if issubclass(type(all_parameters[i]),ng.p.Data):   #Decide if it's the optimizer's parameter
             optim_parameters[i] = all_parameters[i]
         else:
             fix_parameters[i] = all_parameters[i]
-
     parametrization = ng.p.Instrumentation(**optim_parameters)
 
-
-    try:
+    try:    #If there is any parameter to optimize
         optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=dict["Optimizer"]["Budget"],num_workers=dict["Optimizer"]["Num_workers"])
         with futures.ThreadPoolExecutor(max_workers=optimizer.num_workers) as executor:
             recommendation = optimizer.minimize(lambda **kwargs: TS_run(**{**kwargs,**fix_parameters,"Printing":{},"Plotting":{}}), executor=executor, batch_mode=dict["Optimizer"]["Batch mode"], verbosity=dict["Optimizer"]["Verbosity"]).value[1]
         print("Optimization Finished")
 
-    except ValueError as e:
+    except ValueError as e: #If there is no parameter to optimize
         print(e)
         print("Executing single run:")
         recommendation = optim_parameters
 
+    #Doing a run an the end (with the only parameters in single run, or with the optimal parameters in optimized run)
     return TS_run(**fix_parameters,**recommendation)
-
 
 
 def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kwargs):
 
+    #Making the TS_NVAR and fitting it
     my_nvar = NVAR_Time_Series.Nvar_TS(**kwargs,Delay=Delay)
     my_nvar.fit(**kwargs,Delay=Delay,TS_data=TS_data_train)
 
+    #Predicting (starting from the end of the train data)
     initialization = TS_data_train[-Delay - 1:]
     predictions = my_nvar.predict(initialization, predict_time=TS_data_test.shape[0])
     error = Data_Manipulation.error_func_mse(TS_data_test, predictions)
 
+    #Printing and Plotting
     if ("Differential_Equation" in kwargs):
-        Gen_W_out = Differential_Equation.W_out_generator(kwargs["Input_symbols"], kwargs["Combine_symbols"],kwargs["Differential_Equation"].right_side(sympy.symbols("t"),kwargs["Input_symbols"]),kwargs["Differential_Equation"].dt)
-
+        Gen_W_out = Differential_Equation.W_out_generator(kwargs["Input_symbols"],my_nvar.NVAR.combine_symbols,kwargs["Differential_Equation"].symbolic_equation,kwargs["Differential_Equation"].dt)
     if ("Enable_printing" in Printing) and Printing["Enable_printing"]:
 
         my_nvar.NVAR.debug_print()
@@ -254,7 +258,7 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
         Plots.compare_3dData_3dPlot(TS_data_test, predictions)
         Plots.histogram_W_out(my_nvar.NVAR.W_out, my_nvar.NVAR.combine_symbols,**Plotting)
         if "Differential_Equation" in kwargs:
-            Plots.histogram_W_out(Gen_W_out,my_nvar.NVAR.combine_symbols,**Plotting)
+            #Plots.histogram_W_out(Gen_W_out,my_nvar.NVAR.combine_symbols,**Plotting)
             Plots.compare_histogram_W_out(Gen_W_out,my_nvar.NVAR.W_out,my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 

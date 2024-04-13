@@ -20,19 +20,24 @@ def array_min_finder(input_array = np.array([0],dtype=object),maxthreads = 1): #
         return (np.append(np.array([np.argmin(minimums)]),locations[np.argmin(minimums)]),minimums[np.argmin(minimums)])
 
 
-def data_out_of_symbols(delay = 0,dimension = 1):   #make a data, but symbols instead of floats
+def data_out_of_symbols(delay = 0,dimension = 1,input_symbols = None):   #make a data, but symbols instead of floats
+    delay_prefix = "P"  # this is added before the name for every delaystep backwards
+    delay_suffix = ""  # this is added after  the name for every delaystep backwards
 
-    low_dimension_names = ["X","Y","Z"] #for dimension <4 we use these instead of X1,X2,X3...
-    delay_prefix = "P"  #this is added before the name for every delaystep backwards
-    delay_suffix = ""   #this is added after  the name for every delaystep backwards
+    if (input_symbols == None) or len(input_symbols) == 0:
+        low_dimension_names = ["X","Y","Z"] #for dimension <4 we use these instead of X1,X2,X3...
 
-    if dimension > len(low_dimension_names):
-        dimension_names = np.full(dimension,"string")
-        for i in range(dimension):
-            dimension_names[i] = "X" + str(i + 1)
+        if dimension > len(low_dimension_names):
+            dimension_names = np.full(dimension,"string")
+            for i in range(dimension):
+                dimension_names[i] = "X" + str(i + 1)
+        else:
+            dimension_names = low_dimension_names
     else:
-        dimension_names = low_dimension_names
-
+        dimension = len(input_symbols)
+        dimension_names = []
+        for i in input_symbols:
+            dimension_names = dimension_names + [i.name]
     symbol_data = np.zeros((delay + 1, dimension), dtype=object)
     for curr_delay in range(delay + 1):
         for curr_dimension in range(dimension):
