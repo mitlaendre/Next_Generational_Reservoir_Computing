@@ -134,7 +134,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Warmup_length" : 10,
                                     "Ridge" : 0.5,
                                     "Input_symbols" : [x,y,z],
-                                    "Combine_symbols" : [],
+                                    "Combine_symbols" : [sympy.sin(x)],
                                     "Norm_data": False,
                                     "Cutoff_small_weights": 0.
                                     },
@@ -144,7 +144,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                         "Cutoff_small_weights": 0.
                                     },
                                     "Printing": {
-                                        "Enable_printing": False
+                                        "Enable_printing": True
                                     }
                                 },
                                 "Optimizer":{
@@ -234,7 +234,7 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
 
     #Predicting (starting from the end of the train data)
     initialization = TS_data_train[-Delay - 1:]
-    predictions = my_nvar.predict(initialization, predict_time=TS_data_test.shape[0])
+    predictions = my_nvar.predict(initialization, Predict_time=TS_data_test.shape[0])
     error = Data_Manipulation.error_func_mse(TS_data_test, predictions)
 
     #Printing and Plotting
@@ -256,10 +256,10 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
     if ("Enable_plotting" in Plotting) and Plotting["Enable_plotting"]:
         Plots.compare_3dData_2dPlot(TS_data_test, predictions)
         Plots.compare_3dData_3dPlot(TS_data_test, predictions)
-        Plots.histogram_W_out(my_nvar.NVAR.W_out, my_nvar.NVAR.combine_symbols,**Plotting)
+        Plots.histogram_W_out(my_nvar.NVAR.W_out,my_nvar.input_symbols, my_nvar.NVAR.combine_symbols,**Plotting)
         if "Differential_Equation" in kwargs:
             #Plots.histogram_W_out(Gen_W_out,my_nvar.NVAR.combine_symbols,**Plotting)
-            Plots.compare_histogram_W_out(Gen_W_out,my_nvar.NVAR.W_out,my_nvar.NVAR.combine_symbols,**Plotting)
+            Plots.compare_histogram_W_out(Gen_W_out,my_nvar.NVAR.W_out,my_nvar.input_symbols,my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 
 

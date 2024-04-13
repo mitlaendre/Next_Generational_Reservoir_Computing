@@ -56,15 +56,18 @@ class Nvar_TS():
             for j in range(len(undelayed_symbols)):
                 for k in range(1,100):
                     temp = sympy.symbols('P'*k + undelayed_symbols[j].name)
-                    if Combine_symbols[i].coeff(temp) != 0.:
+                    if temp in Combine_symbols[i].free_symbols: #if it contains it in any way
                         contains_delayed_vars = True
                         break
                 if contains_delayed_vars: break
             if contains_delayed_vars:break
         #If there are no delayed parts in it, then add the delayed parts
-
-        """if not contains_delayed_vars:
-            self.combine_symbols = Data_Manipulation.data_out_of_symbols(self.delay, input_symbols=Combine_symbols).flatten()"""
+        all_usable_symbols =  Data_Manipulation.data_out_of_symbols(self.delay, input_symbols=undelayed_symbols)
+        if not contains_delayed_vars:
+            for curr_delay in range(all_usable_symbols.shape[0]-1):
+                for num_symbol in range(len(self.combine_symbols)):
+                    self.combine_symbols = self.combine_symbols + [self.combine_symbols[num_symbol].subs(dict(zip(all_usable_symbols[-1],all_usable_symbols[-2-curr_delay])))]
+                    print(self.combine_symbols)
 
         self.NVAR.fit(**kwargs,X_train=X_train,Y_train=Y_train,Input_symbols=Input_symbols,Combine_symbols=self.combine_symbols)
         return

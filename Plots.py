@@ -96,7 +96,7 @@ def plot_W_out(arr,row_labels,col_labels,**kwargs):
     plt.show()
     return
 
-def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,figheight = 8.,figwidth = 8.,**kwargs):
+def histogram_W_out(W_out,in_labels,out_labels,cutoff_small_weights = 0.,figheight = 8.,figwidth = 8.,**kwargs):
 
     i = W_out.shape[0]+1
     while i < W_out.shape[1]:
@@ -106,13 +106,14 @@ def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,figheight = 8.,figwid
                 delete = False
         if delete:
             W_out = np.delete(W_out, i, axis=1)
-            labels = np.delete(labels, i, axis=0)
+            out_labels = np.delete(out_labels, i, axis=0)
         else: i+=1
 
     combinators = W_out.shape[1]  # it's the input  dimension of W_out (larger)
     dimensions = W_out.shape[0]  # it's the output dimension of W_out (smaller)
 
-    if combinators != len(labels): return
+    if combinators != len(out_labels): out_labels = np.full(1000," ")
+    if dimensions != len(in_labels): in_labels = np.full(1000," ")
     y_pos = np.arange(combinators)
 
     #make the coloring
@@ -126,9 +127,9 @@ def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,figheight = 8.,figwid
     for dimension in range(dimensions):
         axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension])
         axs[dimension].set_yticks(y_pos)
-        axs[dimension].set_yticklabels(labels)
+        axs[dimension].set_yticklabels(out_labels)
         axs[dimension].set_ylim(combinators-0.5, -.5)
-        axs[dimension].set_xlabel("Pred. " + str(labels[1+dimension]))
+        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
         axs[dimension].grid()
     plt.show()
 
@@ -141,17 +142,17 @@ def histogram_W_out(W_out,labels,cutoff_small_weights = 0.,figheight = 8.,figwid
     for dimension in range(dimensions):
         axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension])
         axs[dimension].set_yticks(y_pos)
-        axs[dimension].set_yticklabels(labels)
+        axs[dimension].set_yticklabels(out_labels)
         axs[dimension].set_ylim(combinators - 0.5, -.5)
         axs[dimension].set_xlim(-1.05,1.05)
-        axs[dimension].set_xlabel("Pred. " + str(labels[1 + dimension]))
+        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
         axs[dimension].grid()
     plt.show()
 
 
     return
 
-def compare_histogram_W_out(A_W_out,B_W_out,labels,cutoff_small_weights = 0.,figheight = 8.,figwidth = 8.,**kwargs):
+def compare_histogram_W_out(A_W_out,B_W_out,in_labels,out_labels,cutoff_small_weights = 0.,figheight = 8.,figwidth = 8.,**kwargs):
     #Prework on data
     if A_W_out.shape != B_W_out.shape: return
     i = A_W_out.shape[0] + 1
@@ -165,14 +166,15 @@ def compare_histogram_W_out(A_W_out,B_W_out,labels,cutoff_small_weights = 0.,fig
         if delete:
             A_W_out = np.delete(A_W_out, i, axis=1)
             B_W_out = np.delete(B_W_out, i, axis=1)
-            labels = np.delete(labels, i, axis=0)
+            out_labels = np.delete(out_labels, i, axis=0)
         else:
             i += 1
 
     combinators = A_W_out.shape[1]  # it's the input  dimension of W_out (larger)
     dimensions = A_W_out.shape[0]  # it's the output dimension of W_out (smaller)
 
-    if combinators != len(labels): return
+    if combinators != len(out_labels): out_labels = np.full(1000, " ")
+    if dimensions != len(in_labels): in_labels = np.full(1000, " ")
     #Plotting starts here
     y_pos = np.arange(combinators)
 
@@ -188,9 +190,9 @@ def compare_histogram_W_out(A_W_out,B_W_out,labels,cutoff_small_weights = 0.,fig
         axs[dimension].barh(y_pos, A_W_out[dimension, :], color=colors1[dimension],alpha = 1)
         axs[dimension].barh(y_pos, B_W_out[dimension, :], color=colors2[dimension],alpha = 0.6)
         axs[dimension].set_yticks(y_pos)
-        axs[dimension].set_yticklabels(labels)
+        axs[dimension].set_yticklabels(out_labels)
         axs[dimension].set_ylim(combinators - 0.5, -.5)
-        axs[dimension].set_xlabel("Pred. " + str(labels[1 + dimension]))
+        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
         axs[dimension].grid()
     plt.show()
 
@@ -203,10 +205,10 @@ def compare_histogram_W_out(A_W_out,B_W_out,labels,cutoff_small_weights = 0.,fig
         axs[dimension].barh(y_pos, A_W_out[dimension, :], color=colors1[dimension], alpha=1)
         axs[dimension].barh(y_pos, B_W_out[dimension, :], color=colors2[dimension], alpha=0.6)
         axs[dimension].set_yticks(y_pos)
-        axs[dimension].set_yticklabels(labels)
+        axs[dimension].set_yticklabels(out_labels)
         axs[dimension].set_ylim(combinators - 0.5, -.5)
         axs[dimension].set_xlim(-1.05, 1.05)
-        axs[dimension].set_xlabel("Pred. " + str(labels[1 + dimension]))
+        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
         axs[dimension].grid()
     plt.show()
 
