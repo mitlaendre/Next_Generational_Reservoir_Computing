@@ -134,14 +134,18 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Warmup_length" : 10,
                                     "Ridge" : 0.5,
                                     "Input_symbols" : [x,y,z],
-                                    "Combine_symbols" : [sympy.sin(x)],
+                                    "Combine_symbols" : [],
                                     "Norm_data": False,
                                     "Cutoff_small_weights": 0.
                                     },
                                 "Feedback":{
                                     "Plotting": {
                                         "Enable_plotting": True,
-                                        "Cutoff_small_weights": 0.
+                                        "Cutoff_small_weights": 0.,
+                                        "Figheight" : 8.,
+                                        "Figwidth" : 8.,
+                                        "Black_and_white" : False,
+                                        "Save_image" : False
                                     },
                                     "Printing": {
                                         "Enable_printing": True
@@ -159,8 +163,8 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                         "Method" : "Adams-Bashforth",
                                         "Time_step_length" : 0.025,
                                         "Equation_type" : "Chua",
-                                        "Train_length" : 1000,
-                                        "Test_length" : 1000,
+                                        "Train_length" : 500,
+                                        "Test_length" : 100,
                                         "Generate_symbolic_W_out" : True
                                     },
                                     #"TS_data_train": np.full((200,3),1.),
@@ -256,10 +260,9 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
     if ("Enable_plotting" in Plotting) and Plotting["Enable_plotting"]:
         Plots.compare_3dData_2dPlot(TS_data_test, predictions)
         Plots.compare_3dData_3dPlot(TS_data_test, predictions)
-        Plots.histogram_W_out(my_nvar.NVAR.W_out,my_nvar.input_symbols, my_nvar.NVAR.combine_symbols,**Plotting)
+        Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
         if "Differential_Equation" in kwargs:
-            #Plots.histogram_W_out(Gen_W_out,my_nvar.NVAR.combine_symbols,**Plotting)
-            Plots.compare_histogram_W_out(Gen_W_out,my_nvar.NVAR.W_out,my_nvar.input_symbols,my_nvar.NVAR.combine_symbols,**Plotting)
+            Plots.multiple_histogram_W_out(multiple_W_out= np.array([Gen_W_out,my_nvar.NVAR.W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 
 

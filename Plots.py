@@ -40,10 +40,6 @@ def universal_Data_Plot(data,labels = None,title = "", verbosity = 3,**kwargs):
     else:                           #Multidim data
         print()
 
-
-
-
-
 def compare_3dData_3dPlot(ground_truth, prediction,**kwargs):
     ax = plt.figure().add_subplot(projection='3d')
     ax.plot(*ground_truth.T, lw=0.5, label="ground truth")
@@ -117,7 +113,7 @@ def histogram_W_out(W_out,in_labels,out_labels,cutoff_small_weights = 0.,figheig
     y_pos = np.arange(combinators)
 
     #make the coloring
-    colors = np.full((dimensions,combinators),'b')
+    colors = np.full((dimensions,combinators),'w')
 
     #scaled to biggest component
     fig, axs = plt.subplots(1, dimensions)
@@ -125,7 +121,7 @@ def histogram_W_out(W_out,in_labels,out_labels,cutoff_small_weights = 0.,figheig
     fig.set_figwidth(figwidth)
 
     for dimension in range(dimensions):
-        axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension])
+        axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension],hatch = '/////',edgecolor = 'black')
         axs[dimension].set_yticks(y_pos)
         axs[dimension].set_yticklabels(out_labels)
         axs[dimension].set_ylim(combinators-0.5, -.5)
@@ -140,7 +136,7 @@ def histogram_W_out(W_out,in_labels,out_labels,cutoff_small_weights = 0.,figheig
     fig.set_figwidth(figwidth)
 
     for dimension in range(dimensions):
-        axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension])
+        axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension],hatch = '/////',edgecolor = 'black')
         axs[dimension].set_yticks(y_pos)
         axs[dimension].set_yticklabels(out_labels)
         axs[dimension].set_ylim(combinators - 0.5, -.5)
@@ -152,67 +148,77 @@ def histogram_W_out(W_out,in_labels,out_labels,cutoff_small_weights = 0.,figheig
 
     return
 
-def compare_histogram_W_out(A_W_out,B_W_out,in_labels,out_labels,cutoff_small_weights = 0.,figheight = 8.,figwidth = 8.,**kwargs):
+def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_weights = 0.,Figheight = 8.,Figwidth = 8.,Black_and_white = True,Save_image = False,**kwargs):
     #Prework on data
-    if A_W_out.shape != B_W_out.shape: return
-    i = A_W_out.shape[0] + 1
-    while i < A_W_out.shape[1]:
+    for w_out_num in range(multiple_W_out.shape[0]-1):
+        if multiple_W_out[w_out_num].shape != multiple_W_out[w_out_num+1].shape: return
+    #delete small weighted rows from everything
+    i = multiple_W_out[0].shape[0] + 1
+    while i < multiple_W_out[0].shape[1]:
         delete = True
-        for j in range(A_W_out.shape[0]):
-            if abs(A_W_out[j, i]) > cutoff_small_weights:
-                delete = False
-            if abs(B_W_out[j, i]) > cutoff_small_weights:
-                delete = False
+        for j in range(multiple_W_out[0].shape[0]):
+            for w_out_num in range(multiple_W_out.shape[0]):
+                if abs(multiple_W_out[w_out_num][j, i]) > Cutoff_small_weights:
+                    delete = False
         if delete:
-            A_W_out = np.delete(A_W_out, i, axis=1)
-            B_W_out = np.delete(B_W_out, i, axis=1)
+            for w_out_num in range(multiple_W_out.shape[0]):
+                multiple_W_out[w_out_num] = np.delete(multiple_W_out[w_out_num], i, axis=1)
             out_labels = np.delete(out_labels, i, axis=0)
         else:
             i += 1
 
-    combinators = A_W_out.shape[1]  # it's the input  dimension of W_out (larger)
-    dimensions = A_W_out.shape[0]  # it's the output dimension of W_out (smaller)
-
+    combinators = multiple_W_out[0].shape[1]  # it's the input  dimension of W_out (larger)
+    dimensions = multiple_W_out[0].shape[0]  # it's the output dimension of W_out (smaller)
     if combinators != len(out_labels): out_labels = np.full(1000, " ")
     if dimensions != len(in_labels): in_labels = np.full(1000, " ")
+
     #Plotting starts here
-    y_pos = np.arange(combinators)
+    y_pos = np.array(range(0,combinators*multiple_W_out.shape[0],multiple_W_out.shape[0]))
+    # make the coloring and hatching
+    if Black_and_white:
+        base_colors = np.full(multiple_W_out.shape[0],"white")
+        defaults = ["//","\\","||","-","+","x","o","O",".","*"]
+        base_hatchings = np.full(multiple_W_out.shape[0],{})
+        for i in range(base_hatchings.shape[0]):
+            base_hatchings[i] = ({"hatch" : defaults[i % len(defaults)], "edgecolor" : "black"})
+    else:
+        base_colors = plt.cm.rainbow(np.linspace(0, 1, multiple_W_out.shape[0]))
+        base_hatchings = np.full(multiple_W_out.shape[0], ({"hatch" : ""}))
 
-    # make the coloring
-    colors1 = np.full((dimensions, combinators), 'b')
-    colors2 = np.full((dimensions, combinators), 'r')
-    # scaled to biggest component
-    fig, axs = plt.subplots(1, dimensions)
-    fig.set_figheight(figheight)
-    fig.set_figwidth(figwidth)
+    hatching = np.full(multiple_W_out.shape[0],0,dtype=object)
+    for w_out_num in range(multiple_W_out.shape[0]):
+        hatching[w_out_num] = base_hatchings[w_out_num]
 
-    for dimension in range(dimensions):
-        axs[dimension].barh(y_pos, A_W_out[dimension, :], color=colors1[dimension],alpha = 1)
-        axs[dimension].barh(y_pos, B_W_out[dimension, :], color=colors2[dimension],alpha = 0.6)
-        axs[dimension].set_yticks(y_pos)
-        axs[dimension].set_yticklabels(out_labels)
-        axs[dimension].set_ylim(combinators - 0.5, -.5)
-        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
-        axs[dimension].grid()
-    plt.show()
+    colors = np.full(multiple_W_out.shape[0],0.,dtype=object)
+    for w_out_num in range(multiple_W_out.shape[0]):
+        colors[w_out_num] = base_colors[w_out_num]
 
-    # scaled to (-1,+1)
-    fig, axs = plt.subplots(1, dimensions)
-    fig.set_figheight(figheight)
-    fig.set_figwidth(figwidth)
+    #make one plot for normed and for not normed
+    for normed in {True,False}:
+        fig, axs = plt.subplots(1, dimensions)
+        fig.set_figheight(Figheight)
+        fig.set_figwidth(Figwidth)
 
-    for dimension in range(dimensions):
-        axs[dimension].barh(y_pos, A_W_out[dimension, :], color=colors1[dimension], alpha=1)
-        axs[dimension].barh(y_pos, B_W_out[dimension, :], color=colors2[dimension], alpha=0.6)
-        axs[dimension].set_yticks(y_pos)
-        axs[dimension].set_yticklabels(out_labels)
-        axs[dimension].set_ylim(combinators - 0.5, -.5)
-        axs[dimension].set_xlim(-1.05, 1.05)
-        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
-        axs[dimension].grid()
-    plt.show()
+        for dimension in range(dimensions):
+            for w_out_num in range(multiple_W_out.shape[0]):
+                axs[dimension].barh(0.1*multiple_W_out.shape[0] + y_pos+w_out_num*0.8, multiple_W_out[w_out_num][dimension, :], color=colors[w_out_num],**(hatching[w_out_num]))
 
+            axs[dimension].set_yticks(y_pos+0.1*multiple_W_out.shape[0])
+            if dimension == 0:
+                axs[dimension].set_yticklabels(out_labels)
+            else: axs[dimension].set_yticklabels([])
 
+            axs[dimension].set_ylim(combinators - 0.5, -.5)
+            if normed : axs[dimension].set_xlim(-1.05, 1.05)
+            axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
+            axs[dimension].grid()
+            #add the horizontal lines
+            for row in range(combinators):
+                axs[dimension].axhline(y=row*multiple_W_out.shape[0]-0.4, color='black', linestyle='-')
+        if Save_image: plt.savefig("Images\histogr_wouts_" + str(multiple_W_out.shape[0]) + "_norm_" + str(normed) + "_blacknwhite_" + str(Black_and_white) + ".jpg")
+        plt.show()
+
+    return
 #unfinished; example run below
 def bifurcate_plot(fix_param: float, n_skip: int, n_shown_iter: int, step: int = 1, param_interval_min: float = 0.0, param_interval_max: float = 0.1,**kwargs):
     interval = np.linspace(param_interval_min, param_interval_max, step)
