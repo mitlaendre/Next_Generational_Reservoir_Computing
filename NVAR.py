@@ -8,6 +8,9 @@ def make_all_combinations(input = np.array([]),order = 1):  #making all the comb
         return np.full((input.shape[0],1),1)
     return np.prod(np.array(list(it.combinations_with_replacement(input.T,order))),1).T
 
+def norm(a: np.array,axis = 0,p=2):
+    def vectornorm(a): return np.sum(a**p)**(1./p)
+    return np.apply_along_axis(vectornorm,axis=axis,arr=a)
 
 class NVAR():
 
@@ -55,16 +58,16 @@ class NVAR():
         self.order = Order            #order of the combinations
         self.ridge = Ridge            #ridge parameter
         self.norm_data = None
-        self.cutoff_small_weights = None
-
+        self.cutoff_small_influences = None
+        self.influences_history = []
         return
 
 
-    def fit(self,X_train: np.array([]),Y_train: np.array([]),Input_symbols = [],Combine_symbols = [],Cutoff_small_weights = 0.,Norm_data = False,**kwargs) -> None:
+    def fit(self,X_train: np.array([]),Y_train: np.array([]),Input_symbols = [],Combine_symbols = [],Cutoff_small_influences = 0.,Norm_data = False,**kwargs) -> None:
 
         #Saving some variables
         self.norm_data = Norm_data
-        self.cutoff_small_weights = Cutoff_small_weights
+        self.cutoff_small_influences = Cutoff_small_influences
 
         #Norming data
         if self.norm_data:
@@ -89,11 +92,24 @@ class NVAR():
         #Fit the W_out matrix:
         self.W_out = self.y_train.T @ self.combined_x_train @ np.linalg.pinv(self.combined_x_train.T @ self.combined_x_train + self.ridge * np.identity(self.combined_x_train.shape[1]))
 
-        if self.cutoff_small_weights != 0.:
-            for i in range(self.W_out.shape[0]):
-                for j in range(self.W_out.shape[1]):
-                    if np.abs(self.W_out[i,j]) <= self.cutoff_small_weights:
-                        self.W_out[i,j] = 0.
+        if self.cutoff_small_influences != 0.:
+            while (len(self.influences_history) == 0) or (np.min(self.influences_history[-1]) <= self.cutoff_small_influences):
+
+                influences = np.zeros(self.combined_x_train.shape[1])
+                for combinator in range(self.combined_x_train.shape[1]):
+                    influences[combinator] = np.max(norm(np.array([self.W_out[:,combinator]]).T @ np.array([self.combined_x_train[:,combinator]]),axis=0) / norm(self.y_train,axis=1))
+                self.influences_history.append(influences)
+                if ("Printing" in kwargs) and ("Enable_printing" in kwargs["Printing"]) and kwargs["Printing"]["Enable_printing"]:
+                    print("Overall influences of the combinators: ")
+                    print(influences)
+                    print("for the combinators: ")
+                    print(self.combine_symbols)
+
+                if np.min(influences) <= self.cutoff_small_influences:
+                    min_index = np.argmin(influences)
+                    self.combined_x_train = np.delete(self.combined_x_train,min_index,axis=1)
+                    self.combine_symbols = np.delete(self.combine_symbols,min_index,axis=0)
+                    self.W_out = self.y_train.T @ self.combined_x_train @ np.linalg.pinv(self.combined_x_train.T @ self.combined_x_train + self.ridge * np.identity(self.combined_x_train.shape[1]))
         return
 
 

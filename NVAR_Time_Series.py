@@ -43,7 +43,7 @@ class Nvar_TS():
         #Input_symbols init.
         if len(Input_symbols) != 0: #Input_symbols is given
             if len(Input_symbols) != TS_data.shape[1]: #if not matching length
-                print("Input_symbols length not matching, using the default")
+                if ("Printing" in kwargs) and ("Enable_printing" in kwargs["Printing"]) and kwargs["Printing"]["Enable_printing"]:  print("Input_symbols length not matching, using the default")
                 Input_symbols = Data_Manipulation.data_out_of_symbols(0,dimension=self.dim)[0]
                 self.combine_symbols = []
             undelayed_symbols = Input_symbols

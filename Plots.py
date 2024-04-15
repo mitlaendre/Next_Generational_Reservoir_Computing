@@ -92,69 +92,13 @@ def plot_W_out(arr,row_labels,col_labels,**kwargs):
     plt.show()
     return
 
-def histogram_W_out(W_out,in_labels,out_labels,cutoff_small_weights = 0.,figheight = 8.,figwidth = 8.,**kwargs):
-
-    i = W_out.shape[0]+1
-    while i < W_out.shape[1]:
-        delete = True
-        for j in range(W_out.shape[0]):
-            if abs(W_out[j,i]) > cutoff_small_weights:
-                delete = False
-        if delete:
-            W_out = np.delete(W_out, i, axis=1)
-            out_labels = np.delete(out_labels, i, axis=0)
-        else: i+=1
-
-    combinators = W_out.shape[1]  # it's the input  dimension of W_out (larger)
-    dimensions = W_out.shape[0]  # it's the output dimension of W_out (smaller)
-
-    if combinators != len(out_labels): out_labels = np.full(1000," ")
-    if dimensions != len(in_labels): in_labels = np.full(1000," ")
-    y_pos = np.arange(combinators)
-
-    #make the coloring
-    colors = np.full((dimensions,combinators),'w')
-
-    #scaled to biggest component
-    fig, axs = plt.subplots(1, dimensions)
-    fig.set_figheight(figheight)
-    fig.set_figwidth(figwidth)
-
-    for dimension in range(dimensions):
-        axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension],hatch = '/////',edgecolor = 'black')
-        axs[dimension].set_yticks(y_pos)
-        axs[dimension].set_yticklabels(out_labels)
-        axs[dimension].set_ylim(combinators-0.5, -.5)
-        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
-        axs[dimension].grid()
-    plt.show()
-
-
-    #scaled to (-1,+1)
-    fig, axs = plt.subplots(1, dimensions)
-    fig.set_figheight(figheight)
-    fig.set_figwidth(figwidth)
-
-    for dimension in range(dimensions):
-        axs[dimension].barh(y_pos, W_out[dimension, :], color=colors[dimension],hatch = '/////',edgecolor = 'black')
-        axs[dimension].set_yticks(y_pos)
-        axs[dimension].set_yticklabels(out_labels)
-        axs[dimension].set_ylim(combinators - 0.5, -.5)
-        axs[dimension].set_xlim(-1.05,1.05)
-        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
-        axs[dimension].grid()
-    plt.show()
-
-
-    return
-
 def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_weights = 0.,Figheight = 8.,Figwidth = 8.,Black_and_white = True,Save_image = False,**kwargs):
     #Prework on data
     for w_out_num in range(multiple_W_out.shape[0]-1):
         if multiple_W_out[w_out_num].shape != multiple_W_out[w_out_num+1].shape: return
     #delete small weighted rows from everything
-    i = multiple_W_out[0].shape[0] + 1
-    while i < multiple_W_out[0].shape[1]:
+    i = multiple_W_out[0].shape[1]
+    while i < multiple_W_out.shape[2]:
         delete = True
         for j in range(multiple_W_out[0].shape[0]):
             for w_out_num in range(multiple_W_out.shape[0]):
@@ -162,7 +106,7 @@ def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_we
                     delete = False
         if delete:
             for w_out_num in range(multiple_W_out.shape[0]):
-                multiple_W_out[w_out_num] = np.delete(multiple_W_out[w_out_num], i, axis=1)
+                multiple_W_out = np.delete(multiple_W_out, i, axis=2)
             out_labels = np.delete(out_labels, i, axis=0)
         else:
             i += 1
@@ -219,6 +163,8 @@ def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_we
         plt.show()
 
     return
+
+
 #unfinished; example run below
 def bifurcate_plot(fix_param: float, n_skip: int, n_shown_iter: int, step: int = 1, param_interval_min: float = 0.0, param_interval_max: float = 0.1,**kwargs):
     interval = np.linspace(param_interval_min, param_interval_max, step)

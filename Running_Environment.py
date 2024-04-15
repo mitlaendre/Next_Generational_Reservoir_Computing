@@ -136,7 +136,7 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                     "Input_symbols" : [x,y,z],
                                     "Combine_symbols" : [],
                                     "Norm_data": False,
-                                    "Cutoff_small_weights": 0.
+                                    "Cutoff_small_influences": 2.
                                     },
                                 "Feedback":{
                                     "Plotting": {
@@ -230,7 +230,7 @@ def TS_run_on_dict(dict):
     return TS_run(**fix_parameters,**recommendation)
 
 
-def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kwargs):
+def TS_run(Delay: int, TS_data_train,TS_data_test,**kwargs):
 
     #Making the TS_NVAR and fitting it
     my_nvar = NVAR_Time_Series.Nvar_TS(**kwargs,Delay=Delay)
@@ -244,7 +244,7 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
     #Printing and Plotting
     if ("Differential_Equation" in kwargs):
         Gen_W_out = Differential_Equation.W_out_generator(kwargs["Input_symbols"],my_nvar.NVAR.combine_symbols,kwargs["Differential_Equation"].symbolic_equation,kwargs["Differential_Equation"].dt)
-    if ("Enable_printing" in Printing) and Printing["Enable_printing"]:
+    if ("Printing" in kwargs) and ("Enable_printing" in kwargs["Printing"]) and kwargs["Printing"]["Enable_printing"]:
 
         my_nvar.NVAR.debug_print()
         if "Differential_Equation" in kwargs:
@@ -257,12 +257,12 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
         print("Symbolic prediction: ")
         print(my_nvar.NVAR.W_out @ my_nvar.NVAR.combine_symbols)
 
-    if ("Enable_plotting" in Plotting) and Plotting["Enable_plotting"]:
+    if ("Plotting" in kwargs) and ("Enable_plotting" in kwargs["Plotting"]) and kwargs["Plotting"]["Enable_plotting"]:
         Plots.compare_3dData_2dPlot(TS_data_test, predictions)
         Plots.compare_3dData_3dPlot(TS_data_test, predictions)
-        Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
+        Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**kwargs)
         if "Differential_Equation" in kwargs:
-            Plots.multiple_histogram_W_out(multiple_W_out= np.array([Gen_W_out,my_nvar.NVAR.W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
+            Plots.multiple_histogram_W_out(multiple_W_out= np.array([Gen_W_out,my_nvar.NVAR.W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**kwargs)
     return error
 
 
