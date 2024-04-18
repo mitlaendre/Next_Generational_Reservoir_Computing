@@ -92,7 +92,7 @@ def plot_W_out(arr,row_labels,col_labels,**kwargs):
     plt.show()
     return
 
-def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_weights = 0.,Figheight = 8.,Figwidth = 8.,Black_and_white = True,Save_image = False,**kwargs):
+def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_weights = 0.,Figheight = 8.,Figwidth = 8.,Black_and_white = False,Save_image = False,**kwargs):
     #Prework on data
     for w_out_num in range(multiple_W_out.shape[0]-1):
         if multiple_W_out[w_out_num].shape != multiple_W_out[w_out_num+1].shape: return
@@ -113,28 +113,29 @@ def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_we
 
     combinators = multiple_W_out[0].shape[1]  # it's the input  dimension of W_out (larger)
     dimensions = multiple_W_out[0].shape[0]  # it's the output dimension of W_out (smaller)
+    num_w_outs = multiple_W_out.shape[0]
     if combinators != len(out_labels): out_labels = np.full(1000, " ")
     if dimensions != len(in_labels): in_labels = np.full(1000, " ")
 
     #Plotting starts here
-    y_pos = np.array(range(0,combinators*multiple_W_out.shape[0],multiple_W_out.shape[0]))
+    y_pos = np.array(range(0,combinators*num_w_outs,num_w_outs))
     # make the coloring and hatching
     if Black_and_white:
-        base_colors = np.full(multiple_W_out.shape[0],"white")
+        base_colors = np.full(num_w_outs,"white")
         defaults = ["//","\\","||","-","+","x","o","O",".","*"]
         base_hatchings = np.full(multiple_W_out.shape[0],{})
         for i in range(base_hatchings.shape[0]):
             base_hatchings[i] = ({"hatch" : defaults[i % len(defaults)], "edgecolor" : "black"})
     else:
-        base_colors = plt.cm.rainbow(np.linspace(0, 1, multiple_W_out.shape[0]))
-        base_hatchings = np.full(multiple_W_out.shape[0], ({"hatch" : ""}))
+        base_colors = plt.cm.rainbow(np.linspace(0, 1, num_w_outs))
+        base_hatchings = np.full(num_w_outs, ({"hatch" : ""}))
 
-    hatching = np.full(multiple_W_out.shape[0],0,dtype=object)
-    for w_out_num in range(multiple_W_out.shape[0]):
+    hatching = np.full(num_w_outs,0,dtype=object)
+    for w_out_num in range(num_w_outs):
         hatching[w_out_num] = base_hatchings[w_out_num]
 
-    colors = np.full(multiple_W_out.shape[0],0.,dtype=object)
-    for w_out_num in range(multiple_W_out.shape[0]):
+    colors = np.full(num_w_outs,0.,dtype=object)
+    for w_out_num in range(num_w_outs):
         colors[w_out_num] = base_colors[w_out_num]
 
     #make one plot for normed and for not normed
@@ -144,22 +145,22 @@ def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_we
         fig.set_figwidth(Figwidth)
 
         for dimension in range(dimensions):
-            for w_out_num in range(multiple_W_out.shape[0]):
-                axs[dimension].barh(0.1*multiple_W_out.shape[0] + y_pos+w_out_num*0.8, multiple_W_out[w_out_num][dimension, :], color=colors[w_out_num],**(hatching[w_out_num]))
+            for w_out_num in range(num_w_outs):
+                axs[dimension].barh(0.1*num_w_outs + y_pos+w_out_num*0.8, multiple_W_out[w_out_num][dimension, :], color=colors[w_out_num],**(hatching[w_out_num]))
 
-            axs[dimension].set_yticks(y_pos+0.1*multiple_W_out.shape[0])
+            axs[dimension].set_yticks(y_pos+0.1*num_w_outs)
             if dimension == 0:
                 axs[dimension].set_yticklabels(out_labels)
             else: axs[dimension].set_yticklabels([])
 
-            axs[dimension].set_ylim(combinators - 0.5, -.5)
+            axs[dimension].set_ylim(combinators*num_w_outs - 0.5, -.5)
             if normed : axs[dimension].set_xlim(-1.05, 1.05)
             axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
             axs[dimension].grid()
             #add the horizontal lines
             for row in range(combinators):
-                axs[dimension].axhline(y=row*multiple_W_out.shape[0]-0.4, color='black', linestyle='-')
-        if Save_image: plt.savefig("Images\histogr_wouts_" + str(multiple_W_out.shape[0]) + "_norm_" + str(normed) + "_blacknwhite_" + str(Black_and_white) + ".jpg")
+                axs[dimension].axhline(y=row*num_w_outs-0.4, color='black', linestyle='-')
+        if Save_image: plt.savefig("Images\histogr_wouts_" + str(num_w_outs) + "_norm_" + str(normed) + "_blacknwhite_" + str(Black_and_white) + ".jpg")
         plt.show()
 
     return

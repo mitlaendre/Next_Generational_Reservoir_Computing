@@ -52,7 +52,9 @@ def W_out_generator(input_symbols, combine_symbols, combination_vector,dt):
     W_out = np.zeros((len(input_symbols), len(combine_symbols)))
     for i in range(W_out.shape[0]):
         for j in range(W_out.shape[1]):
-            W_out[i, j] = combination_vector[i].coeff(combine_symbols[j])*dt
+            W_out[i, j] = combination_vector[i].coeff(combine_symbols[j])
+            if input_symbols[i] == combine_symbols[j]:  #corrigate derivative
+                W_out[i, j] = W_out[i,j] - 1
     return W_out
 
 

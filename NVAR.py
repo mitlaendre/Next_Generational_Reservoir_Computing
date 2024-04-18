@@ -1,6 +1,8 @@
 import itertools as it
 import numpy as np
 import Data_Manipulation
+from sklearn.linear_model import ElasticNet
+from sklearn.datasets import make_regression
 
 def make_all_combinations(input = np.array([]),order = 1):  #making all the combinations with the order given
     input = np.array(input)     #cast touple, list and others to np.array([])
@@ -43,9 +45,26 @@ class NVAR():
 
         if len(in_data.shape) == 1: out_data = out_data[0]  # if it was a vector, cast back
         return out_data
+    def regression_fit(self):
+        if self.lasso == 0.:
+            #W = Y.T @ X (X.T @ X + Ridge)^-1
+            self.W_out = self.y_train.T @ self.combined_x_train @ np.linalg.pinv(self.combined_x_train.T @ self.combined_x_train + self.ridge * np.identity(self.combined_x_train.shape[1]))
+        else:
+            Wridge = self.ridge
+            Wlasso = self.lasso
 
+            a = Wlasso
+            b = Wridge * 2.
+            alpha = a+b
+            l1_ratio = a/(a+b)
 
-    def __init__(self,Ridge: float, Order = 1 ,**kwargs):
+            tol = 1e-4 #tolerance of the konvergence
+            max_iter = 100000 #max iterations of the konvergence
+
+            regr = ElasticNet(l1_ratio=l1_ratio,alpha=alpha,fit_intercept=False,tol=tol,max_iter=max_iter)
+            regr.fit(self.combined_x_train, self.y_train)
+            self.W_out = regr.coef_
+    def __init__(self,Ridge : float,Lasso = 0., Order = 1 ,**kwargs):
 
         self.y_train = None             #y_train data
         self.x_train = None             #x_train data
@@ -56,7 +75,10 @@ class NVAR():
 
         self.W_out = None               #trained W_out matrix
         self.order = Order            #order of the combinations
+
         self.ridge = Ridge            #ridge parameter
+        self.lasso = Lasso
+
         self.norm_data = None
         self.cutoff_small_influences = None
         self.influences_history = []
@@ -64,6 +86,8 @@ class NVAR():
 
 
     def fit(self,X_train: np.array([]),Y_train: np.array([]),Input_symbols = [],Combine_symbols = [],Cutoff_small_influences = 0.,Norm_data = False,**kwargs) -> None:
+        if "Ridge" in kwargs: self.ridge = kwargs["Ridge"]
+        if "Lasso" in kwargs: self.lasso = kwargs["Lasso"]
 
         #Saving some variables
         self.norm_data = Norm_data
@@ -90,7 +114,7 @@ class NVAR():
         self.combined_x_train = self.combine_data(self.x_train)
 
         #Fit the W_out matrix:
-        self.W_out = self.y_train.T @ self.combined_x_train @ np.linalg.pinv(self.combined_x_train.T @ self.combined_x_train + self.ridge * np.identity(self.combined_x_train.shape[1]))
+        self.regression_fit()
 
         if self.cutoff_small_influences != 0.:
             while (len(self.influences_history) == 0) or (np.min(self.influences_history[-1]) <= self.cutoff_small_influences):
@@ -109,12 +133,9 @@ class NVAR():
                     min_index = np.argmin(influences)
                     self.combined_x_train = np.delete(self.combined_x_train,min_index,axis=1)
                     self.combine_symbols = np.delete(self.combine_symbols,min_index,axis=0)
-                    self.W_out = self.y_train.T @ self.combined_x_train @ np.linalg.pinv(self.combined_x_train.T @ self.combined_x_train + self.ridge * np.identity(self.combined_x_train.shape[1]))
-        return
-
+                    self.regression_fit()
 
     def run(self,X_data: np.array([]),**kwargs):
-
         if(self.W_out.any == None):
             print("Error: The NVAR has not been trained yet!")
             return

@@ -129,14 +129,15 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                         },
                 "Test_single2": {
                                 "NVAR":{
-                                    "Delay" : 1,
-                                    "Order" : 2,
+                                    "Delay" : 0,
+                                    "Order" : 3,
                                     "Warmup_length" : 10,
-                                    "Ridge" : 0.5,
+                                    "Ridge" : 0.001,
+                                    "Lasso" : 0.,
                                     "Input_symbols" : [x,y,z],
                                     "Combine_symbols" : [],
                                     "Norm_data": False,
-                                    "Cutoff_small_influences": 2.
+                                    "Cutoff_small_influences": 1.
                                     },
                                 "Feedback":{
                                     "Plotting": {
@@ -154,17 +155,17 @@ saved_runs = {"Paper reproduction": {"Train length" : 600,
                                 "Optimizer":{
                                     "Budget": 100,
                                     "Num_workers": 10,
-                                    "Batch mode": True,
+                                    "Batch_mode": True,
                                     "Verbosity": 2
                                 },
                                 "Data": {
                                     "Equation":{
                                         "Starting_point" : [0.2,0.1,0.1],
-                                        "Method" : "Adams-Bashforth",
+                                        "Method" : "Adams-Bashforth 1",
                                         "Time_step_length" : 0.025,
                                         "Equation_type" : "Chua",
-                                        "Train_length" : 500,
-                                        "Test_length" : 100,
+                                        "Train_length" : 1000,
+                                        "Test_length" : 500,
                                         "Generate_symbolic_W_out" : True
                                     },
                                     #"TS_data_train": np.full((200,3),1.),
@@ -191,6 +192,18 @@ def generate_equation_data(Equation_type: str, Train_length: int, Test_length: i
     dict_return = {"TS_data_train": data[:Train_length],"TS_data_test": data[Train_length:],"Differential_Equation" : Current_Equation}
     return dict_return
 
+def init_optim_params(dict):
+    if "Optimizer" not in dict:
+        dict["Optimizer"] = {}
+    if "Budget" not in dict["Optimizer"]:
+        dict["Optimizer"]["Budget"] = 100
+    if "Num_workers" not in dict["Optimizer"]:
+        dict["Optimizer"]["Num_workers"] = 10
+    if "Verbosity" not in dict["Optimizer"]:
+        dict["Optimizer"]["Verbosity"] = 2
+    if "Batch_mode" not in dict["Optimizer"]:
+        dict["Optimizer"]["Batch_mode"] = True
+    return dict
 
 def TS_run_on_dict(dict):
     #Making sure there is some data
@@ -215,10 +228,11 @@ def TS_run_on_dict(dict):
             fix_parameters[i] = all_parameters[i]
     parametrization = ng.p.Instrumentation(**optim_parameters)
 
+    dict = init_optim_params(dict)
     try:    #If there is any parameter to optimize
         optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=dict["Optimizer"]["Budget"],num_workers=dict["Optimizer"]["Num_workers"])
         with futures.ThreadPoolExecutor(max_workers=optimizer.num_workers) as executor:
-            recommendation = optimizer.minimize(lambda **kwargs: TS_run(**{**kwargs,**fix_parameters,"Printing":{},"Plotting":{}}), executor=executor, batch_mode=dict["Optimizer"]["Batch mode"], verbosity=dict["Optimizer"]["Verbosity"]).value[1]
+            recommendation = optimizer.minimize(lambda **kwargs: TS_run(**{**kwargs,**fix_parameters,"Printing":{},"Plotting":{}}), executor=executor, batch_mode=dict["Optimizer"]["Batch_mode"], verbosity=dict["Optimizer"]["Verbosity"]).value[1]
         print("Optimization Finished")
 
     except ValueError as e: #If there is no parameter to optimize
@@ -230,11 +244,11 @@ def TS_run_on_dict(dict):
     return TS_run(**fix_parameters,**recommendation)
 
 
-def TS_run(Delay: int, TS_data_train,TS_data_test,**kwargs):
+def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kwargs):
 
     #Making the TS_NVAR and fitting it
-    my_nvar = NVAR_Time_Series.Nvar_TS(**kwargs,Delay=Delay)
-    my_nvar.fit(**kwargs,Delay=Delay,TS_data=TS_data_train)
+    my_nvar = NVAR_Time_Series.Nvar_TS(**kwargs,Printing = Printing,Plotting = Plotting,Delay=Delay)
+    my_nvar.fit(**kwargs,Printing = Printing,Plotting = Plotting,Delay=Delay,TS_data=TS_data_train)
 
     #Predicting (starting from the end of the train data)
     initialization = TS_data_train[-Delay - 1:]
@@ -244,7 +258,7 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,**kwargs):
     #Printing and Plotting
     if ("Differential_Equation" in kwargs):
         Gen_W_out = Differential_Equation.W_out_generator(kwargs["Input_symbols"],my_nvar.NVAR.combine_symbols,kwargs["Differential_Equation"].symbolic_equation,kwargs["Differential_Equation"].dt)
-    if ("Printing" in kwargs) and ("Enable_printing" in kwargs["Printing"]) and kwargs["Printing"]["Enable_printing"]:
+    if ("Enable_printing" in Printing) and Printing["Enable_printing"]:
 
         my_nvar.NVAR.debug_print()
         if "Differential_Equation" in kwargs:
@@ -257,12 +271,12 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,**kwargs):
         print("Symbolic prediction: ")
         print(my_nvar.NVAR.W_out @ my_nvar.NVAR.combine_symbols)
 
-    if ("Plotting" in kwargs) and ("Enable_plotting" in kwargs["Plotting"]) and kwargs["Plotting"]["Enable_plotting"]:
+    if ("Enable_plotting" in Plotting) and Plotting["Enable_plotting"]:
         Plots.compare_3dData_2dPlot(TS_data_test, predictions)
         Plots.compare_3dData_3dPlot(TS_data_test, predictions)
-        Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**kwargs)
+        Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
         if "Differential_Equation" in kwargs:
-            Plots.multiple_histogram_W_out(multiple_W_out= np.array([Gen_W_out,my_nvar.NVAR.W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**kwargs)
+            Plots.multiple_histogram_W_out(multiple_W_out= np.array([Gen_W_out,my_nvar.NVAR.W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 
 
