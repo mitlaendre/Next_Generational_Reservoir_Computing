@@ -29,17 +29,16 @@ class Nvar_TS():
         self.combine_symbols = []
         return
 
-    def generate_input_combine_symbols(self,Input_symbols,Combine_symbols,dimensions):
+    def generate_input_combine_symbols(self,Input_symbols,Combine_symbols):
         # Input_symbols init.
-        if len(Input_symbols) == 0:  # if Input_symbols is not given
-            self.input_symbols = Data_Manipulation.data_out_of_symbols(0, dimension=self.dim)[0]
-        if len(Input_symbols) != dimensions:  # if not matching length
+
+        if len(Input_symbols) != self.dim:  # if not matching length
             print("Input_symbols length not matching, using the default")
             self.input_symbols = Data_Manipulation.data_out_of_symbols(0, dimension=self.dim)[0]
             self.combine_symbols = []
         else:
             self.input_symbols = Input_symbols
-        self.delayed_input_symbols = Data_Manipulation.data_out_of_symbols(self.delay,input_symbols=Input_symbols).flatten()  # delay it
+        self.delayed_input_symbols = Data_Manipulation.data_out_of_symbols(self.delay,input_symbols=self.input_symbols).flatten()  # delay it
 
         # Combine_symbols init.
         # check if any delayed (Px,PPx,...) variables are there
@@ -73,7 +72,7 @@ class Nvar_TS():
         X_train = delay_data(data = TS_data,delay = self.delay)[self.delay + Warmup:-1,:]
         Y_train = TS_data[self.delay + Warmup+1:,:] - TS_data[self.delay + Warmup:-1,:]
 
-        self.generate_input_combine_symbols(Input_symbols,Combine_symbols,TS_data.shape[1])
+        self.generate_input_combine_symbols(Input_symbols,Combine_symbols)
 
         self.NVAR.fit(**kwargs,X_train=X_train,Y_train=Y_train,Input_symbols=self.delayed_input_symbols,Combine_symbols=self.combine_symbols)
         return
