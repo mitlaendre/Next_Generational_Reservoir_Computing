@@ -161,3 +161,12 @@ class Ex3DLinear(Differential_Equation):
             return a * x + b * y,  -b * x + a * y, c * z
         super().__init__(fx)
         return
+
+class Ex3DCubic(Differential_Equation):
+
+    def __init__(self, a: float = -0.1, b: float = 2.0, c: float = -0.0):
+        def fx(t, state):
+            x, y, z = state
+            return a * x**3 + b * y**3,  -b * x**3 + a * y**3, c * z
+        super().__init__(fx)
+        return
