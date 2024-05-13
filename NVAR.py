@@ -107,7 +107,7 @@ class NVAR():
         else:   self.input_symbols = Input_symbols
 
         if len(Combine_symbols) == 0:
-            self.combine_symbols = self.combine_data(Input_symbols,Initialise_combinations=True)
+            self.combine_symbols = self.combine_data(self.input_symbols,Initialise_combinations=True)
         else:   self.combine_symbols = Combine_symbols
 
         #Make combinations:

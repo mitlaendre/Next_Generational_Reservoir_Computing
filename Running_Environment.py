@@ -13,121 +13,107 @@ Px,Py,Pz,Px1,Px2,Px3,Px4,Px5,Px6,Px7,Px8,Px9,Px10 = sympy.symbols('Px Py Pz Px1 
 PPx,PPy,PPz,PPx1,PPx2,PPx3,PPx4,PPx5,PPx6,PPx7,PPx8,PPx9,PPx10 = sympy.symbols('PPx PPy PPz PPx1 PPx2 PPx3 PPx4 PPx5 PPx6 PPx7 PPx8 PPx9 PPx10')
 PPPx,PPPy,PPPz,PPPx1,PPPx2,PPPx3,PPPx4,PPPx5,PPPx6,PPPx7,PPPx8,PPPx9,PPPx10 = sympy.symbols('PPPx PPPy PPPz PPPx1 PPPx2 PPPx3 PPPx4 PPPx5 PPPx6 PPPx7 PPPx8 PPPx9 PPPx10')
 
-saved_runs = {"Paper reproduction": {"Train length" : 600,
-                                      "Test length" : 799,
-                                      "Equation" : "Lorenz",
-                                      "Time step length" : 0.025,
-                                      "Method" : "RK23",
-                                      "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
-                                      "Delay" : 1,
-                                      "Order" : 2,
-                                      "Warmup length" : 198,
-                                      "Ridge" : 2.5e-6,
-                                      "Plotting" : True,
-                                      "Printing" : True
-                                      },
-               "Paper reproduction 2": {"Train time" : 10.,
-                                        "Test time" : 20.,
-                                        "Time step length": 0.025,
-                                        "Equation" : "Lorenz",
-                                        "Method" : "RK23",
-                                        "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
-                                        "Delay" : 1,
-                                        "Order" : 2,
-                                        "Warmup time" : 5.,
-                                        "Ridge" : 2.5e-6,
-                                        "Plotting" : True,
-                                        "Printing" : True
-                                        },
-               "Rossler example": {"Train length" : 500,
-                                      "Test length" : 2000,
-                                      "Equation" : "Rossler",
-                                      "Time step length" : 0.025,
-                                      "Method" : "RK23",
-                                      "Starting point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
-                                      "Delay" : 1,
-                                      "Order" : 2,
-                                      "Warmup length" : 198,
-                                      "Ridge" : 2.5e-6,
-                                      "Plotting" : True,
-                                      "Printing" : True
-                                      },
-               "Chua example": {
-                                "NVAR":{
-                                    "Delay" : 1,
-                                    "Order" : 3,
-                                    "Warmup length" : 10,
-                                    "Ridge" : 0.01,
-                                    "Input symbols" : [x,y,z],
-                                    "Combine symbols" : [x,y,z,x**2,y**2]
-                                    },
-                                "Equation": {
-                                    "Starting point" : [0.2,0.1,0.1],
-                                    "Method" : "Euler",
-                                    "Time step length" : 0.025,
-                                    "Equation type" : "Chua",
-                                    "Train length" : 1000,
-                                    "Test length" : 1000
-                                    },
-                                "Other": {
-                                    "Plotting": False,
-                                    "Printing": True,
-                                    "Norm data": False,
-                                    "Cutoff small weights": 0.,
-                                    "Cutoff W_out": 0.01
-                                },
-                                #"Data":{
-                                #    "X_train" : np.array([])
-                                #    "Y_train" : np.array([])
-                                #}
-
-
-               },
-                "Test_optim": {
-                                "NVAR":{
-                                    "Delay" : 1,
-                                    "Order" : 1,
-                                    "Warmup length" : 10,
-                                    "Ridge" : ng.p.Scalar(lower=0., upper=1.),
-                                    "Input symbols" : [x,y,z],
-                                    "Combine symbols" : [1,x,y,z,x**2,y**2]
-                                    },
-                                "Other": {
-                                    "Plotting": True,
-                                    "Printing": True,
-                                    "Norm data": False,
-                                    "Cutoff small weights": 0.1
-                                    },
-                                "Data": {
-                                    "X_train": np.full((200,1),1.),
-                                    "X_test": np.full((200,1),8.)
-                                },
-                                "Optimizer":{
-                                    "Budget": 100,
-                                    "Num_workers": 10,
-                                    "Batch mode": True,
-                                    "Verbosity": 2
-                                }
+saved_runs = {"Paper reproduction": {
+                    "NVAR":{
+                        "Delay" : 1,
+                        "Order" : 2,
+                        "Warmup length" : 198,
+                        "Ridge" : 2.5e-6,
+                        "Input_symbols" : [x,y,z]},
+                    "Feedback":{
+                        "Plotting": {
+                            "Enable_plotting": True,
+                            "Cutoff_small_weights": 0.,
+                            "Figheight" : 8.,
+                            "Figwidth" : 8.,
+                            "Black_and_white" : False,
+                            "Save_image" : False
                         },
+                        "Printing": {
+                            "Enable_printing": True
+                        }
+                    },
+                    "Data": {
+                        "Equation":{
+                            "Starting_point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
+                            "Method" : "RK23",
+                            "Time_step_length" : 0.025,
+                            "Equation_type" : "Lorenz",
+                            "Train_length" : 600,
+                            "Test_length" : 799,
+                            "Generate_symbolic_W_out" : True
+                        }
+                    }
+                    },
+
+                "Rossler example": {
+                    "NVAR": {
+                        "Delay": 1,
+                        "Order": 2,
+                        "Warmup length": 198,
+                        "Ridge": 2.5e-6,
+                        "Input_symbols": [x, y, z]
+                    },
+                    "Feedback": {
+                        "Plotting": {
+                            "Enable_plotting": True,
+                            "Cutoff_small_weights": 0.,
+                            "Figheight": 8.,
+                            "Figwidth": 8.,
+                            "Black_and_white": False,
+                            "Save_image": False
+                        },
+                        "Printing": {
+                            "Enable_printing": True
+                        }
+                    },
+                    "Data": {
+                        "Equation": {
+                            "Starting_point": [17.67715816276679, 12.931379185960404, 43.91404334248268],
+                            "Method": "RK23",
+                            "Time_step_length": 0.025,
+                            "Equation_type": "Rossler",
+                            "Train_length": 500,
+                            "Test_length": 2000,
+                            "Generate_symbolic_W_out": True
+                        }
+                    }
+                },
+                "Chua example": {
+                    "NVAR": {
+                        "Delay": 1,
+                        "Order": 3,
+                        "Warmup length": 10,
+                        "Ridge": 0.01,
+                        "Input_symbols": [x, y, z],
+                        "Combine_symbols": [x, y, z, x**2, y**2]
+                    },
+                    "Feedback": {
+                        "Plotting": {
+                            "Enable_plotting": True,
+                            "Cutoff_small_weights": 0.,
+                            "Figheight": 8.,
+                            "Figwidth": 8.,
+                            "Black_and_white": False,
+                            "Save_image": False
+                        },
+                        "Printing": {
+                            "Enable_printing": True
+                        }
+                    },
+                    "Data": {
+                        "Equation": {
+                            "Starting_point": [0.2, 0.1, 0.1],
+                            "Method": "Euler",
+                            "Time_step_length": 0.025,
+                            "Equation_type": "Chua",
+                            "Train_length": 1000,
+                            "Test_length": 1000,
+                            "Generate_symbolic_W_out": True
+                        }
+                    }
+                },
                 "Test_single": {
-                                "NVAR":{
-                                    "Delay" : 1,
-                                    "Order" : 1,
-                                    "Warmup length" : 10,
-                                    "Ridge" : 0.5
-                                    },
-                                "Other": {
-                                    "Plotting": True,
-                                    "Printing": True,
-                                    "Norm data": False,
-                                    "Cutoff small weights": 0.1
-                                    },
-                                "Data": {
-                                    "X_train": np.full((200,3),1.),
-                                    "X_test": np.full((200,3),8.)
-                                }
-                        },
-                "Test_single2": {
                                 "NVAR":{
                                     "Delay" : 0,
                                     "Order" : 3,
@@ -256,12 +242,12 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
     error = Data_Manipulation.error_func_mse(TS_data_test, predictions)
 
     #Printing and Plotting
-    if ("Differential_Equation" in kwargs):
-        Gen_W_out = Differential_Equation.W_out_generator(kwargs["Input_symbols"],my_nvar.NVAR.combine_symbols,kwargs["Differential_Equation"].symbolic_equation,kwargs["Differential_Equation"].dt)
+    if ("Differential_Equation" in kwargs) and (len(kwargs["Differential_Equation"].symbolic_equation)>0):
+        Gen_W_out = Differential_Equation.W_out_generator(my_nvar.NVAR.input_symbols,my_nvar.NVAR.combine_symbols,kwargs["Differential_Equation"].symbolic_equation)
     if ("Enable_printing" in Printing) and Printing["Enable_printing"]:
 
         my_nvar.NVAR.debug_print()
-        if "Differential_Equation" in kwargs:
+        if ("Differential_Equation" in kwargs) and (len(kwargs["Differential_Equation"].symbolic_equation)>0):
             print("Generator W_out matrix: ")
             print(Gen_W_out)
         print("Ground truth: ")
@@ -275,10 +261,9 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
         Plots.compare_3dData_2dPlot(TS_data_test, predictions)
         Plots.compare_3dData_3dPlot(TS_data_test, predictions)
         Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
-        if "Differential_Equation" in kwargs:
+        if ("Differential_Equation" in kwargs) and (len(kwargs["Differential_Equation"].symbolic_equation)>0):
             Plots.multiple_histogram_W_out(multiple_W_out= np.array([Gen_W_out,my_nvar.NVAR.W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 
 
-#TS_run_on_dict(saved_runs["Test_optim"])
-TS_run_on_dict(saved_runs["Test_single2"])
+TS_run_on_dict(saved_runs["Rossler example"])

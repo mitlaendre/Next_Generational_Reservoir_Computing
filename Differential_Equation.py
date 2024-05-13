@@ -48,8 +48,8 @@ def Implemented_Multisteps(right_side,tn,dt,method,last_datapoints):
         return Implemented_Steps(right_side = right_side,tn = tn,dt = dt,Yn = last_datapoints[:,-1],method = "RK4")
 
 
-def W_out_generator(input_symbols, combine_symbols, combination_vector,dt):
-    W_out = np.zeros((len(input_symbols), len(combine_symbols)))
+def W_out_generator(input_symbols, combine_symbols, combination_vector):
+    W_out = np.zeros((len(combination_vector), len(combine_symbols)))
     for i in range(W_out.shape[0]):
         for j in range(W_out.shape[1]):
             W_out[i, j] = combination_vector[i].coeff(combine_symbols[j])
@@ -90,6 +90,7 @@ class Differential_Equation():
             sol = sol.y
             #self.equation_symbols = solve_ivp(self.right_side, y0=symbolic_data, t_span=(0.0, dt), t_eval=[0.0,dt], method = method)
             self.symbolic_equation = []
+            print("Warning, Solve_Ivp is used, symbolic equation cannot be made.")
 
 
         elif method in {"Adams-Bashforth 1","Adams-Bashforth 2","Adams-Bashforth 3","Adams-Bashforth 4","Adams-Bashforth 5","Adams-Bashforth"}:             #Implemented multistep methods

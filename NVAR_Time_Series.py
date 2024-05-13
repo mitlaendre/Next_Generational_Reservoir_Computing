@@ -41,28 +41,27 @@ class Nvar_TS():
         Y_train = TS_data[self.delay + Warmup+1:,:] - TS_data[self.delay + Warmup:-1,:]
 
         #Input_symbols init.
-        if len(Input_symbols) != 0: #Input_symbols is given
+        if len(Input_symbols) != 0: #if Input_symbols is given
             if len(Input_symbols) != TS_data.shape[1]: #if not matching length
                 if ("Printing" in kwargs) and ("Enable_printing" in kwargs["Printing"]) and kwargs["Printing"]["Enable_printing"]:  print("Input_symbols length not matching, using the default")
                 Input_symbols = Data_Manipulation.data_out_of_symbols(0,dimension=self.dim)[0]
                 self.combine_symbols = []
-            undelayed_symbols = Input_symbols
             Input_symbols = Data_Manipulation.data_out_of_symbols(self.delay, input_symbols=Input_symbols).flatten()   #delay it
 
         #Combine_symbols init.
         #check if any delayed (Px,PPx,...) variables are there
         contains_delayed_vars = False
         for i in range(len(self.combine_symbols)):
-            for j in range(len(undelayed_symbols)):
+            for j in range(len(Input_symbols)):
                 for k in range(1,100):
-                    temp = sympy.symbols('P'*k + undelayed_symbols[j].name)
+                    temp = sympy.symbols('P'*k + Input_symbols[j].name)
                     if temp in Combine_symbols[i].free_symbols: #if it contains it in any way
                         contains_delayed_vars = True
                         break
                 if contains_delayed_vars: break
             if contains_delayed_vars:break
         #If there are no delayed parts in it, then add the delayed parts
-        all_usable_symbols =  Data_Manipulation.data_out_of_symbols(self.delay, input_symbols=undelayed_symbols)
+        all_usable_symbols =  Data_Manipulation.data_out_of_symbols(self.delay, input_symbols=Input_symbols)
         if not contains_delayed_vars:
             for curr_delay in range(all_usable_symbols.shape[0]-1):
                 for num_symbol in range(len(self.combine_symbols)):
