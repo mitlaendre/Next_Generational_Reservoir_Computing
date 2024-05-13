@@ -115,20 +115,20 @@ saved_runs = {"Paper reproduction": {
                 },
                 "Test_single": {
                                 "NVAR":{
-                                    "Delay" : 0,
-                                    "Order" : 3,
+                                    "Delay" : 1,
+                                    "Order" : 2,
                                     "Warmup_length" : 10,
                                     "Ridge" : 0.001,
                                     "Lasso" : 0.,
-                                    "Input_symbols" : [x,y,z],
-                                    "Combine_symbols" : [],
+                                    #"Input_symbols" : [x,y,z],
+                                    #"Combine_symbols" : [],
                                     "Norm_data": False,
-                                    "Cutoff_small_influences": 1.
+                                    "Cutoff_small_influences": 0.
                                     },
                                 "Feedback":{
                                     "Plotting": {
                                         "Enable_plotting": True,
-                                        "Cutoff_small_weights": 0.,
+                                        "Cutoff_small_weights": 0.001,
                                         "Figheight" : 8.,
                                         "Figwidth" : 8.,
                                         "Black_and_white" : False,
@@ -266,4 +266,4 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
     return error
 
 
-TS_run_on_dict(saved_runs["Rossler example"])
+TS_run_on_dict(saved_runs["Test_single"])

@@ -24,10 +24,43 @@ class Nvar_TS():
         self.NVAR = NVAR.NVAR(**kwargs)
         self.delay = Delay      #delay = 0 is when just current datapoint is given
         self.warmup = 0
-        self.input_symbols = None   #not contains delayes
-        self.combine_symbols = None
+        self.input_symbols = []           #not contains delayes
+        self.delayed_input_symbols = []   #contains delayes
+        self.combine_symbols = []
         return
 
+    def generate_input_combine_symbols(self,Input_symbols,Combine_symbols,dimensions):
+        # Input_symbols init.
+        if len(Input_symbols) == 0:  # if Input_symbols is not given
+            self.input_symbols = Data_Manipulation.data_out_of_symbols(0, dimension=self.dim)[0]
+        if len(Input_symbols) != dimensions:  # if not matching length
+            print("Input_symbols length not matching, using the default")
+            self.input_symbols = Data_Manipulation.data_out_of_symbols(0, dimension=self.dim)[0]
+            self.combine_symbols = []
+        else:
+            self.input_symbols = Input_symbols
+        self.delayed_input_symbols = Data_Manipulation.data_out_of_symbols(self.delay,input_symbols=Input_symbols).flatten()  # delay it
+
+        # Combine_symbols init.
+        # check if any delayed (Px,PPx,...) variables are there
+        contains_delayed_vars = False
+        for i in range(len(self.combine_symbols)):
+            for j in range(len(self.input_symbols)):
+                for k in range(1, 100):
+                    temp = sympy.symbols('P' * k + self.input_symbols[j].name)
+                    if temp in Combine_symbols[i].free_symbols:  # if it contains it in any way
+                        contains_delayed_vars = True
+                        break
+                if contains_delayed_vars: break
+            if contains_delayed_vars: break
+
+        # If there are no delayed parts in it, then add the delayed parts
+        all_usable_symbols = Data_Manipulation.data_out_of_symbols(self.delay, input_symbols=self.input_symbols)
+        if not contains_delayed_vars:
+            for curr_delay in range(all_usable_symbols.shape[0] - 1):
+                for num_symbol in range(len(self.combine_symbols)):
+                    self.combine_symbols = self.combine_symbols + [self.combine_symbols[num_symbol].subs(
+                        dict(zip(all_usable_symbols[-1], all_usable_symbols[-2 - curr_delay])))]
 
     def fit(self,TS_data: np.array([]), Warmup = 0,Input_symbols = [],Combine_symbols = [], **kwargs) -> None:
 
@@ -40,35 +73,9 @@ class Nvar_TS():
         X_train = delay_data(data = TS_data,delay = self.delay)[self.delay + Warmup:-1,:]
         Y_train = TS_data[self.delay + Warmup+1:,:] - TS_data[self.delay + Warmup:-1,:]
 
-        #Input_symbols init.
-        if len(Input_symbols) != 0: #if Input_symbols is given
-            if len(Input_symbols) != TS_data.shape[1]: #if not matching length
-                if ("Printing" in kwargs) and ("Enable_printing" in kwargs["Printing"]) and kwargs["Printing"]["Enable_printing"]:  print("Input_symbols length not matching, using the default")
-                Input_symbols = Data_Manipulation.data_out_of_symbols(0,dimension=self.dim)[0]
-                self.combine_symbols = []
-            Input_symbols = Data_Manipulation.data_out_of_symbols(self.delay, input_symbols=Input_symbols).flatten()   #delay it
+        self.generate_input_combine_symbols(Input_symbols,Combine_symbols,TS_data.shape[1])
 
-        #Combine_symbols init.
-        #check if any delayed (Px,PPx,...) variables are there
-        contains_delayed_vars = False
-        for i in range(len(self.combine_symbols)):
-            for j in range(len(Input_symbols)):
-                for k in range(1,100):
-                    temp = sympy.symbols('P'*k + Input_symbols[j].name)
-                    if temp in Combine_symbols[i].free_symbols: #if it contains it in any way
-                        contains_delayed_vars = True
-                        break
-                if contains_delayed_vars: break
-            if contains_delayed_vars:break
-        #If there are no delayed parts in it, then add the delayed parts
-        all_usable_symbols =  Data_Manipulation.data_out_of_symbols(self.delay, input_symbols=Input_symbols)
-        if not contains_delayed_vars:
-            for curr_delay in range(all_usable_symbols.shape[0]-1):
-                for num_symbol in range(len(self.combine_symbols)):
-                    self.combine_symbols = self.combine_symbols + [self.combine_symbols[num_symbol].subs(dict(zip(all_usable_symbols[-1],all_usable_symbols[-2-curr_delay])))]
-                    print(self.combine_symbols)
-
-        self.NVAR.fit(**kwargs,X_train=X_train,Y_train=Y_train,Input_symbols=Input_symbols,Combine_symbols=self.combine_symbols)
+        self.NVAR.fit(**kwargs,X_train=X_train,Y_train=Y_train,Input_symbols=self.delayed_input_symbols,Combine_symbols=self.combine_symbols)
         return
 
     def predict(self,Initial_data: np.array([]), Predict_time = 1, **kwargs):

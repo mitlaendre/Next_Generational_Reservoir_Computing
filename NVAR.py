@@ -45,6 +45,19 @@ class NVAR():
 
         if len(in_data.shape) == 1: out_data = out_data[0]  # if it was a vector, cast back
         return out_data
+
+    def generate_input_combine_symbols(self,Input_symbols,Combine_symbols,dimensions):
+        # Making the symbolic fitting
+        if (len(Input_symbols) == 0) or (len(Input_symbols) != dimensions):
+            self.input_symbols = Data_Manipulation.data_out_of_symbols(dimension=self.x_train.shape[1])[0]
+        else:
+            self.input_symbols = Input_symbols
+
+        if len(Combine_symbols) == 0:
+            self.combine_symbols = self.combine_data(self.input_symbols, Initialise_combinations=True)
+        else:
+            self.combine_symbols = Combine_symbols
+
     def regression_fit(self):
         if self.lasso == 0.:
             #W = Y.T @ X (X.T @ X + Ridge)^-1
@@ -70,8 +83,8 @@ class NVAR():
         self.x_train = None             #x_train data
         self.combined_x_train = None    #x_train with all the combinations and the constant
 
-        self.input_symbols = None
-        self.combine_symbols = None
+        self.input_symbols = []
+        self.combine_symbols = []
 
         self.W_out = None               #trained W_out matrix
         self.order = Order            #order of the combinations
@@ -101,14 +114,7 @@ class NVAR():
         else:
             self.x_train, self.y_train = X_train,Y_train
 
-        #Making the symbolic fitting
-        if len(Input_symbols) == 0:
-            self.input_symbols = Data_Manipulation.data_out_of_symbols(dimension=self.x_train.shape[1])[0]
-        else:   self.input_symbols = Input_symbols
-
-        if len(Combine_symbols) == 0:
-            self.combine_symbols = self.combine_data(self.input_symbols,Initialise_combinations=True)
-        else:   self.combine_symbols = Combine_symbols
+        self.generate_input_combine_symbols(Input_symbols,Combine_symbols,X_train.shape[1])
 
         #Make combinations:
         self.combined_x_train = self.combine_data(self.x_train)
