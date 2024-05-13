@@ -13,7 +13,8 @@ Px,Py,Pz,Px1,Px2,Px3,Px4,Px5,Px6,Px7,Px8,Px9,Px10 = sympy.symbols('Px Py Pz Px1 
 PPx,PPy,PPz,PPx1,PPx2,PPx3,PPx4,PPx5,PPx6,PPx7,PPx8,PPx9,PPx10 = sympy.symbols('PPx PPy PPz PPx1 PPx2 PPx3 PPx4 PPx5 PPx6 PPx7 PPx8 PPx9 PPx10')
 PPPx,PPPy,PPPz,PPPx1,PPPx2,PPPx3,PPPx4,PPPx5,PPPx6,PPPx7,PPPx8,PPPx9,PPPx10 = sympy.symbols('PPPx PPPy PPPz PPPx1 PPPx2 PPPx3 PPPx4 PPPx5 PPPx6 PPPx7 PPPx8 PPPx9 PPPx10')
 
-saved_runs = {"Paper reproduction": {
+saved_runs = {
+                "Paper reproduction": {
                     "NVAR":{
                         "Delay" : 1,
                         "Order" : 2,
@@ -37,7 +38,7 @@ saved_runs = {"Paper reproduction": {
                         "Equation":{
                             "Starting_point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
                             "Method" : "RK23",
-                            "Time_step_length" : 0.025,
+                            "Time_step_length" : 0.0125,
                             "Equation_type" : "Lorenz",
                             "Train_length" : 600,
                             "Test_length" : 799,
