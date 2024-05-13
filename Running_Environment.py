@@ -46,7 +46,39 @@ saved_runs = {
                         }
                     }
                     },
-
+                "Rossler final": {
+                    "NVAR": {
+                        "Delay": 0,
+                        "Order": 2,
+                        "Warmup length": 200,
+                        "Ridge": 2e-6,
+                        "Input_symbols": [x, y, z]
+                    },
+                    "Feedback": {
+                        "Plotting": {
+                            "Enable_plotting": True,
+                            "Cutoff_small_weights": 0.01,
+                            "Figheight": 8.,
+                            "Figwidth": 8.,
+                            "Black_and_white": False,
+                            "Save_image": False
+                        },
+                        "Printing": {
+                            "Enable_printing": True
+                        }
+                    },
+                    "Data": {
+                        "Equation": {
+                            "Starting_point": [5, 5, 5],
+                            "Method": "RK23",
+                            "Time_step_length": 0.0125,
+                            "Equation_type": "Rossler",
+                            "Train_length": 2000,
+                            "Test_length": 2000,
+                            "Generate_symbolic_W_out": True
+                        }
+                    }
+                },
                 "Rossler example": {
                     "NVAR": {
                         "Delay": 1,
