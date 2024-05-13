@@ -190,7 +190,73 @@ saved_runs = {
                                     #"TS_data_train": np.full((200,3),1.),
                                     #"TS_data_test": np.full((200,3),8.)
                                 }
-                        }
+                        },
+    "Ex2DLinear": {
+        "NVAR": {
+            "Delay": 0,
+            "Order": 2,
+            "Warmup length": 200,
+            "Ridge": 2e-6,
+            "Input_symbols": [x, y, z]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.01,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": False,
+                "Save_image": False
+            },
+            "Printing": {
+                "Enable_printing": True
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [5, 5],
+                "Method": "RK23",
+                "Time_step_length": 0.0125,
+                "Equation_type": "Ex2DLinear",
+                "Train_length": 2000,
+                "Test_length": 2000,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
+    "Ex3DLinear": {
+        "NVAR": {
+            "Delay": 0,
+            "Order": 2,
+            "Warmup length": 200,
+            "Ridge": 2e-6,
+            "Input_symbols": [x, y, z]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.01,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": False,
+                "Save_image": False
+            },
+            "Printing": {
+                "Enable_printing": True
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [5, 5, 5],
+                "Method": "RK23",
+                "Time_step_length": 0.0125,
+                "Equation_type": "Ex3DLinear",
+                "Train_length": 2000,
+                "Test_length": 2000,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
               }
 
 def generate_equation_data(Equation_type: str, Train_length: int, Test_length: int,  Starting_point: np.array([]), Method = "Euler", Time_step_length = 0.025,**kwargs):
@@ -201,6 +267,10 @@ def generate_equation_data(Equation_type: str, Train_length: int, Test_length: i
         Current_Equation = Differential_Equation.Rossler()
     elif Equation_type == "Chua":
         Current_Equation = Differential_Equation.Chua()
+    elif Equation_type == "Ex2DLinear":
+        Current_Equation = Differential_Equation.Ex2DLinear()
+    elif Equation_type == "Ex3DLinear":
+        Current_Equation = Differential_Equation.Ex3DLinear()
     else:
         print("Invalid Equation_type")
         return False
