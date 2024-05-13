@@ -34,13 +34,44 @@ class NVAR():
                 print("Data shape not matching symbolic shape")
                 return
 
+
+
+            # def seged(v, data):
+            #     out_data = np.full((1, len(self.combine_symbols)), 0.)
+            #     for combination_number in range(len(self.combine_symbols)):
+            #         if (type(self.combine_symbols[combination_number]) == type(0.)) or (type(self.combine_symbols[combination_number]) == type(0)):
+            #             out_data[combination_number] = self.combine_symbols[combination_number]      #If just a number, then leave it
+            #         else:       #If symbolic, then calculate accordingly
+            #             out_data[combination_number] = self.combine_symbols[combination_number].subs(dict(zip(self.input_symbols, data)))
+            #     return out_data
+            #
+            # seged2 = np.vectorize(seged)
+            #
+            # seged2(out_data, data)
+
+
+
+            def seged3(data_timepoint):
+                outdata_timepoint = np.full((len(self.combine_symbols)), 0.)
+                for combination_number in range(len(self.combine_symbols)):
+                    if (type(self.combine_symbols[combination_number]) == type(0.)) or (
+                            type(self.combine_symbols[combination_number]) == type(0)):
+                        outdata_timepoint[combination_number] = self.combine_symbols[
+                            combination_number]  # If just a number, then leave it
+                    else:  # If symbolic, then calculate accordingly
+                        outdata_timepoint[ combination_number] = self.combine_symbols[combination_number].subs(
+                            dict(zip(self.input_symbols, data_timepoint)))
+                return outdata_timepoint
+            out_data = np.apply_along_axis(seged3, 1, data)
+
+            """
             out_data = np.full((data.shape[0], len(self.combine_symbols)), 0.)
             for timepoint in range(data.shape[0]):
                 for combination_number in range(len(self.combine_symbols)):
                     if (type(self.combine_symbols[combination_number]) == type(0.)) or (type(self.combine_symbols[combination_number]) == type(0)):
                         out_data[timepoint, combination_number] = self.combine_symbols[combination_number]      #If just a number, then leave it
                     else:       #If symbolic, then calculate accordingly
-                        out_data[timepoint, combination_number] = self.combine_symbols[combination_number].subs(dict(zip(self.input_symbols, data[timepoint])))
+                        out_data[timepoint, combination_number] = self.combine_symbols[combination_number].subs(dict(zip(self.input_symbols, data[timepoint])))"""
 
 
         if len(in_data.shape) == 1: out_data = out_data[0]  # if it was a vector, cast back
