@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def universal_Data_Plot(data,axlabels = [],title = "",Black_and_white = False,Save_image_as = "", **kwargs):
+"""def universal_Data_Plot(data,axlabels = [],title = "",Black_and_white = False,Save_image_as = "", **kwargs):
     plt.close('all')
     if len(data.shape) > 2:
         print("Data is not in 2D array form")
@@ -11,14 +11,14 @@ def universal_Data_Plot(data,axlabels = [],title = "",Black_and_white = False,Sa
     if data.shape[0] > data.shape[1]:
             data = data.T       #The data should be "longer" than the dimensions. This helps with universality
     if len(axlabels) == 0:
-        axlabels = ["X Axis", "Y Axis", "Z Axis"]
+        axlabels = ["X", "Y", "Z"]
 
 
     color = plt.cm.rainbow(np.linspace(0, 1, data.shape[0]))
     for i, c in enumerate(color):
         plt.plot(data[i], c=c)
         plt.title(title + axlabels[i])
-    if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_" + ".svg")
+    if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_" + ".pdf",bbox_inches='tight')
     else: plt.show()
 
     if data.shape[0] == 1:          #1D data
@@ -30,7 +30,7 @@ def universal_Data_Plot(data,axlabels = [],title = "",Black_and_white = False,Sa
         plt.ylabel(axlabels[1])
         plt.title(title)
         plt.grid(True)
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_2d_" + ".svg")
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_2d_" + ".pdf",bbox_inches='tight')
         else: plt.show()
 
     elif data.shape[0] == 3:        #3D data
@@ -40,13 +40,13 @@ def universal_Data_Plot(data,axlabels = [],title = "",Black_and_white = False,Sa
         ax.set_ylabel(axlabels[1])
         ax.set_zlabel(axlabels[2])
         ax.set_title(title)
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_3d_" + ".svg")
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_3d_" + ".pdf",bbox_inches='tight')
         else: plt.show()
 
     else:                           #Multidim data
         print()
-
-def universal_Compare_Data_Plot(data1,data2,axlabels = [],datatitles = [],Black_and_white = False,Save_image_as = "", **kwargs):
+"""
+def universal_Compare_Data_Plot(data1,data2,dt,axlabels = [],datatitles = [],Line_width=2.,Black_and_white = False,Save_image_as = "", **kwargs):
     plt.close('all')
     if (len(data1.shape) > 2) or (len(data2.shape) > 2):
         print("Data is not in 2D array form")
@@ -62,49 +62,56 @@ def universal_Compare_Data_Plot(data1,data2,axlabels = [],datatitles = [],Black_
         data2 = data2.T            #The data should be "longer" than the dimensions. This helps with universality
     if len(axlabels) == 0:
         if data1.shape[0] > 3:
-            axlabels = ["X1 Axis","X2 Axis","X3 Axis","X4 Axis","X5 Axis","X6 Axis","X7 Axis","X8 Axis","X9 Axis","X10 Axis"]
-        else: axlabels = ["X Axis", "Y Axis", "Z Axis"]
+            axlabels = ["X1","X2","X3","X4","X5","X6","X7","X8","X9","X10"]
+        else: axlabels = ["X", "Y", "Z"]
     if len(datatitles) ==0:
         datatitles = ["Data 1", "Data 2"]
 
+    if Black_and_white:
+        blackNwhite_args1 = {"linestyle":'dashed',"color":'black'}
+        blackNwhite_args2 = {"color": 'black',"alpha":0.6}
+    else:
+        blackNwhite_args1 = {}
+        blackNwhite_args2 = {}
+
     for i in range(data1.shape[0]):     #Basic 2d plot by dimensions
         axs = plt.figure().add_subplot()
-        axs.plot(data1[i], label=datatitles[0])
-        axs.plot(data2[i], label=datatitles[1])
-        axs.set_xlabel("Timestep")
+        time = np.array(range(data1.shape[1]))*dt
+        axs.plot(time,data1[i],**blackNwhite_args1,linewidth=Line_width, label=datatitles[0])
+        axs.plot(time,data2[i],**blackNwhite_args2,linewidth=Line_width, label=datatitles[1])
+        axs.set_xlabel("Time")
         axs.set_ylabel(axlabels[i])
-        axs.set_title("Comparison for " + axlabels[i])
         #plt.legend()
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "data_comparison_dimension_" + str(i) + ".svg")
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "data_comparison_dimension_" + str(i) + ".pdf",bbox_inches='tight')
         else: plt.show()
 
     if data1.shape[0] == 1:          #1D data
         print()
     elif data1.shape[0] == 2:        #2D data
         axs = plt.figure().add_subplot()
-        axs.plot(*data1, label=datatitles[0])
-        axs.plot(*data2, label=datatitles[1])
+        axs.plot(*data1,**blackNwhite_args1,linewidth=Line_width, label=datatitles[0])
+        axs.plot(*data2,**blackNwhite_args2,linewidth=Line_width, label=datatitles[1])
         axs.set_xlabel(axlabels[0])
         axs.set_ylabel(axlabels[1])
         plt.legend()
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_comparison_2d_" + ".svg")
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_comparison_2d_" + ".pdf",bbox_inches='tight')
         else: plt.show()
     elif data1.shape[0] == 3:        #3D data
 
         ax = plt.figure().add_subplot(projection='3d')
-        ax.plot(*data1, lw=0.5, label=datatitles[0])
+        ax.plot(*data1,**blackNwhite_args1, linewidth=Line_width, label=datatitles[0])
         ax.set_xlabel(axlabels[0])
         ax.set_ylabel(axlabels[1])
         ax.set_zlabel(axlabels[2])
-        ax.plot(*data2, lw=0.5, label=datatitles[1])
+        ax.plot(*data2,**blackNwhite_args2, linewidth=Line_width, label=datatitles[1])
         plt.legend()
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_comparison_3d_" + ".svg")
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_comparison_3d_" + ".pdf",bbox_inches='tight')
         else: plt.show()
     else:                           #Multidim data
         print()
     return
 
-def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_weights = 0.,Figheight = 8.,Figwidth = 8.,Black_and_white = False,Save_image_as="",Always_show_inputs=False,**kwargs):
+def multiple_histogram_W_out(multiple_W_out, in_labels, out_labels, Cutoff_small_weights = 0., Figheight = 8., Figwidth = 8., Black_and_white = False, Save_image_as="", Always_show_inputs=False,**kwargs):
     plt.close('all')
     #Prework on data
     for w_out_num in range(multiple_W_out.shape[0]-1):
@@ -137,8 +144,8 @@ def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_we
     y_pos = np.array(range(0,combinators*num_w_outs,num_w_outs))
     # make the coloring and hatching
     if Black_and_white:
-        base_colors = np.full(num_w_outs,"white")
-        defaults = ["//","\\","||","-","+","x","o","O",".","*"]
+        base_colors = plt.cm.Greys(np.linspace(1,0.4, num_w_outs))
+        defaults = ["","","//","\\","||","-","+","x","o","O",".","*"]
         base_hatchings = np.full(multiple_W_out.shape[0],{})
         for i in range(base_hatchings.shape[0]):
             base_hatchings[i] = ({"hatch" : defaults[i % len(defaults)], "edgecolor" : "black"})
@@ -149,6 +156,7 @@ def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_we
     hatching = np.full(num_w_outs,0,dtype=object)
     for w_out_num in range(num_w_outs):
         hatching[w_out_num] = base_hatchings[w_out_num]
+
 
     colors = np.full(num_w_outs,0.,dtype=object)
     for w_out_num in range(num_w_outs):
@@ -186,7 +194,7 @@ def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_we
             #add the horizontal lines
             for row in range(combinators):
                 axs[dimension].axhline(y=row*num_w_outs-0.4, color='black', linestyle='-')
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "histogr_wouts_" + str(num_w_outs) + "_norm_" + str(normed) + "_blacknwhite_" + str(Black_and_white) + ".svg")
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "histogr_wouts_" + str(num_w_outs) + "_norm_" + str(normed) + ".pdf",bbox_inches='tight')
         else: plt.show()
 
     return

@@ -2,6 +2,7 @@ import numpy as np
 from typing import Union
 
 import scipy.integrate
+import sympy
 from scipy.integrate import solve_ivp
 
 import Data_Manipulation
@@ -128,7 +129,7 @@ class Rossler(Differential_Equation):
     def __init__(self, a: float = 0.2, b: float = 0.2, c: float = 5.7):
         def fx(t, state):
             x, y, z = state
-            return -y - z, x + a * y, b + z * (x - c)
+            return -y - z, x + a * y, b + z * x - z * c
         super().__init__(fx)
         return
 
