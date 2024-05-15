@@ -1,112 +1,128 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import Differential_Equation
-from joblib import Parallel, delayed
-import random
 
-def universal_Data_Plot(data,labels = None,title = "", verbosity = 3,**kwargs):
+def universal_Data_Plot(data,axlabels = [],title = "",Black_and_white = False,Save_image_as = "", **kwargs):
+    plt.close('all')
     if len(data.shape) > 2:
         print("Data is not in 2D array form")
         return
+    if len(data.shape)==1:
+        data = [data]
     if data.shape[0] > data.shape[1]:
-        data = data.T       #The data should be "longer" than the dimensions. This helps with universality
-    if labels == None:
-        labels = {"X Axis", "Y Axis", "Z Axis"}
+            data = data.T       #The data should be "longer" than the dimensions. This helps with universality
+    if len(axlabels) == 0:
+        axlabels = ["X Axis", "Y Axis", "Z Axis"]
 
-    if verbosity >= 1:
-        color = plt.cm.rainbow(np.linspace(0, 1, data.shape[0]))
-        for i, c in enumerate(color):
-            plt.plot(data[i], c=c,label=labels[i],title=title)
-        plt.show()
+
+    color = plt.cm.rainbow(np.linspace(0, 1, data.shape[0]))
+    for i, c in enumerate(color):
+        plt.plot(data[i], c=c)
+        plt.title(title + axlabels[i])
+    if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_" + ".svg")
+    else: plt.show()
 
     if data.shape[0] == 1:          #1D data
         print()
     elif data.shape[0] == 2:        #2D data
         plt.figure()
         plt.plot(data[0], data[1], lw=0.5)
-        plt.xlabel(labels[0])
-        plt.ylabel(labels[1])
+        plt.xlabel(axlabels[0])
+        plt.ylabel(axlabels[1])
         plt.title(title)
         plt.grid(True)
-        plt.show()
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_2d_" + ".svg")
+        else: plt.show()
+
     elif data.shape[0] == 3:        #3D data
         ax = plt.figure().add_subplot(projection='3d')
-        ax.plot(*data.T, lw=0.5)
-        ax.set_xlabel(labels[0])
-        ax.set_ylabel(labels[1])
-        ax.set_zlabel(labels[2])
+        ax.plot(*data, lw=0.5)
+        ax.set_xlabel(axlabels[0])
+        ax.set_ylabel(axlabels[1])
+        ax.set_zlabel(axlabels[2])
         ax.set_title(title)
-        plt.show()
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_3d_" + ".svg")
+        else: plt.show()
+
     else:                           #Multidim data
         print()
 
-def compare_3dData_3dPlot(ground_truth, prediction,**kwargs):
-    ax = plt.figure().add_subplot(projection='3d')
-    ax.plot(*ground_truth.T, lw=0.5, label="ground truth")
-    ax.set_xlabel("X Axis")
-    ax.set_ylabel("Y Axis")
-    ax.set_zlabel("Z Axis")
+def universal_Compare_Data_Plot(data1,data2,axlabels = [],datatitles = [],Black_and_white = False,Save_image_as = "", **kwargs):
+    plt.close('all')
+    if (len(data1.shape) > 2) or (len(data2.shape) > 2):
+        print("Data is not in 2D array form")
+        return
+    if data1.shape != data2.shape:
+        print("Two data not same shape")
+        return
+    if len(data1.shape) ==1:
+        data1 = np.array([data1])
+        data2 = np.array([data2])
+    if data1.shape[0] > data1.shape[1]:
+        data1 = data1.T
+        data2 = data2.T            #The data should be "longer" than the dimensions. This helps with universality
+    if len(axlabels) == 0:
+        if data1.shape[0] > 3:
+            axlabels = ["X1 Axis","X2 Axis","X3 Axis","X4 Axis","X5 Axis","X6 Axis","X7 Axis","X8 Axis","X9 Axis","X10 Axis"]
+        else: axlabels = ["X Axis", "Y Axis", "Z Axis"]
+    if len(datatitles) ==0:
+        datatitles = ["Data 1", "Data 2"]
 
-    ax.plot(*prediction.T, lw=0.5, label="prediction")
+    for i in range(data1.shape[0]):     #Basic 2d plot by dimensions
+        axs = plt.figure().add_subplot()
+        axs.plot(data1[i], label=datatitles[0])
+        axs.plot(data2[i], label=datatitles[1])
+        axs.set_xlabel("Timestep")
+        axs.set_ylabel(axlabels[i])
+        axs.set_title("Comparison for " + axlabels[i])
+        #plt.legend()
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "data_comparison_dimension_" + str(i) + ".svg")
+        else: plt.show()
 
-    plt.legend()
-    plt.show()
+    if data1.shape[0] == 1:          #1D data
+        print()
+    elif data1.shape[0] == 2:        #2D data
+        axs = plt.figure().add_subplot()
+        axs.plot(*data1, label=datatitles[0])
+        axs.plot(*data2, label=datatitles[1])
+        axs.set_xlabel(axlabels[0])
+        axs.set_ylabel(axlabels[1])
+        plt.legend()
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_comparison_2d_" + ".svg")
+        else: plt.show()
+    elif data1.shape[0] == 3:        #3D data
+
+        ax = plt.figure().add_subplot(projection='3d')
+        ax.plot(*data1, lw=0.5, label=datatitles[0])
+        ax.set_xlabel(axlabels[0])
+        ax.set_ylabel(axlabels[1])
+        ax.set_zlabel(axlabels[2])
+        ax.plot(*data2, lw=0.5, label=datatitles[1])
+        plt.legend()
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_comparison_3d_" + ".svg")
+        else: plt.show()
+    else:                           #Multidim data
+        print()
     return
 
-def compare_3dData_2dPlot(ground_truth, prediction,**kwargs):
-    plt.plot(np.transpose(ground_truth)[0], "r-", label="x")
-    plt.plot(np.transpose(ground_truth)[1], "g-", label="y")
-    plt.plot(np.transpose(ground_truth)[2], "b-", label="z")
-    plt.plot(np.transpose(prediction)[0], "r--", label="Prediction x")
-    plt.plot(np.transpose(prediction)[1], "g--", label="Prediciton y")
-    plt.plot(np.transpose(prediction)[2], "b--", label="Prediciton z")
-    plt.show()
-    return
-
-
-def plot_W_out(arr,row_labels,col_labels,**kwargs):
-    fig, ax = plt.subplots()
-
-    # Create the heatmap
-    ax.imshow(np.abs(arr), cmap='hot')
-
-    # We want to show all ticks...
-    ax.set_xticks(np.arange(len(col_labels)))
-    ax.set_yticks(np.arange(len(row_labels)))
-
-    # ... and label them with the respective list entries
-    ax.set_xticklabels(col_labels)
-    ax.set_yticklabels(row_labels)
-
-    # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-             rotation_mode="anchor")
-
-    # Loop over data dimensions and create text annotations.
-    for i in range(len(row_labels)):
-        for j in range(len(col_labels)):
-            ax.text(j, i, arr[i, j],ha="center", va="center", color="w")
-
-    ax.set_title("W_out matrix")
-    fig.tight_layout()
-    plt.show()
-    return
-
-def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_weights = 0.,Figheight = 8.,Figwidth = 8.,Black_and_white = False,Save_image = False,**kwargs):
+def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_weights = 0.,Figheight = 8.,Figwidth = 8.,Black_and_white = False,Save_image_as="",Always_show_inputs=False,**kwargs):
+    plt.close('all')
     #Prework on data
     for w_out_num in range(multiple_W_out.shape[0]-1):
         if multiple_W_out[w_out_num].shape != multiple_W_out[w_out_num+1].shape: return
     #delete small weighted rows from everything
-    i = multiple_W_out[0].shape[1]
+    if Always_show_inputs:  i = multiple_W_out[0].shape[1]
+    else:   i = 0
+
     while i < multiple_W_out.shape[2]:
         delete = True
         for j in range(multiple_W_out[0].shape[0]):
             for w_out_num in range(multiple_W_out.shape[0]):
                 if abs(multiple_W_out[w_out_num][j, i]) > Cutoff_small_weights:
                     delete = False
+                if delete: break
         if delete:
-            for w_out_num in range(multiple_W_out.shape[0]):
-                multiple_W_out = np.delete(multiple_W_out, i, axis=2)
+
+            multiple_W_out = np.delete(multiple_W_out, i, axis=2)
             out_labels = np.delete(out_labels, i, axis=0)
         else:
             i += 1
@@ -154,53 +170,24 @@ def multiple_histogram_W_out(multiple_W_out,in_labels,out_labels,Cutoff_small_we
             else: axs[dimension].set_yticklabels([])
 
             axs[dimension].set_ylim(combinators*num_w_outs - 0.5, -.5)
-            if normed : axs[dimension].set_xlim(-1.05, 1.05)
+            if normed :
+                xlims = (-0.,0.)
+                for w_out_num in range(num_w_outs):
+                    if np.min(multiple_W_out[w_out_num][dimension, :])<xlims[0]:
+                        xlims = (np.min(multiple_W_out[w_out_num][dimension, :]),xlims[1])
+                    if np.max(multiple_W_out[w_out_num][dimension, :]) > xlims[1]:
+                        xlims = (xlims[0],np.max(multiple_W_out[w_out_num][dimension, :]))
+                dist = xlims[1]-xlims[0]
+                xlims = (xlims[0]-dist*0.05,xlims[1]+dist*0.05)
+
+                axs[dimension].set_xlim(*xlims)
             axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
-            axs[dimension].grid()
+            axs[dimension].grid(axis='x')
             #add the horizontal lines
             for row in range(combinators):
                 axs[dimension].axhline(y=row*num_w_outs-0.4, color='black', linestyle='-')
-        if Save_image: plt.savefig("Images\histogr_wouts_" + str(num_w_outs) + "_norm_" + str(normed) + "_blacknwhite_" + str(Black_and_white) + ".jpg")
-        plt.show()
+        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "histogr_wouts_" + str(num_w_outs) + "_norm_" + str(normed) + "_blacknwhite_" + str(Black_and_white) + ".svg")
+        else: plt.show()
 
     return
 
-
-#unfinished; example run below
-def bifurcate_plot(fix_param: float, n_skip: int, n_shown_iter: int, step: int = 1, param_interval_min: float = 0.0, param_interval_max: float = 0.1,**kwargs):
-    interval = np.linspace(param_interval_min, param_interval_max, step)
-    def func(atadott):
-        diffegy = Differential_Equation.Chua(a=atadott, b=fix_param)
-        kezdo = [random.randrange(-1,1),random.randrange(-1,1),random.randrange(-1,1)]
-        data = diffegy.generate_data(x0=kezdo, n_timepoints=n_skip + n_shown_iter, dt=0.1)
-        X = data[n_skip:, 0]
-        Y = data[n_skip:, 1]
-        Z = data[n_skip:, 2]
-        A = np.full(n_shown_iter - 1, atadott)
-        return (X,Y,Z,A)
-
-    res = Parallel(n_jobs=20)(delayed(func)(atadott) for atadott in interval)
-
-    As = np.array([])
-    Xs = np.array([])
-    Ys = np.array([])
-    Zs = np.array([])
-    for i in range(len(res)):
-        As = np.append(As,res[i][3])
-        Xs = np.append(Xs,res[i][0])
-        Ys = np.append(Ys, res[i][1])
-        Zs = np.append(Zs, res[i][2])
-
-    dpi = 180
-    plt.plot(As, Xs, ls='', marker=',', color='black')
-    plt.xlim(param_interval_min, param_interval_max)
-    plt.savefig('bifurcation_' + str(param_interval_min) + '-' + str(param_interval_max) + '_x_' + str(step) + '.png',dpi=dpi)
-    plt.plot(As, Ys, ls='', marker=',', color='black')
-    plt.xlim(param_interval_min, param_interval_max)
-    plt.savefig('bifurcation_' + str(param_interval_min) + '-' + str(param_interval_max) + '_y_' + str(step) + '.png',dpi=dpi)
-    plt.plot(As, Zs, ls='', marker=',', color='black')
-    plt.xlim(param_interval_min, param_interval_max)
-    plt.savefig('bifurcation_' + str(param_interval_min) + '-' + str(param_interval_max) + '_z_' + str(step) + '.png',dpi=dpi)
-
-    return
-    #bifurcate_plot(seed = 14,n_skip= 100000,n_iter= 100, r_min=6, r_max=14,step=200)

@@ -48,14 +48,14 @@ def Implemented_Multisteps(right_side,tn,dt,method,last_datapoints):
         return Implemented_Steps(right_side = right_side,tn = tn,dt = dt,Yn = last_datapoints[:,-1],method = "RK4")
 
 
-def W_out_generator(input_symbols, combine_symbols, combination_vector):
+def W_out_generator(input_symbols, combine_symbols, combination_vector,dt):
     W_out = np.zeros((len(combination_vector), len(combine_symbols)))
     for i in range(W_out.shape[0]):
         for j in range(W_out.shape[1]):
             W_out[i, j] = combination_vector[i].coeff(combine_symbols[j])
             if input_symbols[i] == combine_symbols[j]:  #corrigate derivative
                 W_out[i, j] = W_out[i,j] - 1
-    return W_out
+    return W_out/dt
 
 
 class Differential_Equation():
@@ -111,7 +111,7 @@ class Differential_Equation():
                 if i > 0:
                     sol[:, i] = Implemented_Steps(right_side=self.right_side,tn=t,Yn=sol[:,i-1],dt=dt,method=method)
             #Make one symbolic step too
-            symbolic_data = Data_Manipulation.data_out_of_symbols(delay=1, dimension=x0.shape[1],input_symbols=equation_symbols)[0]
+            symbolic_data = Data_Manipulation.data_out_of_symbols(delay=1, dimension=x0.shape[1],input_symbols=equation_symbols)[-1]
             self.symbolic_equation = Implemented_Steps(right_side=self.right_side, tn=0., dt=dt, method=method,Yn=symbolic_data)
         return sol.T[:-1]
 class Lorenz63(Differential_Equation):

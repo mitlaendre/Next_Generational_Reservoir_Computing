@@ -14,195 +14,50 @@ PPx,PPy,PPz,PPx1,PPx2,PPx3,PPx4,PPx5,PPx6,PPx7,PPx8,PPx9,PPx10 = sympy.symbols('
 PPPx,PPPy,PPPz,PPPx1,PPPx2,PPPx3,PPPx4,PPPx5,PPPx6,PPPx7,PPPx8,PPPx9,PPPx10 = sympy.symbols('PPPx PPPy PPPz PPPx1 PPPx2 PPPx3 PPPx4 PPPx5 PPPx6 PPPx7 PPPx8 PPPx9 PPPx10')
 
 saved_runs = {
-                "Paper reproduction": {
-                    "NVAR":{
-                        "Delay" : 1,
-                        "Order" : 2,
-                        "Warmup length" : 198,
-                        "Ridge" : 2.5e-6,
-                        "Input_symbols" : [x,y,z]},
-                    "Feedback":{
-                        "Plotting": {
-                            "Enable_plotting": True,
-                            "Cutoff_small_weights": 0.,
-                            "Figheight" : 8.,
-                            "Figwidth" : 8.,
-                            "Black_and_white" : False,
-                            "Save_image" : False
-                        },
-                        "Printing": {
-                            "Enable_printing": True
-                        }
-                    },
-                    "Data": {
-                        "Equation":{
-                            "Starting_point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
-                            "Method" : "RK23",
-                            "Time_step_length" : 0.0125,
-                            "Equation_type" : "Lorenz",
-                            "Train_length" : 600,
-                            "Test_length" : 799,
-                            "Generate_symbolic_W_out" : True
-                        }
-                    }
-                    },
-                "Rossler final": {
-                    "NVAR": {
-                        "Delay": 0,
-                        "Order": 2,
-                        "Warmup length": 200,
-                        "Ridge": 2e-6,
-                        "Input_symbols": [x, y, z]
-                    },
-                    "Feedback": {
-                        "Plotting": {
-                            "Enable_plotting": True,
-                            "Cutoff_small_weights": 0.01,
-                            "Figheight": 8.,
-                            "Figwidth": 8.,
-                            "Black_and_white": False,
-                            "Save_image": False
-                        },
-                        "Printing": {
-                            "Enable_printing": True
-                        }
-                    },
-                    "Data": {
-                        "Equation": {
-                            "Starting_point": [5, 5, 5],
-                            "Method": "RK23",
-                            "Time_step_length": 0.0125,
-                            "Equation_type": "Rossler",
-                            "Train_length": 2000,
-                            "Test_length": 2000,
-                            "Generate_symbolic_W_out": True
-                        }
-                    }
-                },
-                "Rossler example": {
-                    "NVAR": {
-                        "Delay": 1,
-                        "Order": 2,
-                        "Warmup length": 198,
-                        "Ridge": 2.5e-6,
-                        "Input_symbols": [x, y, z]
-                    },
-                    "Feedback": {
-                        "Plotting": {
-                            "Enable_plotting": True,
-                            "Cutoff_small_weights": 0.,
-                            "Figheight": 8.,
-                            "Figwidth": 8.,
-                            "Black_and_white": False,
-                            "Save_image": False
-                        },
-                        "Printing": {
-                            "Enable_printing": True
-                        }
-                    },
-                    "Data": {
-                        "Equation": {
-                            "Starting_point": [17.67715816276679, 12.931379185960404, 43.91404334248268],
-                            "Method": "RK23",
-                            "Time_step_length": 0.025,
-                            "Equation_type": "Rossler",
-                            "Train_length": 500,
-                            "Test_length": 2000,
-                            "Generate_symbolic_W_out": True
-                        }
-                    }
-                },
-                "Chua example": {
-                    "NVAR": {
-                        "Delay": 1,
-                        "Order": 3,
-                        "Warmup length": 10,
-                        "Ridge": 0.01,
-                        "Input_symbols": [x, y, z],
-                        "Combine_symbols": [x, y, z, x**2, y**2]
-                    },
-                    "Feedback": {
-                        "Plotting": {
-                            "Enable_plotting": True,
-                            "Cutoff_small_weights": 0.,
-                            "Figheight": 8.,
-                            "Figwidth": 8.,
-                            "Black_and_white": False,
-                            "Save_image": False
-                        },
-                        "Printing": {
-                            "Enable_printing": True
-                        }
-                    },
-                    "Data": {
-                        "Equation": {
-                            "Starting_point": [0.2, 0.1, 0.1],
-                            "Method": "Euler",
-                            "Time_step_length": 0.025,
-                            "Equation_type": "Chua",
-                            "Train_length": 1000,
-                            "Test_length": 1000,
-                            "Generate_symbolic_W_out": True
-                        }
-                    }
-                },
-                "Test_single": {
-                                "NVAR":{
-                                    "Delay" : 1,
-                                    "Order" : 2,
-                                    "Warmup_length" : 10,
-                                    "Ridge" : 0.001,
-                                    "Lasso" : 0.,
-                                    #"Input_symbols" : [x,y,z],
-                                    #"Combine_symbols" : [],
-                                    "Norm_data": False,
-                                    "Cutoff_small_influences": 0.
-                                    },
-                                "Feedback":{
-                                    "Plotting": {
-                                        "Enable_plotting": True,
-                                        "Cutoff_small_weights": 0.001,
-                                        "Figheight" : 8.,
-                                        "Figwidth" : 8.,
-                                        "Black_and_white" : False,
-                                        "Save_image" : False
-                                    },
-                                    "Printing": {
-                                        "Enable_printing": True
-                                    }
-                                },
-                                "Optimizer":{
-                                    "Budget": 100,
-                                    "Num_workers": 10,
-                                    "Batch_mode": True,
-                                    "Verbosity": 2
-                                },
-                                "Data": {
-                                    "Equation":{
-                                        "Starting_point" : [0.2,0.1,0.1],
-                                        "Method" : "Adams-Bashforth 1",
-                                        "Time_step_length" : 0.025,
-                                        "Equation_type" : "Chua",
-                                        "Train_length" : 1000,
-                                        "Test_length" : 500,
-                                        "Generate_symbolic_W_out" : True
-                                    },
-                                    #"TS_data_train": np.full((200,3),1.),
-                                    #"TS_data_test": np.full((200,3),8.)
-                                }
-                        },
-    "Ex2DLinear": {
+    "Paper reproduction": {
+        "NVAR":{
+            "Delay" : 1,
+            "Order" : 2,
+            "Warmup length" : 198,
+            "Ridge" : 2.5e-6,
+            "Input_symbols" : [x,y,z]},
+        "Feedback":{
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.,
+                "Figheight" : 8.,
+                "Figwidth" : 8.,
+                "Black_and_white" : False,
+                "Save_image_as" : ""
+            },
+            "Printing": {
+                "Enable_printing": True
+            }
+        },
+        "Data": {
+            "Equation":{
+                "Starting_point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
+                "Method" : "RK23",
+                "Time_step_length" : 0.0125,
+                "Equation_type" : "Lorenz",
+                "Train_length" : 600,
+                "Test_length" : 799,
+                "Generate_symbolic_W_out" : True
+            }
+        }
+        },
+    "Rossler example": {
         "NVAR": {
-            "Delay": 0,
+            "Delay": 1,
             "Order": 2,
-            "Warmup length": 200,
-            "Ridge": 2e-6,
+            "Warmup length": 198,
+            "Ridge": 2.5e-6,
             "Input_symbols": [x, y, z]
         },
         "Feedback": {
             "Plotting": {
                 "Enable_plotting": True,
-                "Cutoff_small_weights": 0.01,
+                "Cutoff_small_weights": 0.,
                 "Figheight": 8.,
                 "Figwidth": 8.,
                 "Black_and_white": False,
@@ -214,12 +69,125 @@ saved_runs = {
         },
         "Data": {
             "Equation": {
-                "Starting_point": [5, 5],
+                "Starting_point": [17.67715816276679, 12.931379185960404, 43.91404334248268],
                 "Method": "RK23",
-                "Time_step_length": 0.0125,
-                "Equation_type": "Ex2DLinear",
-                "Train_length": 2000,
+                "Time_step_length": 0.025,
+                "Equation_type": "Rossler",
+                "Train_length": 500,
                 "Test_length": 2000,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
+    "Chua example": {
+        "NVAR": {
+            "Delay": 1,
+            "Order": 3,
+            "Warmup length": 10,
+            "Ridge": 0.01,
+            "Input_symbols": [x, y, z],
+            "Combine_symbols": [x, y, z, x**2, y**2]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": False,
+                "Save_image_as": ""
+            },
+            "Printing": {
+                "Enable_printing": True
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [0.2, 0.1, 0.1],
+                "Method": "Euler",
+                "Time_step_length": 0.025,
+                "Equation_type": "Chua",
+                "Train_length": 1000,
+                "Test_length": 1000,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
+    "Test_single": {
+                    "NVAR":{
+                        "Delay" : 1,
+                        "Order" : 2,
+                        "Warmup_length" : 10,
+                        "Ridge" : 0.001,
+                        "Lasso" : 0.,
+                        #"Input_symbols" : [x,y,z],
+                        #"Combine_symbols" : [],
+                        "Norm_data": False,
+                        "Cutoff_small_influences": 0.
+                        },
+                    "Feedback":{
+                        "Plotting": {
+                            "Enable_plotting": True,
+                            "Cutoff_small_weights": 0.1,
+                            "Figheight" : 8.,
+                            "Figwidth" : 8.,
+                            "Black_and_white" : False,
+                            "Save_image_as" : ""
+                        },
+                        "Printing": {
+                            "Enable_printing": True
+                        }
+                    },
+                    "Optimizer":{
+                        "Budget": 100,
+                        "Num_workers": 10,
+                        "Batch_mode": True,
+                        "Verbosity": 2
+                    },
+                    "Data": {
+                        "Equation":{
+                            "Starting_point" : [0.2,0.1,0.1],
+                            "Method" : "Adams-Bashforth 1",
+                            "Time_step_length" : 0.025,
+                            "Equation_type" : "Chua",
+                            "Train_length" : 1000,
+                            "Test_length" : 500,
+                            "Generate_symbolic_W_out" : True
+                        },
+                        #"TS_data_train": np.full((200,3),1.),
+                        #"TS_data_test": np.full((200,3),8.)
+                    }
+            },
+    "Ex2DLinear": {
+        "NVAR": {
+            "Delay": 0,
+            "Order": 1,
+            "Warmup length": 200,
+            "Ridge": 2e-6,
+            "Input_symbols": [x, y]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.01,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": False,
+                "Save_image_as": "",
+                "Always_show_inputs" : True
+            },
+            "Printing": {
+                "Enable_printing": True
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [5, 5],
+                "Method": "Adams-Bashforth 1",
+                "Time_step_length": 0.025,
+                "Equation_type": "Ex2DLinear",
+                "Train_length": 500,
+                "Test_length": 1000,
                 "Generate_symbolic_W_out": True
             }
         }
@@ -239,7 +207,7 @@ saved_runs = {
                 "Figheight": 8.,
                 "Figwidth": 8.,
                 "Black_and_white": False,
-                "Save_image": False
+                "Save_image_as": ""
             },
             "Printing": {
                 "Enable_printing": True
@@ -248,7 +216,7 @@ saved_runs = {
         "Data": {
             "Equation": {
                 "Starting_point": [5, 5, 5],
-                "Method": "RK23",
+                "Method": "Midpoint",
                 "Time_step_length": 0.0125,
                 "Equation_type": "Ex3DLinear",
                 "Train_length": 2000,
@@ -259,8 +227,8 @@ saved_runs = {
     },
     "Ex3DCubic": {
         "NVAR": {
-            "Delay": 0,
-            "Order": 5,
+            "Delay": 1,
+            "Order": 3,
             "Warmup length": 200,
             "Ridge": 2e-6,
             "Input_symbols": [x, y, z]
@@ -272,7 +240,7 @@ saved_runs = {
                 "Figheight": 8.,
                 "Figwidth": 8.,
                 "Black_and_white": False,
-                "Save_image": False
+                "Save_image_as": ""
             },
             "Printing": {
                 "Enable_printing": True
@@ -281,7 +249,7 @@ saved_runs = {
         "Data": {
             "Equation": {
                 "Starting_point": [2, 0, 1],
-                "Method": "Euler",
+                "Method": "Adams-Bashforth 1",
                 "Time_step_length": 0.0125,
                 "Equation_type": "Ex3DCubic",
                 "Train_length": 2500,
@@ -289,8 +257,209 @@ saved_runs = {
                 "Generate_symbolic_W_out": True
             }
         }
+    }
+  }
+thesis_plots = {
+    "Rossler": {
+        "NVAR": {
+            "Delay": 0,
+            "Order": 2,
+            "Warmup length": 200,
+            "Ridge": 2e-6,
+            "Input_symbols": [x, y, z]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.01,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": False,
+                "Save_image_as": "Rossler_basic"
+            },
+            "Printing": {
+                "Enable_printing": False
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [5, 5, 5],
+                "Method": "RK23",
+                "Time_step_length": 0.0125,
+                "Equation_type": "Rossler",
+                "Train_length": 2000,
+                "Test_length": 2000,
+                "Generate_symbolic_W_out": True
+            }
+        }
     },
-              }
+    "Lorenz": {
+        "NVAR":{
+            "Delay" : 1,
+            "Order" : 2,
+            "Warmup length" : 198,
+            "Ridge" : 2.5e-6,
+            "Input_symbols" : [x,y,z]},
+        "Feedback":{
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.,
+                "Figheight" : 8.,
+                "Figwidth" : 8.,
+                "Black_and_white" : False,
+                "Save_image_as" : "Lorenz_basic"
+            },
+            "Printing": {
+                "Enable_printing": False
+            }
+        },
+        "Data": {
+            "Equation":{
+                "Starting_point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
+                "Method" : "RK23",
+                "Time_step_length" : 0.0125,
+                "Equation_type" : "Lorenz",
+                "Train_length" : 600,
+                "Test_length" : 799,
+                "Generate_symbolic_W_out" : True
+            }
+        }
+        },
+    "Chua example": {
+        "NVAR": {
+            "Delay": 1,
+            "Order": 3,
+            "Warmup length": 10,
+            "Ridge": 0.01,
+            "Input_symbols": [x, y, z],
+            "Combine_symbols": [x, y, z, x**2, y**2]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": False,
+                "Save_image_as": "Chua_basic"
+            },
+            "Printing": {
+                "Enable_printing": False
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [0.2, 0.1, 0.1],
+                "Method": "Euler",
+                "Time_step_length": 0.025,
+                "Equation_type": "Chua",
+                "Train_length": 1000,
+                "Test_length": 1000,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
+    "Ex2DLinear": {
+            "NVAR": {
+                "Delay": 0,
+                "Order": 1,
+                "Warmup length": 200,
+                "Ridge": 2e-6,
+                "Input_symbols": [x, y]
+            },
+            "Feedback": {
+                "Plotting": {
+                    "Enable_plotting": True,
+                    "Cutoff_small_weights": 0.01,
+                    "Figheight": 8.,
+                    "Figwidth": 8.,
+                    "Black_and_white": False,
+                    "Save_image_as": "Ex2DLinear_basic",
+                    "Always_show_inputs" : True
+                },
+                "Printing": {
+                    "Enable_printing": False
+                }
+            },
+            "Data": {
+                "Equation": {
+                    "Starting_point": [5, 5],
+                    "Method": "Adams-Bashforth 1",
+                    "Time_step_length": 0.025,
+                    "Equation_type": "Ex2DLinear",
+                    "Train_length": 500,
+                    "Test_length": 1000,
+                    "Generate_symbolic_W_out": True
+                }
+            }
+        },
+    "Ex3DLinear": {
+            "NVAR": {
+                "Delay": 0,
+                "Order": 2,
+                "Warmup length": 200,
+                "Ridge": 2e-6,
+                "Input_symbols": [x, y, z]
+            },
+            "Feedback": {
+                "Plotting": {
+                    "Enable_plotting": True,
+                    "Cutoff_small_weights": 0.01,
+                    "Figheight": 8.,
+                    "Figwidth": 8.,
+                    "Black_and_white": False,
+                    "Save_image_as": "Ex3DLinear_basic"
+                },
+                "Printing": {
+                    "Enable_printing": False
+                }
+            },
+            "Data": {
+                "Equation": {
+                    "Starting_point": [5, 5, 5],
+                    "Method": "RK23",
+                    "Time_step_length": 0.0125,
+                    "Equation_type": "Ex3DLinear",
+                    "Train_length": 2000,
+                    "Test_length": 2000,
+                    "Generate_symbolic_W_out": True
+                }
+            }
+        },
+    "Ex3DCubic": {
+            "NVAR": {
+                "Delay": 0,
+                "Order": 3,
+                "Warmup length": 200,
+                "Ridge": 2e-6,
+                "Input_symbols": [x, y, z]
+            },
+            "Feedback": {
+                "Plotting": {
+                    "Enable_plotting": True,
+                    "Cutoff_small_weights": 0.01,
+                    "Figheight": 8.,
+                    "Figwidth": 8.,
+                    "Black_and_white": False,
+                    "Save_image_as": "Ex3DCubic_basic"
+                },
+                "Printing": {
+                    "Enable_printing": False
+                }
+            },
+            "Data": {
+                "Equation": {
+                    "Starting_point": [2, 0, 1.5],
+                    "Method": "Euler",
+                    "Time_step_length": 0.0125,
+                    "Equation_type": "Ex3DCubic",
+                    "Train_length": 1500,
+                    "Test_length": 1000,
+                    "Generate_symbolic_W_out": True
+                }
+            }
+        }
+}
 
 def generate_equation_data(Equation_type: str, Train_length: int, Test_length: int,  Starting_point: np.array([]), Method = "Euler", Time_step_length = 0.025,**kwargs):
 
@@ -311,8 +480,9 @@ def generate_equation_data(Equation_type: str, Train_length: int, Test_length: i
         return False
 
     data = Current_Equation.generate_data(x0=Starting_point, n_timepoints=Train_length + Test_length, dt=Time_step_length, method=Method,**kwargs)
-    print("Data generated: ")
-    print(data)
+    if ("Printing" in kwargs) and ("Enable_printing" in kwargs["Printing"]) and kwargs["Printing"]["Enable_printing"]:
+        print("Data generated: ")
+        print(data)
     dict_return = {"TS_data_train": data[:Train_length],"TS_data_test": data[Train_length:],"Differential_Equation" : Current_Equation}
     return dict_return
 
@@ -338,7 +508,7 @@ def TS_run_on_dict(dict):
         else:
             if "Input_symbols" in dict["NVAR"]:
                 dict["Data"]["Equation"]["equation_symbols"] = dict["NVAR"]["Input_symbols"]
-            dict["Data"] = generate_equation_data(**dict["Data"]["Equation"])
+            dict["Data"] = generate_equation_data(**dict["Data"]["Equation"],**dict["Feedback"])
 
     #Dealing with the optimizer parameters
     all_parameters = {**dict["NVAR"],**dict["Data"],**dict["Feedback"]}
@@ -381,7 +551,7 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
 
     #Printing and Plotting
     if ("Differential_Equation" in kwargs) and (len(kwargs["Differential_Equation"].symbolic_equation)>0):
-        Gen_W_out = Differential_Equation.W_out_generator(my_nvar.NVAR.input_symbols,my_nvar.NVAR.combine_symbols,kwargs["Differential_Equation"].symbolic_equation)
+        Gen_W_out = Differential_Equation.W_out_generator(my_nvar.input_symbols,my_nvar.NVAR.combine_symbols,kwargs["Differential_Equation"].symbolic_equation,kwargs["Differential_Equation"].dt)
     if ("Enable_printing" in Printing) and Printing["Enable_printing"]:
 
         my_nvar.NVAR.debug_print()
@@ -396,12 +566,13 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
         print(my_nvar.NVAR.W_out @ my_nvar.NVAR.combine_symbols)
 
     if ("Enable_plotting" in Plotting) and Plotting["Enable_plotting"]:
-        Plots.compare_3dData_2dPlot(TS_data_test, predictions)
-        Plots.compare_3dData_3dPlot(TS_data_test, predictions)
+        Plots.universal_Compare_Data_Plot(TS_data_test, predictions,datatitles=["Ground truth", "Prediction"],**Plotting)
         Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
         if ("Differential_Equation" in kwargs) and (len(kwargs["Differential_Equation"].symbolic_equation)>0):
-            Plots.multiple_histogram_W_out(multiple_W_out= np.array([Gen_W_out,my_nvar.NVAR.W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
+            Plots.multiple_histogram_W_out(multiple_W_out= np.array([my_nvar.NVAR.W_out/kwargs["Differential_Equation"].dt,Gen_W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 
 
-TS_run_on_dict(saved_runs["Test_single"])
+#TS_run_on_dict(thesis_plots["Ex3DCubic"])
+#TS_run_on_dict(saved_runs["Ex3DLinear"])
+for run in thesis_plots: print(run), TS_run_on_dict(thesis_plots[run])
