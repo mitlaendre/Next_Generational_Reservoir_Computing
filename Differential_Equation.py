@@ -53,7 +53,10 @@ def W_out_generator(input_symbols, combine_symbols, combination_vector,dt):
     W_out = np.zeros((len(combination_vector), len(combine_symbols)))
     for i in range(W_out.shape[0]):
         for j in range(W_out.shape[1]):
-            W_out[i, j] = combination_vector[i].coeff(combine_symbols[j])
+            const_coef = combination_vector[i].coeff(combine_symbols[j])
+            if not const_coef.is_constant():
+                const_coef, non_constant = const_coef.as_coeff_add()
+            W_out[i, j] = const_coef
             if input_symbols[i] == combine_symbols[j]:  #corrigate derivative
                 W_out[i, j] = W_out[i,j] - 1
     return W_out/dt
