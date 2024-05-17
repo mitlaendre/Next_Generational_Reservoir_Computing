@@ -162,40 +162,40 @@ def multiple_histogram_W_out(multiple_W_out, in_labels, out_labels, Cutoff_small
     for w_out_num in range(num_w_outs):
         colors[w_out_num] = base_colors[w_out_num]
 
-    #make one plot for normed and for not normed
-    for normed in {True,False}:
-        fig, axs = plt.subplots(1, dimensions)
-        fig.set_figheight(Figheight)
-        fig.set_figwidth(Figwidth)
+    #make one plot for not normed
+    normed = False
+    fig, axs = plt.subplots(1, dimensions)
+    fig.set_figheight(Figheight)
+    fig.set_figwidth(Figwidth)
 
-        for dimension in range(dimensions):
+    for dimension in range(dimensions):
+        for w_out_num in range(num_w_outs):
+            axs[dimension].barh(0.1*num_w_outs + y_pos+w_out_num*0.8, multiple_W_out[w_out_num][dimension, :], color=colors[w_out_num],**(hatching[w_out_num]))
+
+        axs[dimension].set_yticks(y_pos+0.1*num_w_outs)
+        if dimension == 0:
+            axs[dimension].set_yticklabels(out_labels)
+        else: axs[dimension].set_yticklabels([])
+
+        axs[dimension].set_ylim(combinators*num_w_outs - 0.5, -.5)
+        if normed :
+            xlims = (-0.,0.)
             for w_out_num in range(num_w_outs):
-                axs[dimension].barh(0.1*num_w_outs + y_pos+w_out_num*0.8, multiple_W_out[w_out_num][dimension, :], color=colors[w_out_num],**(hatching[w_out_num]))
+                if np.min(multiple_W_out[w_out_num][dimension, :])<xlims[0]:
+                    xlims = (np.min(multiple_W_out[w_out_num][dimension, :]),xlims[1])
+                if np.max(multiple_W_out[w_out_num][dimension, :]) > xlims[1]:
+                    xlims = (xlims[0],np.max(multiple_W_out[w_out_num][dimension, :]))
+            dist = xlims[1]-xlims[0]
+            xlims = (xlims[0]-dist*0.05,xlims[1]+dist*0.05)
 
-            axs[dimension].set_yticks(y_pos+0.1*num_w_outs)
-            if dimension == 0:
-                axs[dimension].set_yticklabels(out_labels)
-            else: axs[dimension].set_yticklabels([])
-
-            axs[dimension].set_ylim(combinators*num_w_outs - 0.5, -.5)
-            if normed :
-                xlims = (-0.,0.)
-                for w_out_num in range(num_w_outs):
-                    if np.min(multiple_W_out[w_out_num][dimension, :])<xlims[0]:
-                        xlims = (np.min(multiple_W_out[w_out_num][dimension, :]),xlims[1])
-                    if np.max(multiple_W_out[w_out_num][dimension, :]) > xlims[1]:
-                        xlims = (xlims[0],np.max(multiple_W_out[w_out_num][dimension, :]))
-                dist = xlims[1]-xlims[0]
-                xlims = (xlims[0]-dist*0.05,xlims[1]+dist*0.05)
-
-                axs[dimension].set_xlim(*xlims)
-            axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
-            axs[dimension].grid(axis='x')
-            #add the horizontal lines
-            for row in range(combinators):
-                axs[dimension].axhline(y=row*num_w_outs-0.4, color='black', linestyle='-')
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "histogr_wouts_" + str(num_w_outs) + "_norm_" + str(normed) + ".pdf",bbox_inches='tight')
-        else: plt.show()
+            axs[dimension].set_xlim(*xlims)
+        axs[dimension].set_xlabel("Pred. " + str(in_labels[dimension]))
+        axs[dimension].grid(axis='x')
+        #add the horizontal lines
+        for row in range(combinators):
+            axs[dimension].axhline(y=row*num_w_outs-0.4, color='black', linestyle='-')
+    if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "histogr_wouts_" + str(num_w_outs) + "_norm_" + str(normed) + ".pdf",bbox_inches='tight')
+    else: plt.show()
 
     return
 

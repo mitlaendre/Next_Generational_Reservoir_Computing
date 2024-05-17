@@ -264,7 +264,7 @@ saved_runs = {
     }
   }
 thesis_plots = {
-    "Rossler": {
+    "Rossler_Adams5": {
         "NVAR": {
             "Delay": 0,
             "Order": 2,
@@ -279,7 +279,7 @@ thesis_plots = {
                 "Figheight": 8.,
                 "Figwidth": 8.,
                 "Black_and_white": True,
-                "Save_image_as": "Rossler_basic"
+                "Save_image_as": "Rossler_Adams5"
             },
             "Printing": {
                 "Enable_printing": False
@@ -291,15 +291,48 @@ thesis_plots = {
                 "Method": "Adams-Bashforth 5",
                 "Time_step_length": 0.0125,
                 "Equation_type": "Rossler",
-                "Train_length": 1500,
-                "Test_length": 2000,
+                "Train_length": 1000,
+                "Test_length": 3000,
                 "Generate_symbolic_W_out": True
             }
         }
     },
-    "Lorenz": {
+    "Rossler_Euler": {
+        "NVAR": {
+            "Delay": 0,
+            "Order": 2,
+            "Warmup length": 10,
+            "Ridge": 2e-6,
+            "Input_symbols": [x, y, z]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.01,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": True,
+                "Save_image_as": "Rossler_Euler"
+            },
+            "Printing": {
+                "Enable_printing": False
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [4.6, 5.1, 5.1],
+                "Method": "Adams-Bashforth 1",
+                "Time_step_length": 0.0125,
+                "Equation_type": "Rossler",
+                "Train_length": 1000,
+                "Test_length": 3000,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
+    "Lorenz_Adams3": {
         "NVAR":{
-            "Delay" : 0,
+            "Delay" : 2,
             "Order" : 2,
             "Warmup length" : 10,
             "Ridge" : 2e-6,
@@ -307,11 +340,11 @@ thesis_plots = {
         "Feedback":{
             "Plotting": {
                 "Enable_plotting": True,
-                "Cutoff_small_weights": 0.,
+                "Cutoff_small_weights": 0.01,
                 "Figheight" : 8.,
                 "Figwidth" : 8.,
                 "Black_and_white" : True,
-                "Save_image_as" : "Lorenz_basic"
+                "Save_image_as" : "Lorenz_Adams3"
             },
             "Printing": {
                 "Enable_printing": False
@@ -320,23 +353,54 @@ thesis_plots = {
         "Data": {
             "Equation":{
                 "Starting_point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
-                "Method" : "Adams-Bashforth 5",
-                "Time_step_length" : 0.025,
+                "Method" : "Adams-Bashforth 3",
+                "Time_step_length" : 0.0125,
                 "Equation_type" : "Lorenz",
-                "Train_length" : 1000,
-                "Test_length" : 2000,
+                "Train_length" : 1500,
+                "Test_length" : 1500,
                 "Generate_symbolic_W_out" : True
             }
         }
         },
-    "Chua": {
+    "Lorenz_Midpoint": {
         "NVAR": {
             "Delay": 0,
             "Order": 3,
             "Warmup length": 10,
             "Ridge": 2e-6,
-            "Input_symbols": [x, y, z],
-            "Combine_symbols": []
+            "Input_symbols": [x, y, z]},
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.01,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": True,
+                "Save_image_as": "Lorenz_Midpoint"
+            },
+            "Printing": {
+                "Enable_printing": False
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [17.67715816276679, 12.931379185960404, 43.91404334248268],
+                "Method": "Midpoint",
+                "Time_step_length": 0.0125,
+                "Equation_type": "Lorenz",
+                "Train_length": 1000,
+                "Test_length": 1000,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
+    "Chua_Adams5": {
+        "NVAR": {
+            "Delay": 0,
+            "Order": 3,
+            "Warmup length": 10,
+            "Ridge": 2e-6,
+            "Input_symbols": [x, y, z]
         },
         "Feedback": {
             "Plotting": {
@@ -345,7 +409,7 @@ thesis_plots = {
                 "Figheight": 8.,
                 "Figwidth": 8.,
                 "Black_and_white": True,
-                "Save_image_as": "Chua_basic"
+                "Save_image_as": "Chua_Adams5"
             },
             "Printing": {
                 "Enable_printing": False
@@ -358,12 +422,45 @@ thesis_plots = {
                 "Time_step_length": 0.025,
                 "Equation_type": "Chua",
                 "Train_length": 1000,
-                "Test_length": 2000,
+                "Test_length": 1500,
                 "Generate_symbolic_W_out": True
             }
         }
     },
-    "Ex2DLinear": {
+    "Chua_RK4": {
+        "NVAR": {
+            "Delay": 0,
+            "Order": 3,
+            "Warmup length": 10,
+            "Ridge": 2e-6,
+            "Input_symbols": [x, y, z]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": True,
+                "Save_image_as": "Chua_RK4"
+            },
+            "Printing": {
+                "Enable_printing": True
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [0.2, 0.1, 0.1],
+                "Method": "RK4",
+                "Time_step_length": 0.025,
+                "Equation_type": "Chua",
+                "Train_length": 1000,
+                "Test_length": 1500,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
+    "Ex2DLinear_Adams5": {
             "NVAR": {
                 "Delay": 0,
                 "Order": 1,
@@ -378,8 +475,7 @@ thesis_plots = {
                     "Figheight": 8.,
                     "Figwidth": 8.,
                     "Black_and_white": True,
-                    "Save_image_as": "Ex2DLinear_basic",
-                    "Always_show_inputs" : False
+                    "Save_image_as": "Ex2DLinear_Adams5"
                 },
                 "Printing": {
                     "Enable_printing": False
@@ -391,13 +487,46 @@ thesis_plots = {
                     "Method": "Adams-Bashforth 5",
                     "Time_step_length": 0.025,
                     "Equation_type": "Ex2DLinear",
-                    "Train_length": 500,
-                    "Test_length": 2000,
+                    "Train_length": 10,
+                    "Test_length": 1000,
                     "Generate_symbolic_W_out": True
                 }
             }
         },
-    "Ex3DLinear": {
+    "Ex3DCubic_with_dummy": {
+        "NVAR": {
+            "Delay": 1,
+            "Order": 3,
+            "Warmup length": 10,
+            "Ridge": 2e-6,
+            "Input_symbols": [x, y, z]
+        },
+        "Feedback": {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.01,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": True,
+                "Save_image_as": ""
+            },
+            "Printing": {
+                "Enable_printing": False
+            }
+        },
+        "Data": {
+            "Equation": {
+                "Starting_point": [5.1, 5.1, 1.0],
+                "Method": "Euler",
+                "Time_step_length": 0.0125,
+                "Equation_type": "Ex2DCubic_with_dummy",
+                "Train_length": 2000,
+                "Test_length": 2000,
+                "Generate_symbolic_W_out": True
+            }
+        }
+    },
+    "Ex3DLinear_Adams5": {
             "NVAR": {
                 "Delay": 0,
                 "Order": 2,
@@ -412,7 +541,7 @@ thesis_plots = {
                     "Figheight": 8.,
                     "Figwidth": 8.,
                     "Black_and_white": True,
-                    "Save_image_as": "Ex3DLinear_basic"
+                    "Save_image_as": "Ex3DLinear_Adams5"
                 },
                 "Printing": {
                     "Enable_printing": False
@@ -430,12 +559,12 @@ thesis_plots = {
                 }
             }
         },
-    "Ex3DCubic": {
+    "Ex3DCubic_Euler": {
             "NVAR": {
                 "Delay": 0,
                 "Order": 3,
                 "Warmup length": 10,
-                "Ridge": 2e-3,
+                "Ridge": 2e-6,
                 "Input_symbols": [x, y, z]
             },
             "Feedback": {
@@ -445,7 +574,7 @@ thesis_plots = {
                     "Figheight": 8.,
                     "Figwidth": 8.,
                     "Black_and_white": True,
-                    "Save_image_as": "Ex3DCubic_basic"
+                    "Save_image_as": "Ex3DCubic_Euler"
                 },
                 "Printing": {
                     "Enable_printing": False
@@ -453,12 +582,12 @@ thesis_plots = {
             },
             "Data": {
                 "Equation": {
-                    "Starting_point": [2, 0, 1.5],
+                    "Starting_point": [2, 1, 1.5],
                     "Method": "Euler",
-                    "Time_step_length": 0.025,
+                    "Time_step_length": 0.0125,
                     "Equation_type": "Ex3DCubic",
                     "Train_length": 500,
-                    "Test_length": 2000,
+                    "Test_length": 3000,
                     "Generate_symbolic_W_out": True
                 }
             }
@@ -479,6 +608,8 @@ def generate_equation_data(Equation_type: str, Train_length: int, Test_length: i
         Current_Equation = Differential_Equation.Ex3DLinear()
     elif Equation_type == "Ex3DCubic":
         Current_Equation = Differential_Equation.Ex3DCubic()
+    elif Equation_type == "Ex2DCubic_with_dummy":
+        Current_Equation = Differential_Equation.Ex2DCubic_with_dummy()
     else:
         print("Invalid Equation_type")
         return False
@@ -535,18 +666,20 @@ def TS_run_on_dict(dict):
 
     except ValueError as e: #If there is no parameter to optimize
         print(e)
-        print("Executing single run:")
+        print("Executing single run")
         recommendation = optim_parameters
 
     #Doing a run an the end (with the only parameters in single run, or with the optimal parameters in optimized run)
     return TS_run(**fix_parameters,**recommendation)
 
-
 def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kwargs):
 
     #Making the TS_NVAR and fitting it
     my_nvar = NVAR_Time_Series.Nvar_TS(**kwargs,Printing = Printing,Plotting = Plotting,Delay=Delay)
-    my_nvar.fit(**kwargs,Printing = Printing,Plotting = Plotting,Delay=Delay,TS_data=TS_data_train)
+    try:
+        my_nvar.fit(**kwargs,Printing = Printing,Plotting = Plotting,Delay=Delay,TS_data=TS_data_train)
+    except np.linalg.LinAlgError as e:
+        return float('inf')
 
     #Predicting (starting from the end of the train data)
     initialization = TS_data_train[-Delay - 1:]
@@ -566,12 +699,13 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
         print(TS_data_test)
         print("Predicted data: ")
         print(predictions)
+        print("Symbolic generation:")
+        print(kwargs["Differential_Equation"].symbolic_equation)
         print("Symbolic prediction: ")
         print(my_nvar.NVAR.W_out @ my_nvar.NVAR.combine_symbols)
-
     if ("Enable_plotting" in Plotting) and Plotting["Enable_plotting"]:
         Plots.universal_Compare_Data_Plot(TS_data_test, predictions,axlabels=["X","Y","Z"],datatitles=["Ground truth", "Prediction"],dt = kwargs["Differential_Equation"].dt,**Plotting)
-        Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
+        #Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
         if ("Differential_Equation" in kwargs) and (len(kwargs["Differential_Equation"].symbolic_equation)>0):
             Plots.multiple_histogram_W_out(multiple_W_out= np.array([my_nvar.NVAR.W_out/kwargs["Differential_Equation"].dt,Gen_W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
     return error
@@ -579,4 +713,6 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
 
 #TS_run_on_dict(thesis_plots["Ex3DCubic"])
 #TS_run_on_dict(saved_runs["Test_single"])
-for run in thesis_plots: print(run), TS_run_on_dict(thesis_plots[run])
+#for run in thesis_plots: print(run), TS_run_on_dict(thesis_plots[run])
+
+TS_run_on_dict(thesis_plots["Ex3DCubic_with_dummy"])

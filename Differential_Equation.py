@@ -51,12 +51,13 @@ def Implemented_Multisteps(right_side,tn,dt,method,last_datapoints):
 
 def W_out_generator(input_symbols, combine_symbols, combination_vector,dt):
     W_out = np.zeros((len(combination_vector), len(combine_symbols)))
+
     for i in range(W_out.shape[0]):
         for j in range(W_out.shape[1]):
-            const_coef = combination_vector[i].coeff(combine_symbols[j])
-            if not const_coef.is_constant():
-                const_coef, non_constant = const_coef.as_coeff_add()
-            W_out[i, j] = const_coef
+            const_coeff = combination_vector[i].coeff(combine_symbols[j])
+            if not const_coeff.is_constant():
+                const_coeff, non_constant = const_coeff.as_coeff_Add()
+            W_out[i, j] = const_coeff
             if input_symbols[i] == combine_symbols[j]:  #corrigate derivative
                 W_out[i, j] = W_out[i,j] - 1
     return W_out/dt
@@ -89,10 +90,8 @@ class Differential_Equation():
         t_eval = np.linspace(0.0, maxtime, n_timepoints)
 
         if method in {"","RK45","RK23","DOP853","Radau","BDF","LSODA"}:                             #Solve_Ivp implemented methods
-            symbolic_data = Data_Manipulation.data_out_of_symbols(delay=1,dimension=x0.shape[1], input_symbols=equation_symbols)[0]
             sol = solve_ivp(self.right_side, y0=x0[-1], t_span=(0.0, maxtime), t_eval=t_eval, method = method)
             sol = sol.y
-            #self.equation_symbols = solve_ivp(self.right_side, y0=symbolic_data, t_span=(0.0, dt), t_eval=[0.0,dt], method = method)
             self.symbolic_equation = []
             print("Warning, Solve_Ivp is used, symbolic equation cannot be made.")
 
@@ -107,7 +106,7 @@ class Differential_Equation():
             #make one symbolic step too
             symbolic_data = Data_Manipulation.data_out_of_symbols(delay=10, dimension=x0.shape[1], input_symbols=equation_symbols).T
             self.symbolic_equation = Implemented_Multisteps(right_side=self.right_side, tn=0., dt=dt, method=method,last_datapoints=symbolic_data)
-
+            self.symbolic_equation = np.array([i.simplify() for i in self.symbolic_equation])
         else:                                                                                                       #Implemented single step methods
             sol = np.full((x0.shape[1], t_eval.shape[0]), 0.)
             sol[:, 0] = x0[-1]
@@ -117,6 +116,7 @@ class Differential_Equation():
             #Make one symbolic step too
             symbolic_data = Data_Manipulation.data_out_of_symbols(delay=1, dimension=x0.shape[1],input_symbols=equation_symbols)[-1]
             self.symbolic_equation = Implemented_Steps(right_side=self.right_side, tn=0., dt=dt, method=method,Yn=symbolic_data)
+            self.symbolic_equation = np.array([i.expand() for i in self.symbolic_equation])
         return sol.T[:-1]
 class Lorenz63(Differential_Equation):
 
@@ -168,9 +168,18 @@ class Ex3DLinear(Differential_Equation):
 
 class Ex3DCubic(Differential_Equation):
 
-    def __init__(self, a: float = -0.1, b: float = 2.0, c: float = -0.0):
+    def __init__(self, a: float = -0.1, b: float = 2.0, c: float = -0.1):
         def fx(t, state):
             x, y, z = state
             return a * x**3 + b * y**3,  -b * x**3 + a * y**3, c * z
+        super().__init__(fx)
+        return
+
+class Ex2DCubic_with_dummy(Differential_Equation):
+
+    def __init__(self, a: float = -0.1, b: float = 2.0, c: float = -0.0):
+        def fx(t, state):
+            x, y, z = state
+            return a * x**3 + b * y**3,  -b * x**3 + a * y**3, 0.
         super().__init__(fx)
         return
