@@ -459,7 +459,7 @@ thesis_plots = {
                 "Generate_symbolic_W_out": True
             }
         }
-    },
+    },#double scroll a ground truth majd átmegy a test pedig a douple scrollt megtalálta (train?)
     "Ex2DLinear_Adams5": {
             "NVAR": {
                 "Delay": 0,
