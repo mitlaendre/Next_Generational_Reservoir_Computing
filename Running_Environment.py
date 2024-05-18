@@ -6,6 +6,8 @@ import Differential_Equation
 import nevergrad as ng
 from concurrent import futures
 import sympy
+import copy
+from joblib import Parallel, delayed
 
 #Making some symbols to work with
 x,y,z,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10 = sympy.symbols('x y z x1 x2 x3 x4 x5 x6 x7 x8 x9 x10')
@@ -263,6 +265,20 @@ saved_runs = {
         }
     }
   }
+
+thesis_default_feedback = {
+            "Plotting": {
+                "Enable_plotting": True,
+                "Cutoff_small_weights": 0.01,
+                "Figheight": 8.,
+                "Figwidth": 8.,
+                "Black_and_white": True
+            },
+            "Printing": {
+                "Enable_printing": False
+            }
+        }
+
 thesis_plots = {
     "Rossler_Adams5": {
         "NVAR": {
@@ -271,19 +287,6 @@ thesis_plots = {
             "Warmup length": 10,
             "Ridge": 2e-6,
             "Input_symbols": [x, y, z]
-        },
-        "Feedback": {
-            "Plotting": {
-                "Enable_plotting": True,
-                "Cutoff_small_weights": 0.01,
-                "Figheight": 8.,
-                "Figwidth": 8.,
-                "Black_and_white": True,
-                "Save_image_as": "Rossler_Adams5"
-            },
-            "Printing": {
-                "Enable_printing": False
-            }
         },
         "Data": {
             "Equation": {
@@ -305,19 +308,6 @@ thesis_plots = {
             "Ridge": 2e-6,
             "Input_symbols": [x, y, z]
         },
-        "Feedback": {
-            "Plotting": {
-                "Enable_plotting": True,
-                "Cutoff_small_weights": 0.01,
-                "Figheight": 8.,
-                "Figwidth": 8.,
-                "Black_and_white": True,
-                "Save_image_as": "Rossler_Euler"
-            },
-            "Printing": {
-                "Enable_printing": False
-            }
-        },
         "Data": {
             "Equation": {
                 "Starting_point": [4.6, 5.1, 5.1],
@@ -337,19 +327,6 @@ thesis_plots = {
             "Warmup length" : 10,
             "Ridge" : 2e-6,
             "Input_symbols" : [x,y,z]},
-        "Feedback":{
-            "Plotting": {
-                "Enable_plotting": True,
-                "Cutoff_small_weights": 0.01,
-                "Figheight" : 8.,
-                "Figwidth" : 8.,
-                "Black_and_white" : True,
-                "Save_image_as" : "Lorenz_Adams3"
-            },
-            "Printing": {
-                "Enable_printing": False
-            }
-        },
         "Data": {
             "Equation":{
                 "Starting_point" : [17.67715816276679, 12.931379185960404, 43.91404334248268],
@@ -369,19 +346,6 @@ thesis_plots = {
             "Warmup length": 10,
             "Ridge": 2e-6,
             "Input_symbols": [x, y, z]},
-        "Feedback": {
-            "Plotting": {
-                "Enable_plotting": True,
-                "Cutoff_small_weights": 0.01,
-                "Figheight": 8.,
-                "Figwidth": 8.,
-                "Black_and_white": True,
-                "Save_image_as": "Lorenz_Midpoint"
-            },
-            "Printing": {
-                "Enable_printing": False
-            }
-        },
         "Data": {
             "Equation": {
                 "Starting_point": [17.67715816276679, 12.931379185960404, 43.91404334248268],
@@ -401,19 +365,6 @@ thesis_plots = {
             "Warmup length": 10,
             "Ridge": 2e-6,
             "Input_symbols": [x, y, z]
-        },
-        "Feedback": {
-            "Plotting": {
-                "Enable_plotting": True,
-                "Cutoff_small_weights": 0.,
-                "Figheight": 8.,
-                "Figwidth": 8.,
-                "Black_and_white": True,
-                "Save_image_as": "Chua_Adams5"
-            },
-            "Printing": {
-                "Enable_printing": False
-            }
         },
         "Data": {
             "Equation": {
@@ -435,19 +386,6 @@ thesis_plots = {
             "Ridge": 2e-6,
             "Input_symbols": [x, y, z]
         },
-        "Feedback": {
-            "Plotting": {
-                "Enable_plotting": True,
-                "Cutoff_small_weights": 0.,
-                "Figheight": 8.,
-                "Figwidth": 8.,
-                "Black_and_white": True,
-                "Save_image_as": "Chua_RK4"
-            },
-            "Printing": {
-                "Enable_printing": True
-            }
-        },
         "Data": {
             "Equation": {
                 "Starting_point": [0.2, 0.1, 0.1],
@@ -467,19 +405,6 @@ thesis_plots = {
                 "Warmup length": 10,
                 "Ridge": 2e-6,
                 "Input_symbols": [x, y]
-            },
-            "Feedback": {
-                "Plotting": {
-                    "Enable_plotting": True,
-                    "Cutoff_small_weights": 0.01,
-                    "Figheight": 8.,
-                    "Figwidth": 8.,
-                    "Black_and_white": True,
-                    "Save_image_as": "Ex2DLinear_Adams5"
-                },
-                "Printing": {
-                    "Enable_printing": False
-                }
             },
             "Data": {
                 "Equation": {
@@ -501,19 +426,6 @@ thesis_plots = {
             "Ridge": 2e-6,
             "Input_symbols": [x, y, z]
         },
-        "Feedback": {
-            "Plotting": {
-                "Enable_plotting": True,
-                "Cutoff_small_weights": 0.01,
-                "Figheight": 8.,
-                "Figwidth": 8.,
-                "Black_and_white": True,
-                "Save_image_as": ""
-            },
-            "Printing": {
-                "Enable_printing": False
-            }
-        },
         "Data": {
             "Equation": {
                 "Starting_point": [5.1, 5.1, 1.0],
@@ -533,19 +445,6 @@ thesis_plots = {
                 "Warmup length": 10,
                 "Ridge": 2e-6,
                 "Input_symbols": [x, y, z]
-            },
-            "Feedback": {
-                "Plotting": {
-                    "Enable_plotting": True,
-                    "Cutoff_small_weights": 0.01,
-                    "Figheight": 8.,
-                    "Figwidth": 8.,
-                    "Black_and_white": True,
-                    "Save_image_as": "Ex3DLinear_Adams5"
-                },
-                "Printing": {
-                    "Enable_printing": False
-                }
             },
             "Data": {
                 "Equation": {
@@ -567,19 +466,6 @@ thesis_plots = {
                 "Ridge": 2e-6,
                 "Input_symbols": [x, y, z]
             },
-            "Feedback": {
-                "Plotting": {
-                    "Enable_plotting": True,
-                    "Cutoff_small_weights": 0.01,
-                    "Figheight": 8.,
-                    "Figwidth": 8.,
-                    "Black_and_white": True,
-                    "Save_image_as": "Ex3DCubic_Euler"
-                },
-                "Printing": {
-                    "Enable_printing": False
-                }
-            },
             "Data": {
                 "Equation": {
                     "Starting_point": [2, 1, 1.5],
@@ -593,6 +479,12 @@ thesis_plots = {
             }
         }
 }
+
+#name the output images for every used runs
+for i in thesis_plots:
+    thesis_plots[i]["Feedback"] = copy.deepcopy(thesis_default_feedback)
+    thesis_plots[i]["Feedback"]["Plotting"]["Save_image_as"] = i
+
 
 def generate_equation_data(Equation_type: str, Train_length: int, Test_length: int,  Starting_point: np.array([]), Method = "Euler", Time_step_length = 0.025,**kwargs):
 
@@ -635,6 +527,7 @@ def init_optim_params(dict):
     return dict
 
 def TS_run_on_dict(dict):
+    #print(dict)
     #Making sure there is some data
     if ("TS_data_train" not in dict["Data"]) or ("TS_data_test" not in dict["Data"]):
         if "Equation" not in dict["Data"]:
@@ -711,8 +604,7 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
     return error
 
 
-#TS_run_on_dict(thesis_plots["Ex3DCubic"])
-#TS_run_on_dict(saved_runs["Test_single"])
 #for run in thesis_plots: print(run), TS_run_on_dict(thesis_plots[run])
 
-TS_run_on_dict(thesis_plots["Ex3DCubic_with_dummy"])
+#for run in thesis_plots: TS_run_on_dict(thesis_plots[run])
+Parallel(n_jobs=12)(delayed(TS_run_on_dict)(thesis_plots[run]) for run in thesis_plots) #run all at once on 12 threads
