@@ -270,12 +270,12 @@ thesis_default_feedback = {
             "Plotting": {
                 "Enable_plotting": True,
                 "Cutoff_small_weights": 0.01,
-                "Figheight": 8.,
+                #"Figheight": 8.,
                 "Figwidth": 8.,
                 "Black_and_white": True
             },
             "Printing": {
-                "Enable_printing": False
+                "Enable_printing": True
             }
         }
 
@@ -285,7 +285,7 @@ thesis_plots = {
             "Delay": 0,
             "Order": 2,
             "Warmup length": 10,
-            "Ridge": 2e-6,
+            "Ridge": 4.3666865800818615e-89, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
             "Input_symbols": [x, y, z]
         },
         "Data": {
@@ -299,13 +299,13 @@ thesis_plots = {
                 "Generate_symbolic_W_out": True
             }
         }
-    },
+    },  #pipa
     "Rossler_Euler": {
         "NVAR": {
             "Delay": 0,
             "Order": 2,
             "Warmup length": 10,
-            "Ridge": 2e-6,
+            "Ridge": 1.7196768261623774e-71, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
             "Input_symbols": [x, y, z]
         },
         "Data": {
@@ -319,13 +319,13 @@ thesis_plots = {
                 "Generate_symbolic_W_out": True
             }
         }
-    },
+    },  #pipa
     "Lorenz_Adams3": {
         "NVAR":{
             "Delay" : 2,
             "Order" : 2,
             "Warmup length" : 10,
-            "Ridge" : 2e-6,
+            "Ridge" : 2.6211043210694877e-09, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
             "Input_symbols" : [x,y,z]},
         "Data": {
             "Equation":{
@@ -333,18 +333,18 @@ thesis_plots = {
                 "Method" : "Adams-Bashforth 3",
                 "Time_step_length" : 0.0125,
                 "Equation_type" : "Lorenz",
-                "Train_length" : 1500,
-                "Test_length" : 1500,
+                "Train_length" : 1000,
+                "Test_length" : 1000,
                 "Generate_symbolic_W_out" : True
             }
         }
-        },
+        },  #pipa?
     "Lorenz_Midpoint": {
         "NVAR": {
             "Delay": 0,
             "Order": 3,
             "Warmup length": 10,
-            "Ridge": 2e-6,
+            "Ridge": 2.000000000000002e-06, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
             "Input_symbols": [x, y, z]},
         "Data": {
             "Equation": {
@@ -357,13 +357,13 @@ thesis_plots = {
                 "Generate_symbolic_W_out": True
             }
         }
-    },
+    },  #pipa
     "Chua_Adams5": {
         "NVAR": {
             "Delay": 0,
             "Order": 3,
             "Warmup length": 10,
-            "Ridge": 2e-6,
+            "Ridge": 0.003148937675505577, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
             "Input_symbols": [x, y, z]
         },
         "Data": {
@@ -377,13 +377,13 @@ thesis_plots = {
                 "Generate_symbolic_W_out": True
             }
         }
-    },
+    },  #pipa
     "Chua_RK4": {
         "NVAR": {
-            "Delay": 0,
+            "Delay": 1,
             "Order": 3,
             "Warmup length": 10,
-            "Ridge": 2e-6,
+            "Ridge": 2e-5,#ng.p.Log(init=2e-10,lower=1e-100,upper=1e+100),
             "Input_symbols": [x, y, z]
         },
         "Data": {
@@ -397,13 +397,13 @@ thesis_plots = {
                 "Generate_symbolic_W_out": True
             }
         }
-    },#double scroll a ground truth majd átmegy a test pedig a douple scrollt megtalálta (train?)
+    },
     "Ex2DLinear_Adams5": {
             "NVAR": {
                 "Delay": 0,
                 "Order": 1,
                 "Warmup length": 10,
-                "Ridge": 2e-6,
+                "Ridge": 6.54661762521678e-39, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
                 "Input_symbols": [x, y]
             },
             "Data": {
@@ -417,13 +417,13 @@ thesis_plots = {
                     "Generate_symbolic_W_out": True
                 }
             }
-        },
+        },  #pipa
     "Ex3DCubic_with_dummy": {
         "NVAR": {
             "Delay": 1,
             "Order": 3,
             "Warmup length": 10,
-            "Ridge": 2e-6,
+            "Ridge": 35340.61601172445, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
             "Input_symbols": [x, y, z]
         },
         "Data": {
@@ -443,7 +443,7 @@ thesis_plots = {
                 "Delay": 0,
                 "Order": 2,
                 "Warmup length": 10,
-                "Ridge": 2e-6,
+                "Ridge": 2.5872539504719764e-94, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
                 "Input_symbols": [x, y, z]
             },
             "Data": {
@@ -457,13 +457,13 @@ thesis_plots = {
                     "Generate_symbolic_W_out": True
                 }
             }
-        },
+        },  #pipa
     "Ex3DCubic_Euler": {
             "NVAR": {
                 "Delay": 0,
                 "Order": 3,
                 "Warmup length": 10,
-                "Ridge": 2e-6,
+                "Ridge": 4.121451908778411e-92, #ng.p.Log(init=2e-6,lower=1e-100,upper=1e+100),
                 "Input_symbols": [x, y, z]
             },
             "Data": {
@@ -477,7 +477,7 @@ thesis_plots = {
                     "Generate_symbolic_W_out": True
                 }
             }
-        }
+        }   #pipa
 }
 
 #name the output images for every used runs
@@ -517,21 +517,21 @@ def init_optim_params(dict):
     if "Optimizer" not in dict:
         dict["Optimizer"] = {}
     if "Budget" not in dict["Optimizer"]:
-        dict["Optimizer"]["Budget"] = 100
+        dict["Optimizer"]["Budget"] = 30
     if "Num_workers" not in dict["Optimizer"]:
-        dict["Optimizer"]["Num_workers"] = 10
+        dict["Optimizer"]["Num_workers"] = 5
     if "Verbosity" not in dict["Optimizer"]:
-        dict["Optimizer"]["Verbosity"] = 2
+        dict["Optimizer"]["Verbosity"] = 1
     if "Batch_mode" not in dict["Optimizer"]:
         dict["Optimizer"]["Batch_mode"] = True
     return dict
 
-def TS_run_on_dict(dict):
+def TS_run_on_dict(dict,name = ""):
     #print(dict)
     #Making sure there is some data
     if ("TS_data_train" not in dict["Data"]) or ("TS_data_test" not in dict["Data"]):
         if "Equation" not in dict["Data"]:
-            print("No data or equation found")
+            print(name + " no data or equation found")
             return
         else:
             if "Input_symbols" in dict["NVAR"]:
@@ -555,11 +555,12 @@ def TS_run_on_dict(dict):
         optimizer = ng.optimizers.NGOpt(parametrization=parametrization, budget=dict["Optimizer"]["Budget"],num_workers=dict["Optimizer"]["Num_workers"])
         with futures.ThreadPoolExecutor(max_workers=optimizer.num_workers) as executor:
             recommendation = optimizer.minimize(lambda **kwargs: TS_run(**{**kwargs,**fix_parameters,"Printing":{},"Plotting":{}}), executor=executor, batch_mode=dict["Optimizer"]["Batch_mode"], verbosity=dict["Optimizer"]["Verbosity"]).value[1]
-        print("Optimization Finished")
+        print(name + " optimization finished, parameters: ")
+        print(recommendation)
 
     except ValueError as e: #If there is no parameter to optimize
         print(e)
-        print("Executing single run")
+        print(name + " executing single run")
         recommendation = optim_parameters
 
     #Doing a run an the end (with the only parameters in single run, or with the optimal parameters in optimized run)
@@ -597,14 +598,15 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
         print("Symbolic prediction: ")
         print(my_nvar.NVAR.W_out @ my_nvar.NVAR.combine_symbols)
     if ("Enable_plotting" in Plotting) and Plotting["Enable_plotting"]:
-        Plots.universal_Compare_Data_Plot(TS_data_test, predictions,axlabels=["X","Y","Z"],datatitles=["Ground truth", "Prediction"],dt = kwargs["Differential_Equation"].dt,**Plotting)
+        Plots.universal_Compare_Data_Plot(predictions,TS_data_test,axlabels=["X","Y","Z"],datatitles=["Prediction","Ground truth"],dt = kwargs["Differential_Equation"].dt,**Plotting)
         #Plots.multiple_histogram_W_out(multiple_W_out = np.array([my_nvar.NVAR.W_out]),in_labels = my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
         if ("Differential_Equation" in kwargs) and (len(kwargs["Differential_Equation"].symbolic_equation)>0):
             Plots.multiple_histogram_W_out(multiple_W_out= np.array([my_nvar.NVAR.W_out/kwargs["Differential_Equation"].dt,Gen_W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 
 
+TS_run_on_dict(thesis_plots["Chua_RK4"],"Chua_RK4")
+
 #for run in thesis_plots: print(run), TS_run_on_dict(thesis_plots[run])
 
-#for run in thesis_plots: TS_run_on_dict(thesis_plots[run])
-Parallel(n_jobs=12)(delayed(TS_run_on_dict)(thesis_plots[run]) for run in thesis_plots) #run all at once on 12 threads
+#Parallel(n_jobs=12)(delayed(TS_run_on_dict)(thesis_plots[run],run) for run in thesis_plots) #run all at once on 12 threads

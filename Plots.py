@@ -46,7 +46,7 @@ import matplotlib.pyplot as plt
     else:                           #Multidim data
         print()
 """
-def universal_Compare_Data_Plot(data1,data2,dt,axlabels = [],datatitles = [],Line_width=2.,Black_and_white = False,Save_image_as = "", **kwargs):
+def universal_Compare_Data_Plot(data1,data2,dt,axlabels = [],datatitles = [],Line_width=1.5,Black_and_white = False,Save_image_as = "", **kwargs):
     plt.close('all')
     if (len(data1.shape) > 2) or (len(data2.shape) > 2):
         print("Data is not in 2D array form")
@@ -69,13 +69,13 @@ def universal_Compare_Data_Plot(data1,data2,dt,axlabels = [],datatitles = [],Lin
 
     if Black_and_white:
         blackNwhite_args1 = {"linestyle":'dashed',"color":'black'}
-        blackNwhite_args2 = {"color": 'black',"alpha":0.6}
+        blackNwhite_args2 = {"color": 'black',"alpha":0.4}
     else:
         blackNwhite_args1 = {}
         blackNwhite_args2 = {}
 
     for i in range(data1.shape[0]):     #Basic 2d plot by dimensions
-        axs = plt.figure().add_subplot()
+        axs = plt.figure(figsize=(3,3)).add_subplot()
         time = np.array(range(data1.shape[1]))*dt
         axs.plot(time,data1[i],**blackNwhite_args1,linewidth=Line_width, label=datatitles[0])
         axs.plot(time,data2[i],**blackNwhite_args2,linewidth=Line_width, label=datatitles[1])
@@ -85,10 +85,12 @@ def universal_Compare_Data_Plot(data1,data2,dt,axlabels = [],datatitles = [],Lin
         if Save_image_as != "": plt.savefig("Images\\" + Save_image_as +  "data_comparison_dimension_" + str(i) + ".pdf",bbox_inches='tight')
         else: plt.show()
 
+
+
     if data1.shape[0] == 1:          #1D data
         print()
     elif data1.shape[0] == 2:        #2D data
-        axs = plt.figure().add_subplot()
+        axs = plt.figure(figsize=(4,4)).add_subplot()
         axs.plot(*data1,**blackNwhite_args1,linewidth=Line_width, label=datatitles[0])
         axs.plot(*data2,**blackNwhite_args2,linewidth=Line_width, label=datatitles[1])
         axs.set_xlabel(axlabels[0])
@@ -98,7 +100,7 @@ def universal_Compare_Data_Plot(data1,data2,dt,axlabels = [],datatitles = [],Lin
         else: plt.show()
     elif data1.shape[0] == 3:        #3D data
 
-        ax = plt.figure().add_subplot(projection='3d')
+        ax = plt.figure(figsize=(4,4)).add_subplot(projection='3d')
         ax.plot(*data1,**blackNwhite_args1, linewidth=Line_width, label=datatitles[0])
         ax.set_xlabel(axlabels[0])
         ax.set_ylabel(axlabels[1])
@@ -111,7 +113,7 @@ def universal_Compare_Data_Plot(data1,data2,dt,axlabels = [],datatitles = [],Lin
         print()
     return
 
-def multiple_histogram_W_out(multiple_W_out, in_labels, out_labels, Cutoff_small_weights = 0., Figheight = 8., Figwidth = 8., Black_and_white = False, Save_image_as="", Always_show_inputs=False,**kwargs):
+def multiple_histogram_W_out(multiple_W_out, in_labels, out_labels, Cutoff_small_weights = 0., Figheight = -1., Figwidth = 8., Black_and_white = False, Save_image_as="", Always_show_inputs=False,**kwargs):
     plt.close('all')
     #Prework on data
     for w_out_num in range(multiple_W_out.shape[0]-1):
@@ -165,6 +167,8 @@ def multiple_histogram_W_out(multiple_W_out, in_labels, out_labels, Cutoff_small
     #make one plot for not normed
     normed = False
     fig, axs = plt.subplots(1, dimensions)
+    if Figheight == -1.:
+        Figheight = combinators*num_w_outs/2.
     fig.set_figheight(Figheight)
     fig.set_figwidth(Figwidth)
 
