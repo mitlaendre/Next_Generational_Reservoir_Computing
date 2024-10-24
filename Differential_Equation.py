@@ -1,12 +1,9 @@
 import numpy as np
-from typing import Union
-
-import scipy.integrate
-import sympy
 from scipy.integrate import solve_ivp
-
 import Data_Manipulation
-
+#from typing import Union
+#import scipy.integrate
+#import sympy
 
 def Implemented_Steps(right_side,tn,Yn,dt,method):
 
@@ -24,7 +21,6 @@ def Implemented_Steps(right_side,tn,Yn,dt,method):
         k3 = np.array(right_side(tn + dt/2,   Yn + dt/2 * k2))
         k4 = np.array(right_side(tn + dt,     Yn + dt   * k3))
         return Yn + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
-
 
 def Implemented_Multisteps(right_side,tn,dt,method,last_datapoints):
     #last_datapoints contains: [...,Yn-2,Yn-1,Yn] and we calculate Yn+1
@@ -48,7 +44,6 @@ def Implemented_Multisteps(right_side,tn,dt,method,last_datapoints):
     except IndexError: #If there is not enough datapoints yet for multistep, then do RK4:
         return Implemented_Steps(right_side = right_side,tn = tn,dt = dt,Yn = last_datapoints[:,-1],method = "RK4")
 
-
 def W_out_generator(input_symbols, combine_symbols, combination_vector,dt):
     W_out = np.zeros((len(combination_vector), len(combine_symbols)))
 
@@ -61,7 +56,6 @@ def W_out_generator(input_symbols, combine_symbols, combination_vector,dt):
             if input_symbols[i] == combine_symbols[j]:  #corrigate derivative
                 W_out[i, j] = W_out[i,j] - 1
     return W_out/dt
-
 
 class Differential_Equation():
     def __init__(self, function = None):
@@ -118,6 +112,7 @@ class Differential_Equation():
             self.symbolic_equation = Implemented_Steps(right_side=self.right_side, tn=0., dt=dt, method=method,Yn=symbolic_data)
             self.symbolic_equation = np.array([i.expand() for i in self.symbolic_equation])
         return sol.T[:-1]
+
 class Lorenz63(Differential_Equation):
 
     def __init__(self, rho: float = 28.0, sigma: float = 10.0, beta: float = 8.0 / 3.0):

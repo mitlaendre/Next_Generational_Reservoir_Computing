@@ -83,6 +83,7 @@ class NVAR():
             regr = ElasticNet(l1_ratio=l1_ratio,alpha=alpha,fit_intercept=False,tol=tol,max_iter=max_iter)
             regr.fit(self.combined_x_train, self.y_train)
             self.W_out = regr.coef_
+
     def __init__(self,Ridge : float,Lasso = 0., Order = 1 ,**kwargs):
 
         self.y_train = None             #y_train data
@@ -102,7 +103,6 @@ class NVAR():
         self.cutoff_small_influences = None
         self.influences_history = []
         return
-
 
     def fit(self,X_train: np.array([]),Y_train: np.array([]),Input_symbols = [],Combine_symbols = [],Cutoff_small_influences = 0.,Norm_data = False,**kwargs) -> None:
         if "Ridge" in kwargs: self.ridge = kwargs["Ridge"]

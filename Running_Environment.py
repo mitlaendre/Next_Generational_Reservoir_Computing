@@ -7,7 +7,7 @@ import nevergrad as ng
 from concurrent import futures
 import sympy
 import copy
-from joblib import Parallel, delayed
+#from joblib import Parallel, delayed
 
 #Making some symbols to work with
 x,y,z,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10 = sympy.symbols('x y z x1 x2 x3 x4 x5 x6 x7 x8 x9 x10')
@@ -485,7 +485,6 @@ for i in thesis_plots:
     thesis_plots[i]["Feedback"] = copy.deepcopy(thesis_default_feedback)
     thesis_plots[i]["Feedback"]["Plotting"]["Save_image_as"] = i
 
-
 def generate_equation_data(Equation_type: str, Train_length: int, Test_length: int,  Starting_point: np.array([]), Method = "Euler", Time_step_length = 0.025,**kwargs):
 
     if Equation_type == "Lorenz":
@@ -604,9 +603,7 @@ def TS_run(Delay: int, TS_data_train,TS_data_test,Printing = {},Plotting={},**kw
             Plots.multiple_histogram_W_out(multiple_W_out= np.array([my_nvar.NVAR.W_out/kwargs["Differential_Equation"].dt,Gen_W_out]),in_labels= my_nvar.input_symbols,out_labels = my_nvar.NVAR.combine_symbols,**Plotting)
     return error
 
-
 TS_run_on_dict(thesis_plots["Chua_RK4"],"Chua_RK4")
 
 #for run in thesis_plots: print(run), TS_run_on_dict(thesis_plots[run])
-
 #Parallel(n_jobs=12)(delayed(TS_run_on_dict)(thesis_plots[run],run) for run in thesis_plots) #run all at once on 12 threads

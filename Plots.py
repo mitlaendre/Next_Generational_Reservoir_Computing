@@ -1,51 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-"""def universal_Data_Plot(data,axlabels = [],title = "",Black_and_white = False,Save_image_as = "", **kwargs):
-    plt.close('all')
-    if len(data.shape) > 2:
-        print("Data is not in 2D array form")
-        return
-    if len(data.shape)==1:
-        data = [data]
-    if data.shape[0] > data.shape[1]:
-            data = data.T       #The data should be "longer" than the dimensions. This helps with universality
-    if len(axlabels) == 0:
-        axlabels = ["X", "Y", "Z"]
-
-
-    color = plt.cm.rainbow(np.linspace(0, 1, data.shape[0]))
-    for i, c in enumerate(color):
-        plt.plot(data[i], c=c)
-        plt.title(title + axlabels[i])
-    if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_" + ".pdf",bbox_inches='tight')
-    else: plt.show()
-
-    if data.shape[0] == 1:          #1D data
-        print()
-    elif data.shape[0] == 2:        #2D data
-        plt.figure()
-        plt.plot(data[0], data[1], lw=0.5)
-        plt.xlabel(axlabels[0])
-        plt.ylabel(axlabels[1])
-        plt.title(title)
-        plt.grid(True)
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_2d_" + ".pdf",bbox_inches='tight')
-        else: plt.show()
-
-    elif data.shape[0] == 3:        #3D data
-        ax = plt.figure().add_subplot(projection='3d')
-        ax.plot(*data, lw=0.5)
-        ax.set_xlabel(axlabels[0])
-        ax.set_ylabel(axlabels[1])
-        ax.set_zlabel(axlabels[2])
-        ax.set_title(title)
-        if Save_image_as != "": plt.savefig("Images\\" + Save_image_as + "data_plot_3d_" + ".pdf",bbox_inches='tight')
-        else: plt.show()
-
-    else:                           #Multidim data
-        print()
-"""
 def universal_Compare_Data_Plot(data1,data2,dt,axlabels = [],datatitles = [],Line_width=1.5,Black_and_white = False,Save_image_as = "", **kwargs):
     plt.close('all')
     if (len(data1.shape) > 2) or (len(data2.shape) > 2):
@@ -202,4 +157,3 @@ def multiple_histogram_W_out(multiple_W_out, in_labels, out_labels, Cutoff_small
     else: plt.show()
 
     return
-

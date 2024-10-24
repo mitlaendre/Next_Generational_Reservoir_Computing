@@ -103,4 +103,3 @@ class Nvar_TS():
     def get_symbolic_prediction(self):
         data_out_of_symbols = Data_Manipulation.data_out_of_symbols(delay = self.delay,dimension=self.dim)
         return self.predict(data_out_of_symbols)
-

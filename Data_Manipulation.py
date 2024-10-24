@@ -4,6 +4,7 @@ import sympy
 
 def error_func_mse(x, y):
     return np.average(np.power(sum(np.square(x - y)), 0.5))
+
 def array_min_finder(input_array = np.array([0],dtype=object),maxthreads = 1): #output is a tuple with first element is the location vector (as an np.array), second is the minimum value
     if (input_array.ndim == 1):
         return np.array([np.array([np.argmin(input_array)]),np.amin(input_array)],dtype=object)
@@ -18,7 +19,6 @@ def array_min_finder(input_array = np.array([0],dtype=object),maxthreads = 1): #
             minimums[i] = sub_solutions[i][1]
 
         return (np.append(np.array([np.argmin(minimums)]),locations[np.argmin(minimums)]),minimums[np.argmin(minimums)])
-
 
 def data_out_of_symbols(delay = 0,dimension = 1,input_symbols = []):   #make a data, but symbols instead of floats
     delay_prefix = "P"  # this is added before the name for every delaystep backwards
